@@ -14,6 +14,8 @@ import pandas as pd
 import pygama.io.lh5 as lh5
 import pygama.genpar_tmp.cuts as cut
 
+#Script to calibrate Ba133 pygama data and obtain resolution fit coefficients
+
 CodePath=os.path.dirname(os.path.realpath(__file__))
 
 def main():

@@ -12,7 +12,7 @@ from scipy import stats
 
 from GammaLine_Counting_Ba133 import read_all_dsp_lh5
 
-#Script to plot spectra of MC and data
+#Script to plot spectra of MC (best fit FCCD) and data
 
 def main(): 
 

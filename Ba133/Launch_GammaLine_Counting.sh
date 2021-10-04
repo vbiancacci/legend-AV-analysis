@@ -1,3 +1,5 @@
+#Old bash script to launch Gamma line counting
+
 export PATH=~/miniconda3/bin:$PATH
 
 #=========SIM MODE===============

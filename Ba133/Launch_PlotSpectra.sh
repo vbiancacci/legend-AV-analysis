@@ -1,3 +1,5 @@
+#Old bash script to launch PlotSpectra.py
+
 export PATH=~/miniconda3/bin:$PATH
 
 detector=V07302A

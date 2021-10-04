@@ -6,18 +6,20 @@ from datetime import datetime
 import pandas as pd
 import matplotlib.pyplot as plt
 
+# Master script to automatically launch other scripts in order to automatically process multiple detectors at once
+
 CodePath=os.path.dirname(os.path.realpath(__file__))
 
 def main():
 
     #Processing instructions
-    order_list = [5] #make an input argument?
-    Calibrate_Data = False
-    Gamma_line_count_data = False
-    Gamma_line_count_MC = False
-    Calculate_FCCD = False
-    Gamma_line_count_MC_bestfitFCCD = True
-    PlotSpectra = True
+    order_list = [5] #List of orders to process
+    Calibrate_Data = False #Pre-reqs: needs dsp pygama data
+    Gamma_line_count_data = False #Pre-reqs: needs calibration
+    Gamma_line_count_MC = False #Pre-reqs: needs AV post processed MC for range of FCCDs
+    Calculate_FCCD = False #Pre-reqs: needs gammaline counts for data and MC
+    Gamma_line_count_MC_bestfitFCCD = True #Pre-reqs: needs AV postprocessed MC for best fit FCCD
+    PlotSpectra = True #Pre-reqs: meeds all above stages
 
     #Get detector list
     detector_list = CodePath+"/detector_list.json" 

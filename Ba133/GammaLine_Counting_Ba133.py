@@ -18,6 +18,8 @@ from pygama.analysis import peak_fitting
 
 import pygama.genpar_tmp.cuts as cut
 
+#Script to fit the gamma lines in the Ba133 spectra, for data and/or MC 
+
 
 def main():
 
