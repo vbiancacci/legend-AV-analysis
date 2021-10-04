@@ -1,0 +1,8 @@
+*root
+*hdf5
+*mac
+*out
+*zip
+core*
+
+Ba133/__pycache__
