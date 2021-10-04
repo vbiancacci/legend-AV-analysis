@@ -12,11 +12,11 @@ def main():
 
     #Processing instructions
     order_list = [5] #make an input argument?
-    calibrate_data = False
-    gamma_line_count_data = False
-    gamma_line_count_MC = False
-    calculate_FCCD = False
-    gamma_line_count_MC_bestfitFCCD = True
+    Calibrate_Data = False
+    Gamma_line_count_data = False
+    Gamma_line_count_MC = False
+    Calculate_FCCD = False
+    Gamma_line_count_MC_bestfitFCCD = True
     PlotSpectra = True
 
     #Get detector list
@@ -29,7 +29,7 @@ def main():
         for detector in detectors:
 
             #========Calibration - DATA==========
-            if calibrate_data == True:
+            if Calibrate_Data == True:
 
                 if order == 2:
                     detector_oldname = "I"+detector[1:]
@@ -54,7 +54,7 @@ def main():
 
 
             #========GAMMA LINE COUNTING - DATA==========
-            if gamma_line_count_data == True:
+            if Gamma_line_count_data == True:
                 if order == 2:
                     detector_oldname = "I"+detector[1:]
                     data_path = "/lfs/l1/legend/legend-prodenv/prod-usr/ggmarsh-test-v03/gen/"+detector_oldname+"/tier2/ba_HS4_top_dlt/"
@@ -85,7 +85,7 @@ def main():
                 os.system("python "+CodePath+"/GammaLine_Counting_Ba133.py --data "+detector+" "+data_path+" "+calibration+" "+energy_filter+" "+cuts+" "+str(run))
 
             #=========GAMMA LINE COUNTING - MC=============
-            if gamma_line_count_MC == True:
+            if Gamma_line_count_MC == True:
 
                 DLF_list=[1.0] 
                 smear="g"
@@ -104,7 +104,7 @@ def main():
                         os.system("python "+CodePath+"/GammaLine_Counting_Ba133.py --sim "+detector+" "+sim_path+" "+MC_id)
 
             #=============Calculate FCCD===============
-            if calculate_FCCD == True:
+            if Calculate_FCCD == True:
 
                 MC_id=detector+"-ba_HS4-top-0r-78z"
                 smear="g"
@@ -120,10 +120,10 @@ def main():
                 if detector == "V04549B":
                     continue
 
-                os.system("python "+CodePath+"/calculate_FCCD.py "+detector+" "+MC_id+" "+smear+" "+TL_model+" "+str(frac_FCCDbore)+" "+energy_filter+" "+cuts+" "+str(run))
+                os.system("python "+CodePath+"/Calculate_FCCD.py "+detector+" "+MC_id+" "+smear+" "+TL_model+" "+str(frac_FCCDbore)+" "+energy_filter+" "+cuts+" "+str(run))
 
             #=========GAMMA LINE COUNTING - MC, best fit FCCD=============
-            if gamma_line_count_MC_bestfitFCCD == True:
+            if Gamma_line_count_MC_bestfitFCCD == True:
 
                 # if detector != "V04549A":
                 #     continue
