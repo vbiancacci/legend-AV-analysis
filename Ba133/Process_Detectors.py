@@ -22,12 +22,12 @@ def main():
     PlotSpectra = True #Pre-reqs: meeds all above stages
 
     #Get detector list
-    detector_list = CodePath+"/detector_list.json" 
+    detector_list = CodePath+"/../detector_list.json" 
     with open(detector_list) as json_file: 
-        data = json.load(json_file)
+        detector_list_data = json.load(json_file)
     
     for order in order_list:
-        detectors = data["order_"+str(order)]
+        detectors = detector_list_data["order_"+str(order)]
         for detector in detectors:
 
             #========Calibration - DATA==========
@@ -144,11 +144,11 @@ def main():
                 
                 if cuts == "False":
                     with open(CodePath+"/FCCD/FCCD_data_"+detector+"-ba_HS4-top-0r-78z_"+smear+"_"+TL_model+"_fracFCCDbore"+str(frac_FCCDbore)+"_"+energy_filter+"_run"+str(run)+".json") as json_file:
-                        data = json.load(json_file)
+                        FCCD_data = json.load(json_file)
                 else:
                     with open(CodePath+"/FCCD/FCCD_data_"+detector+"-ba_HS4-top-0r-78z_"+smear+"_"+TL_model+"_fracFCCDbore"+str(frac_FCCDbore)+"_"+energy_filter+"_run"+str(run)+"_cuts.json") as json_file:
-                        data = json.load(json_file)
-                FCCD = round(data["FCCD"],2)
+                        FCCD_data = json.load(json_file)
+                FCCD = round(FCCD_data["FCCD"],2)
 
                 MC_id=detector+"-ba_HS4-top-0r-78z_"+smear+"_"+TL_model+"_FCCD"+str(FCCD)+"mm_DLF"+str(DLF)+"_fracFCCDbore"+str(frac_FCCDbore)
                 sim_path="/lfs/l1/legend/users/aalexander/legend-g4simple-simulation/legend/simulations/"+detector+"/ba_HS4/top_0r_78z/hdf5/AV_processed/"+MC_id+".hdf5"
@@ -189,11 +189,11 @@ def main():
                 
                 if cuts == "False":
                     with open(CodePath+"/FCCD/FCCD_data_"+detector+"-ba_HS4-top-0r-78z_"+smear+"_"+TL_model+"_fracFCCDbore"+str(frac_FCCDbore)+"_"+energy_filter+"_run"+str(run)+".json") as json_file:
-                        data = json.load(json_file)
+                        FCCD_data = json.load(json_file)
                 else:
                     with open(CodePath+"/FCCD/FCCD_data_"+detector+"-ba_HS4-top-0r-78z_"+smear+"_"+TL_model+"_fracFCCDbore"+str(frac_FCCDbore)+"_"+energy_filter+"_run"+str(run)+"_cuts.json") as json_file:
-                        data = json.load(json_file)
-                FCCD = round(data["FCCD"],2)
+                        FCCD_data = json.load(json_file)
+                FCCD = round(FCCD_data["FCCD"],2)
                 
                 MC_id=detector+"-ba_HS4-top-0r-78z_"+smear+"_"+TL_model+"_FCCD"+str(FCCD)+"mm_DLF"+str(DLF)+"_fracFCCDbore"+str(frac_FCCDbore)
                 sim_path="/lfs/l1/legend/users/aalexander/legend-g4simple-simulation/legend/simulations/"+detector+"/ba_HS4/top_0r_78z/hdf5/AV_processed/"+MC_id+".hdf5"
