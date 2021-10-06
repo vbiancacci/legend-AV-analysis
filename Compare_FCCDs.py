@@ -6,6 +6,8 @@ from datetime import datetime
 import pandas as pd
 import matplotlib.pyplot as plt
 
+#Script to compare FCCDs for each detector - currently just for Ba133
+
 CodePath=os.path.dirname(os.path.realpath(__file__))
 
 def main():
@@ -30,12 +32,12 @@ def main():
 
         for detector in detectors:
 
-            if detector == "V04549B": #doesnt yet have an FCCD - calibration problems 
-                FCCD, FCCD_err_up, FCCD_err_low = 0,0,0
-                FCCDs.append(FCCD)
-                FCCD_err_ups.append(FCCD_err_up)
-                FCCD_err_lows.append(FCCD_err_low)
-                continue
+            # if detector == "V04549B": #doesnt yet have an FCCD - calibration problems 
+            #     FCCD, FCCD_err_up, FCCD_err_low = 0,0,0
+            #     FCCDs.append(FCCD)
+            #     FCCD_err_ups.append(FCCD_err_up)
+            #     FCCD_err_lows.append(FCCD_err_low)
+            #     continue
 
             #get best fit FCCD:
             smear = "g"
@@ -62,7 +64,7 @@ def main():
     plt.ylabel('FCCD (mm)')
     plt.legend()
     plt.tight_layout()
-    plt.title("FCCDs from Ba133")
+    plt.title("FCCDs from Ba-133")
     plt.savefig(CodePath+"/FCCDs_Ba133.png", bbox_inches='tight')
     plt.show()
 

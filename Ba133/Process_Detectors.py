@@ -13,13 +13,13 @@ CodePath=os.path.dirname(os.path.realpath(__file__))
 def main():
 
     #Processing instructions
-    order_list = [5] #List of orders to process
+    order_list = [4] #List of orders to process
     Calibrate_Data = False #Pre-reqs: needs dsp pygama data
-    Gamma_line_count_data = False #Pre-reqs: needs calibration
+    Gamma_line_count_data = False#Pre-reqs: needs calibration
     Gamma_line_count_MC = False #Pre-reqs: needs AV post processed MC for range of FCCDs
     Calculate_FCCD = False #Pre-reqs: needs gammaline counts for data and MC
     Gamma_line_count_MC_bestfitFCCD = True #Pre-reqs: needs AV postprocessed MC for best fit FCCD
-    PlotSpectra = True #Pre-reqs: meeds all above stages
+    PlotSpectra = True #Pre-reqs: needs all above stages
 
     #Get detector list
     detector_list = CodePath+"/../detector_list.json" 
@@ -29,6 +29,9 @@ def main():
     for order in order_list:
         detectors = detector_list_data["order_"+str(order)]
         for detector in detectors:
+
+            if detector != "V04549B":
+                continue
 
             #========Calibration - DATA==========
             if Calibrate_Data == True:
@@ -48,9 +51,6 @@ def main():
                     run=2
                 else:
                     run=1
-                
-                if detector == "V04549B":
-                    continue
 
                 os.system("python "+CodePath+"/Calibration_Ba133.py "+detector+" "+data_path+" "+energy_filter+" "+cuts+" "+str(run))
 
@@ -80,10 +80,6 @@ def main():
                     calibration = CodePath+"/data_calibration/"+detector+"/calibration_run"+str(run)+"_cuts.json"
 
 
-                if detector == "V04549B":
-                    continue
-                
-
                 os.system("python "+CodePath+"/GammaLine_Counting_Ba133.py --data "+detector+" "+data_path+" "+calibration+" "+energy_filter+" "+cuts+" "+str(run))
 
             #=========GAMMA LINE COUNTING - MC=============
@@ -94,9 +90,6 @@ def main():
                 frac_FCCDbore=0.5
                 TL_model="notl"
                 FCCD_list=[0.0,0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 3.0] 
-
-                if detector == "V04549B":
-                    continue
 
                 for FCCD in FCCD_list:
                     
@@ -118,9 +111,6 @@ def main():
                     run=2
                 else:
                     run=1
-
-                if detector == "V04549B":
-                    continue
 
                 os.system("python "+CodePath+"/Calculate_FCCD.py "+detector+" "+MC_id+" "+smear+" "+TL_model+" "+str(frac_FCCDbore)+" "+energy_filter+" "+cuts+" "+str(run))
 

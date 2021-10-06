@@ -59,18 +59,23 @@ def main():
     print("df_total_lh5: ", df_total_lh5)
     energy_filter_data = df_total_lh5[energy_filter]
 
+    # plt.hist(energy_filter_data, bins=5000)
+    # plt.show()
+
     
     #========Compute calibration coefficients===========
     print("Calibrating...")
     glines    = [80.9979, 160.61, 223.24, 276.40, 302.85, 356.01, 383.85] # gamma lines used for calibration
-    range_keV = [(1,1),(2,2),(3,3),(4,4),(4,4),(4,4),(4,4)] # side bands width
+    range_keV = [(1,1),(1.5,1.5),(2,2),(2.5,2.5),(3,3),(3,3),(3,3)] # side bands width
     # glines    = [160.61, 223.24, 276.40, 302.85, 356.01, 383.85] # gamma lines used for calibration
     # range_keV = [(2,2),(3,3),(4,4),(4,4),(4,4),(4,4)] # side bands width
 
-    guess     = 2614.5/45403
+    # guess = 2614.5/45403 #old Th guess
+    # print(energy_filter_data.quantile(0.9))
+    guess = 383/(energy_filter_data.quantile(0.9))
 
     print("Find peaks and compute calibration curve...",end=' ')
-    pars, cov, results = cal.hpge_E_calibration(energy_filter_data,glines,guess,deg=1,range_keV = range_keV,funcs = [pgp.gauss_step,pgp.gauss_step,pgp.gauss_step,pgp.gauss_step,pgp.gauss_step,pgp.gauss_step,pgp.gauss_step],verbose=False)
+    pars, cov, results = cal.hpge_E_calibration(energy_filter_data,glines,guess,deg=1,range_keV = range_keV,funcs = [pgp.gauss_step,pgp.gauss_step,pgp.gauss_step,pgp.gauss_step,pgp.gauss_step,pgp.gauss_step,pgp.gauss_step],verbose=True)
     # pars, cov, results = cal.hpge_E_calibration(energy_filter_data,glines,guess,deg=1,range_keV = range_keV,funcs = [pgp.gauss_step,pgp.gauss_step,pgp.gauss_step,pgp.gauss_step,pgp.gauss_step,pgp.gauss_step],verbose=False)
     print("cal pars: ", pars)
 
