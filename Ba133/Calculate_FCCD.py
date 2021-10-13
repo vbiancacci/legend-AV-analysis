@@ -70,7 +70,6 @@ def main():
 
             #get errors:
             O_Ba133_err_pct = uncertainty(C_79,C_81, C_356)
-            O_Ba133_err_pct = uncertainty(C_79,C_81, C_356)
             O_Ba133_err_pct_list.append(O_Ba133_err_pct)
 
     #Get count ratio for data
@@ -102,7 +101,7 @@ def main():
 
     #plot and fit exp decay
     xdata, ydata = np.array(FCCD_list), np.array(O_Ba133_list)
-    yerr = O_Ba133_err_pct_list*ydata/100
+    yerr = O_Ba133_err_pct_list*ydata/100 #get absolute error, not percentage
     aguess = max(ydata)
     bguess = 1
     cguess = min(ydata)
@@ -195,8 +194,6 @@ def main():
 def exponential_decay(x, a, b ,c):
     f = a*np.exp(-b*x) + c
     return f
-
-##VALENTINA CODE: UNCERTAINTIES##
 
 def uncertainty(C_79, C_81, C_356):
 
