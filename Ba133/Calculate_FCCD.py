@@ -69,7 +69,8 @@ def main():
             O_Ba133_list.append(O_Ba133)
 
             #get errors:
-            O_Ba133_err_pct = uncertainty(C_79+C_81, C_356)
+            O_Ba133_err_pct = uncertainty(C_79,C_81, C_356)
+            O_Ba133_err_pct = uncertainty(C_79,C_81, C_356)
             O_Ba133_err_pct_list.append(O_Ba133_err_pct)
 
     #Get count ratio for data
@@ -131,7 +132,6 @@ def main():
     popt_low, pcov_low = optimize.curve_fit(exponential_decay, xdata, y_lowlim, p0=p_guess_low, maxfev = 10**7, method ="trf") #, bounds = bounds)
     yfit_low = exponential_decay(xfit,*popt_low)
     plt.plot(xfit, yfit_low, color='grey', linestyle='dashed', linewidth=1) 
-    
 
 
     #calculate FCCD of data - invert eq
@@ -198,9 +198,10 @@ def exponential_decay(x, a, b ,c):
 
 ##VALENTINA CODE: UNCERTAINTIES##
 
-def uncertainty(C_79_81keV, C_356keV):
+def uncertainty(C_79, C_81, C_356):
 
     #values from Bjoern's thesis - Barium source
+    #all percentages
     gamma_line=0.69
     geant4=2.
     source_thickness=0.02
@@ -210,27 +211,24 @@ def uncertainty(C_79_81keV, C_356keV):
     detector_cup_material=0.03
 
     #compute statistical error
-    se=StatisticalError(C_79_81keV, C_356keV)
-    MC_statistics=np.sqrt(se)*100
+    se_rel = StatisticalError(C_79, C_81, C_356)
+    MC_statistics = se_rel*100
 
     #sum squared of all the contributions
     tot_error=np.sqrt(gamma_line**2+geant4**2+source_thickness**2+source_material**2+endcap_thickness**2+detector_cup_thickness**2+detector_cup_material**2+MC_statistics**2)
 
-    return tot_error
+    return tot_error #NB: tot_error is a percentage error
 
 
-def StatisticalError(C_79_81, C_356):
-#error on a peak is sqrt(N) where N is the # counts of the peak    ??
-#counts_79_81keV is the sum of the # counts of the peaks at 79 keV and 81 keV
-#counts_356keV is the # counts of the peak at 356keV
+def StatisticalError(C_79, C_81, C_356):
+#error on a peak is sqrt(N) where N is the # counts of the peak 
 
-    sigma_79_81=np.sqrt(C_79_81)
-    sigma_356=np.sqrt(C_356)
-    ratio=sigma_79_81/sigma_356
-    
-    se=((sigma_79_81/C_356)**2+((C_79_81*sigma_356)/(C_356**2))**2)
-    
-    return se
+    O_Ba133 = (C_79+C_81)/C_356
+    sigma_79, sigma_81, sigma_356 = np.sqrt(C_79), np.sqrt(C_81), np.sqrt(C_356)
+    se = np.sqrt((sigma_79**2 + sigma_81**2)/(C_356**2) + (((C_79+C_81)**2)/(C_356**4))*sigma_356**2) #error propagation
+    se_rel = se/O_Ba133
+
+    return se_rel
 
 
 if __name__ == "__main__":

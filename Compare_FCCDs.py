@@ -18,7 +18,6 @@ def main():
         detector_list_data = json.load(json_file)
     order_list = [2,3,4,5]
 
-
     plt.rcParams['figure.figsize'] = (12, 8)
     plt.figure()
 
@@ -57,12 +56,13 @@ def main():
             FCCD_err_ups.append(FCCD_err_up)
             FCCD_err_lows.append(FCCD_err_low)
         
-        plt.errorbar(detectors,FCCDs, yerr = [FCCD_err_lows, FCCD_err_ups], marker = 'o', linestyle = ' ', label=f'Order #'+str(order))
+        plt.errorbar(detectors,FCCDs, yerr = [FCCD_err_lows, FCCD_err_ups], marker = 'o', linestyle = '-', label=f'Order #'+str(order))
 
     plt.xticks(rotation = 45)
     plt.xlabel('Detector')
     plt.ylabel('FCCD (mm)')
     plt.legend()
+    plt.grid(linestyle='dashed', linewidth=0.5)
     plt.tight_layout()
     plt.title("FCCDs from Ba-133")
     plt.savefig(CodePath+"/FCCDs_Ba133.png", bbox_inches='tight')
