@@ -21,6 +21,12 @@ def main():
     plt.rcParams['figure.figsize'] = (12, 8)
     plt.figure()
 
+    detectors_all = []
+    orders_all = []
+    FCCDs_all =[]
+    FCCD_err_ups_all = []
+    FCCD_err_lows_all = []
+
     for order in order_list:
 
         detectors = detector_list_data["order_"+str(order)]
@@ -55,6 +61,14 @@ def main():
             FCCDs.append(FCCD)
             FCCD_err_ups.append(FCCD_err_up)
             FCCD_err_lows.append(FCCD_err_low)
+
+
+            detectors_all.append(detector)
+            orders_all.append(order)
+            FCCDs_all.append(FCCD)
+            FCCD_err_ups_all.append(FCCD_err_up)
+            FCCD_err_lows_all.append(FCCD_err_low)
+
         
         plt.errorbar(detectors,FCCDs, yerr = [FCCD_err_lows, FCCD_err_ups], marker = 'o', linestyle = '-', label=f'Order #'+str(order))
 
@@ -67,6 +81,14 @@ def main():
     plt.title("FCCDs from Ba-133")
     plt.savefig(CodePath+"/FCCDs_Ba133.png", bbox_inches='tight')
     plt.show()
+
+
+    #Save all values to csv file
+    dict = {"detector": detectors_all, "detector_order": orders_all, "FCCD": FCCDs_all, "FCCD_err_up": FCCD_err_ups_all, "FCCD_err_low": FCCD_err_lows_all}
+    df = pd.DataFrame(dict)
+    print(df)
+    df.to_csv(CodePath+"/FCCDs_Ba133.csv")
+    
 
 
 if __name__ == "__main__":

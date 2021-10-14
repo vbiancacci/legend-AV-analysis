@@ -108,6 +108,32 @@ def main():
     # fig.suptitle("Calibration Coefficients")
 
 
+    #compute percentage difference for resolution coefficients
+    a_dif_pct = ((np.array(a_Ba_list)-np.array(a_Th_list))/np.array(a_Ba_list))*100
+    b_dif_pct = ((np.array(b_Ba_list)-np.array(b_Th_list))/np.array(b_Ba_list))*100
+    plt.figure()
+    plt.scatter(detectors_all,a_dif_pct, label=f'x = a')
+    plt.scatter(detectors_all,b_dif_pct, label=f'x = b')
+    plt.hlines(0, detectors_all[0], detectors_all[-1], colors = "grey", linestyles='dashed')
+    plt.xticks(rotation = 45)
+    plt.xlabel('Detector')
+    plt.ylabel(r'$(x_{Ba}-x_{Th})/x_{Ba}  \%$')
+    plt.legend()
+    plt.tight_layout()
+    plt.title(r"$\%$ difference of resolution coefficients")
+    plt.savefig("compare_resolution_coef_pct.png")
+
+    # plt.figure()
+    # plt.scatter(detectors_all,b_Ba_list, label=f'Ba-133')
+    # plt.scatter(detectors_all,b_Th_list, label=f'Th-228')
+    # plt.xticks(rotation = 45)
+    # plt.xlabel('Detector')
+    # plt.ylabel('b')
+    # plt.legend()
+    # plt.tight_layout()
+    # plt.title("")
+
+
 
 
 
@@ -119,7 +145,7 @@ def main():
     # plt.xlabel('Detector')
     # plt.ylabel('m')
     # plt.legend()
-    plt.tight_layout()
+    # plt.tight_layout()
     # plt.title("")
 
     # plt.figure()
