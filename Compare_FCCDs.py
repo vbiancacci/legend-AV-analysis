@@ -16,7 +16,7 @@ def main():
     detector_list = CodePath+"/detector_list.json" 
     with open(detector_list) as json_file: 
         detector_list_data = json.load(json_file)
-    order_list = [2,3,4,5]
+    order_list = [2,3,4,5,7]
 
     plt.rcParams['figure.figsize'] = (12, 8)
     plt.figure()
@@ -49,7 +49,10 @@ def main():
             TL_model = "notl"
             frac_FCCDbore = 0.5
             energy_filter = "cuspEmax_ctc"
-            run = 1
+            if order == 7 or order == 8:
+                run = 2
+            else:
+                run = 1
             cuts = True
 
             #Just Ba133 for now
