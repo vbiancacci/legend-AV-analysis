@@ -30,7 +30,7 @@ def main():
         detectors = detector_list_data["order_"+str(order)]
         for detector in detectors:
 
-            if detector != "V07298B":
+            if detector != "V07647A":
                 continue
 
             #========Calibration - DATA==========
