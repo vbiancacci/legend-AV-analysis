@@ -16,14 +16,18 @@ CodePath=dir=os.path.dirname(os.path.realpath(__file__))
 
 def main():
 
-    detector = "V05268A" 
+    detector = "V07647B" 
+    FCCD = 0.75
 
     #==========DATA==========
     #Parameters
     data_path="/lfs/l1/legend/legend-prodenv/prod-usr/ggmarsh-test-v03/gen/"+detector+"/tier2/ba_HS4_top_dlt/"
     energy_filter="cuspEmax_ctc"
     cuts="True"
-    run=1
+    if (detector[2] == "7") or (detector[2] =="8"):
+        run = 2
+    else:
+        run=1
     calibration = CodePath+"/data_calibration/"+detector+"/calibration_run"+str(run)+"_cuts.json"
 
     #get data
@@ -51,7 +55,6 @@ def main():
 
     #===========MC============
     #paramaters
-    FCCD = 0.96
     DLF_list = [0.0,0.25,0.5,0.75,1.0]
     smear="g"
     frac_FCCDbore=0.5
@@ -87,6 +90,8 @@ def main():
     plt.xlim(0,450)
     plt.tight_layout()
     plt.savefig(dir+"/Spectra/"+detector+"/DataMC_compareDLFs.png")
+
+    plt.show()
 
 
 
