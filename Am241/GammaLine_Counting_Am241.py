@@ -27,7 +27,7 @@ def main():
                                   usage="python GammaLine_Counting.py [OPERATION: -d -s] [arguments: ]"
     )
     arg, st, sf = par.add_argument, "store_true", "store_false"
-    arg("-d", "--data",  nargs=6, help="fit data, usage: python GammaLine_Counting.py --data <detector> <data_path> <calibration> <energy_filter> <cuts> <run>")
+    arg("-d", "--data",  nargs=5, help="fit data, usage: python GammaLine_Counting.py --data <detector> <calibration> <energy_filter> <cuts> <run>")
     arg("-s", "--sim", nargs=3, help="fit processed simulations, usage: python GammaLine_Counting.py --sim <detector> <sim_path> <MC_id>")
 
     args=vars(par.parse_args())
@@ -38,11 +38,10 @@ def main():
 
     #========DATA MODE=======:
     if args["data"]:
-        detector, data_path, calibration, energy_filter, cuts, run = args["data"][0], args["data"][1], args["data"][2], args["data"][3], args["data"][4], int(args["data"][5])
+        detector, calibration, energy_filter, cuts, run = args["data"][0], args["data"][1], args["data"][2], args["data"][3], args["data"][4]
         print("")
         print("MODE: Data")
         print("detector: ", detector)
-        print("data path: ", data_path)
         print("calibration path: ", calibration)
         print("energy filter: ", energy_filter)
         print("applying cuts: ", cuts)
@@ -53,22 +52,16 @@ def main():
             cuts = False
         else:
             cuts = True
+            sigma_cuts = 4
+
 
         #initialise directories for detectors to save
         if not os.path.exists(dir+"/PeakCounts/"+detector+"/plots/data/"):
             os.makedirs(dir+"/PeakCounts/"+detector+"/plots/data/")
 
         #Get data and concoatonate into df
-        if cuts == False:
-            df_total_lh5 = read_all_dsp_lh5(data_path,cuts,run=run)
-        else:
-            sigma_cuts = 4
-            print("sigma cuts: ", str(sigma_cuts))
-            df_total_lh5 = read_all_dsp_lh5(data_path,cuts,run=run, sigma=sigma_cuts)
-
-
-        print("df_total_lh5: ", df_total_lh5)
-        energy_filter_data = df_total_lh5[energy_filter]
+        df=pd.read_hdf(dir+"/data_calibration/"+detector+"/test_calibrated_energy.hdf5", key='energy')
+        energy_filter_data=df['energy_filter']
 
         #Get Calibration
         with open(calibration) as json_file:
@@ -102,8 +95,8 @@ def main():
 
 
     #get total pygama histogram
-    binwidth = 0.3 #keV
-    bins = np.arange(0,700,binwidth)
+    binwidth = 0.1 #keV
+    bins = np.arange(0,140,binwidth)
     hist, bins, var = histograms.get_hist(energies, bins=bins)
 
     #_________Fit 99/103 double peak____________:
@@ -113,16 +106,18 @@ def main():
     #prepare histogram
     xmin_99_103, xmax_99_103 = 95, 107
     bins_peak = np.arange(xmin_99_103,xmax_99_103,binwidth)
+    #print(bins_peak)
     hist_peak, bins_peak, var_peak = histograms.get_hist(energies, bins=bins_peak)
     bins_centres_peak = histograms.get_bin_centers(bins_peak)
+    #print(bins_centres_peak)
 
-    zeros = (hist_peak == 0)
-    mask = ~(zeros)
-    sigma = np.sqrt(hist_peak)
-    hist_peak = hist_peak[mask]
+    #zeros = (hist_peak == 0)
+    #mask = ~(zeros)
+    #sigma = np.sqrt(hist_peak)
+    #hist_peak = hist_peak[mask]
 
-    bins_centres_peak = histograms.get_bin_centers(bins_peak)[mask]
-
+    #bins_centres_peak = histograms.get_bin_centers(bins_peak)[mask]
+    #print(bins_centres_peak)
 
     #fit function initial guess
     R =  0.0203/0.0195

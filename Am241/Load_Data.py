@@ -12,7 +12,7 @@ import fnmatch
 import h5py
 import pandas as pd
 
-import pygama.io.lh5 as lh5
+import pygama.lh5 as lh5
 import pygama.genpar_tmp.cuts as cut
 
 #Script to calibrate Ba133 pygama data and obtain resolution fit coefficients
@@ -22,7 +22,7 @@ CodePath=os.path.dirname(os.path.realpath(__file__))
 def main():
 
     if(len(sys.argv) != 6):
-        print('Example usage: python Calibration_Am241.py <detector> <data_path> <energy_filter> <cuts> <run>')
+        print('Example usage: python Load_Data.py <detector> <data_path> <energy_filter> <cuts> <run>')
         sys.exit()
 
     detector = sys.argv[1]
@@ -57,13 +57,15 @@ def main():
         print("sigma cuts: ", str(sigma_cuts))
         df_total_lh5, failed_cuts = read_all_dsp_lh5(data_path,cuts,run=run, sigma=sigma_cuts)
         failed_cuts = failed_cuts[energy_filter]
+
     print("df_total_lh5: ", df_total_lh5)
     energy_filter_data = df_total_lh5[energy_filter]
-    energy_filter_data.to_frame(name='energy_cal')
-    energy_filter_data.to_hdf("test_calibrated_energy.hdf5", key='df', mode='w')
+    energy_filter_data=energy_filter_data.to_frame(name='energy_filter')
+    energy_failed=failed_cuts.to_frame(name='failed_cuts')
 
-
-    procdf.to_hdf("test_calibrated_energy.hdf5", key='energy_cal', mode='w')
+    output_file=CodePath+"/data_calibration/"+detector+"/loaded_energy_"+detector+"_"+energy_filter+"_run"+str(run)+".hdf5
+    energy_filter_data.to_hdf(output_file, key='energy', mode='w')
+    energy_failed.to_hdf(output_file, key='failed')
 
 
 def read_all_dsp_lh5(t2_folder, cuts, cut_file_path=None, run="all", sigma=4):
@@ -72,7 +74,7 @@ def read_all_dsp_lh5(t2_folder, cuts, cut_file_path=None, run="all", sigma=4):
     files = os.listdir(t2_folder)
     files = fnmatch.filter(files, "*lh5")
     if run == 1:
-        files = fnmatch.filter(files, "*run0001-210601T135959*")
+        files = fnmatch.filter(files, "*run0001*")
     if run == 2:
         files = fnmatch.filter(files, "*run0002*")
 

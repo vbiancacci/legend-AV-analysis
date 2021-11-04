@@ -17,8 +17,8 @@ from GammaLine_Counting_Am241 import read_all_dsp_lh5
 def main():
 
 
-    if(len(sys.argv) != 11):
-        print('Example usage: python AV_postproc.py <detector> <MC_id> <sim_path> <FCCD> <DLF> <data_path> <calibration> <cuts> <run>')
+    if(len(sys.argv) != 10):
+        print('Example usage: python AV_postproc.py <detector> <MC_id> <sim_path> <FCCD> <DLF> <calibration> <cuts> <run>')
         sys.exit()
 
     detector = sys.argv[1] #raw MC folder path - e.g. "/lfs/l1/legend/users/aalexander/legend-g4simple-simulation/legend/simulations/V02160A/ba_HS4/top_0r_78z/hdf5/"
@@ -26,18 +26,16 @@ def main():
     sim_path = sys.argv[3] #path to AV processed sim, e.g. /lfs/l1/legend/users/aalexander/legend-g4simple-simulation/legend/simulations/${detector}/ba_HS4/top_0r_78z/hdf5/AV_processed/${MC_id}.hdf5
     FCCD = sys.argv[4] #FCCD of MC - e.g. 0.69
     DLF = sys.argv[5] #DLF of MC - e.g. 1.0
-    data_path = sys.argv[6] #path to data
-    calibration = sys.argv[7] #path to data calibration
-    energy_filter = sys.argv[8] #energy filter - e.g. trapEftp
-    cuts = sys.argv[9] #e.g. False
-    run = int(sys.argv[10]) #data run, e.g. 1 or 2
+    calibration = sys.argv[6] #path to data calibration
+    energy_filter = sys.argv[7] #energy filter - e.g. trapEftp
+    cuts = sys.argv[8] #e.g. False
+    run = int(sys.argv[9]) #data run, e.g. 1 or 2
 
     print("detector: ", detector)
     print("MC_id: ", MC_id)
     print("sim_path: ", sim_path)
     print("FCCD: ", str(FCCD))
     print("DLF: ", str(DLF))
-    print("data_path: ", data_path)
     print("calibration: ", calibration)
     print("energy_filter: ", energy_filter)
     print("applying data cuts: ", cuts)
@@ -57,25 +55,16 @@ def main():
 
     print("start...")
 
-
     #GET DATA
-    #Get data and concoatonate into df
-    if cuts == False:
-        df_total_lh5 = read_all_dsp_lh5(data_path,cuts=cuts,run=run)
-    else:
-        df_total_lh5 = read_all_dsp_lh5(data_path,cuts=cuts,run=run)
-
-    energy_filter_data = df_total_lh5[energy_filter]
+    energy_data_file=pd.read_hdf(dir+"/data_calibration/"+detector+"/loaded_energy_"+detector+"_"+energy_filter+"_run"+str(run)+".hdf5, key='energy')
+    energy_filter_data=energy_data_file['energy_filter']
 
     #Get Calibration
     with open(calibration) as json_file:
         calibration_coefs = json.load(json_file)
-    # m = calibration_coefs[energy_filter]["Calibration_pars"][0]
-    # c = calibration_coefs[energy_filter]["Calibration_pars"][1]
     m = calibration_coefs[energy_filter]["calibration"][0]
     c = calibration_coefs[energy_filter]["calibration"][1]
 
-    # energy_data = (energy_filter_data-c)/m
     energy_data = energy_filter_data*m + c
 
     #GET MC
@@ -103,7 +92,9 @@ def main():
 
     #Plot data and scaled MC
     binwidth = 0.1 #keV
-    bins = np.arange(0,120,binwidth)
+    xmin=0
+    xmax=120
+    bins = np.arange(xmin,xmax,binwidth)
 
 
     fig = plt.figure()
@@ -139,7 +130,7 @@ def main():
     print("errors")
 
     ax1.errorbar(bins[1:], Data_MC_ratios, yerr=Data_MC_ratios_err,color="green", elinewidth = 1, fmt='x', ms = 1.0, mew = 1.0)
-    ax1.hlines(1, 0, 120, colors="gray", linestyles='dashed')
+    ax1.hlines(1, xmin, xmax, colors="gray", linestyles='dashed')
 
 
     plt.xlabel("Energy [keV]")
@@ -149,8 +140,8 @@ def main():
     ax0.set_title(detector)
     ax1.set_ylabel("data/MC")
     ax1.set_yscale("log")
-    ax1.set_xlim(0,120)
-    ax0.set_xlim(0,120)
+    ax1.set_xlim(xmin,xmax)
+    ax0.set_xlim(xmin,xmax)
 
     # plt.subplots_adjust(hspace=.0)
 

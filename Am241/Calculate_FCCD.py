@@ -52,7 +52,7 @@ def main():
     print("start...")
 
     #Get O_ba133 for each FCCD
-    FCCD_list = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.9, 2.0] #mm
+    FCCD_list = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0] #mm
     O_Am241_list = []
     O_Am241_err_pct_list = []
     DLF = 1.0 #considering 0 TL
@@ -105,6 +105,7 @@ def main():
     #bounds=([0, 0, 0, 0, -np.inf], [np.inf]*5)
     popt, pcov = optimize.curve_fit(exponential_decay, xdata, ydata, p0=p_guess, sigma = yerr, maxfev = 10**7, method ="trf") #, bounds = bounds)
     a,b,c = popt[0],popt[1],popt[2]
+    print(a, b, c)
     a_err, b_err, c_err = np.sqrt(pcov[0][0]), np.sqrt(pcov[1][1]), np.sqrt(pcov[2][2])
     chi_sq, p_value, residuals, dof = chi_sq_calc(xdata, ydata, yerr, exponential_decay, popt)
 
@@ -135,8 +136,10 @@ def main():
 
     #calculate error on FCCD
     a_up, b_up, c_up = popt_up[0], popt_up[1], popt_up[2]
+    print(a_up, b_up, c_up)
     FCCD_data_err_up = (1/b_up)*np.log(a_up/(O_Am241_data-c_up))-FCCD_data
     a_low, b_low, c_low = popt_low[0], popt_low[1], popt_low[2]
+    print(a_low, b_low, c_low)
     FCCD_data_err_low = FCCD_data - (1/b_low)*np.log(a_low/(O_Am241_data-c_low))
     #FCCD_data_err = np.sqrt((1/(a**2*b**4*(c-O_Am241_data)**2))*(a**2*(b_err**2*(c-O_Am241_data)**2)*(np.log(-a/(c-O_Am241_data))**2) + b**2*(c_err**2+O_Am241_err_data**2) + a_err**2*b**2*(c-O_Am241_data)**2)) #wolfram alpha
 
