@@ -11,6 +11,7 @@ import json
 from datetime import datetime
 from scipy.integrate import quad
 import fnmatch
+from scipy.special import erf, erfc
 
 from pygama.analysis import histograms
 from pygama.analysis import peak_fitting
@@ -65,8 +66,6 @@ def main():
         #Get Calibration
         with open(calibration) as json_file:
             calibration_coefs = json.load(json_file)
-        # m = calibration_coefs[energy_filter]["Calibration_pars"][0]
-        # c = calibration_coefs[energy_filter]["Calibration_pars"][1]
         m = calibration_coefs[energy_filter]["calibration"][0]
         c = calibration_coefs[energy_filter]["calibration"][1]
 
@@ -121,39 +120,39 @@ def main():
     #fit function initial guess
     R =  0.0203/0.0195
     mu_99_guess, sigma_99_guess, a_99_guess, bkg_99_guess, s_99_guess = 99., 0.5, max(hist_peak)*R, min(hist_peak), min(hist_peak)
-    mu_103_guess, sigma_103_guess, a_103_guess, bkg_103_guess, s_103_guess = 103., 0.5, max(hist_peak), min(hist_peak), min(hist_peak)
+    mu_103_guess, sigma_103_guess, a_103_guess = 103., 0.5, max(hist_peak)
     mu_small_guess, sigma_small_guess, a_small_guess = 101., 0.5, max(hist_peak)*0.1
     double_guess = [a_99_guess, mu_99_guess, sigma_99_guess,
                     a_103_guess, mu_103_guess, sigma_103_guess,
                     a_small_guess, mu_small_guess, sigma_small_guess,
-                    bkg_99_guess, bkg_103_guess, s_99_guess, s_103_guess]
+                    bkg_99_guess,s_99_guess]
     try:
 
-        coeff, cov_matrix = peak_fitting.fit_hist(peak_fitting.Am_double, hist_peak, bins_peak, var=None, guess=double_guess, poissonLL=False, integral=None, method=None, bounds=None)
+        coeff, cov_matrix = peak_fitting.fit_hist(Am_double, hist_peak, bins_peak, var=None, guess=double_guess, poissonLL=False, integral=None, method=None, bounds=None)
 
         a_99, mu_99, sigma_99, a_103, mu_103, sigma_103, a_small, mu_small, sigma_small = coeff[0], coeff[1], coeff[2], coeff[3], coeff[4], coeff[5], coeff[6], coeff[7], coeff[8]
-        bkg_99, bkg_103, s_99, s_103 = coeff[9], coeff[10], coeff[11], coeff[12]
+        bkg_99, s_99 = coeff[9], coeff[10]
         a_99_err, mu_99_err, sigma_99_err, a_103_err, mu_103_err, sigma_103_err, a_small_err, mu_small_err, sigma_small_err = np.sqrt(cov_matrix[0][0]), np.sqrt(cov_matrix[1][1]), np.sqrt(cov_matrix[2][2]), np.sqrt(cov_matrix[3][3]), np.sqrt(cov_matrix[4][4]), np.sqrt(cov_matrix[5][5]), np.sqrt(cov_matrix[6][6]), np.sqrt(cov_matrix[7][7]), np.sqrt(cov_matrix[8][8])
-        bkg_99_err , bkg_103_err , s_99_err , s_103_err = np.sqrt(cov_matrix[9][9]), np.sqrt(cov_matrix[10][10]), np.sqrt(cov_matrix[11][11]), np.sqrt(cov_matrix[12][12])
-        print (cov_matrix[9][9],cov_matrix[10][10],cov_matrix[11][11],cov_matrix[12][12])
+        bkg_99_err , s_99_err  = np.sqrt(cov_matrix[9][9]), np.sqrt(cov_matrix[10][10])
         #compute chi sq of fit
-        chi_sq, p_value, residuals, dof = chi_sq_calc(bins_centres_peak, hist_peak, np.sqrt(hist_peak), peak_fitting.Am_double, coeff)
+        chi_sq, p_value, residuals, dof = chi_sq_calc(bins_centres_peak, hist_peak, np.sqrt(hist_peak), Am_double, coeff)
         print("r chi sq: ", chi_sq/dof)
 
-        #Counting - integrate gaussian signal part +/- 3 sigma -- change!
+        #Counting - integrate gaussian signal part
 
         C_99_103, C_99_103_err = double_gauss_count(a_99, mu_99,sigma_99, a_103, mu_103, sigma_103, binwidth)
         print("peak count 99-103 = ", str(C_99_103)," +/- ", str(C_99_103_err))
 
         #plot with fit
         xfit = np.linspace(xmin_99_103, xmax_99_103, 1000)
-        yfit = peak_fitting.Am_double(xfit, *coeff)
-        #yfit_step = peak_fitting.step(xfit,mu_99, sigma_99, bkg_99, s_99)
+        yfit = Am_double(xfit, *coeff)
+        yfit_step = peak_fitting.step(xfit,mu_99, sigma_99, bkg_99, s_99)
 
         fig, ax = plt.subplots()
         histograms.plot_hist(hist_peak, bins_peak, var=None, show_stats=False, stats_hloc=0.75, stats_vloc=0.85)
         plt.plot(xfit, yfit, label=r'gauss($x,\mu_{99},\sigma_{99},Ra$)+gauss($x,\mu_{103},\sigma_{103},a$)+step($x,\mu_{99},\sigma_{99},bkg,s$)')
         #plt.plot(xfit, yfit_step, "--", label =r'step($x,\mu_{99},\sigma_{99},bkg,s$))')
+
 
         plt.xlim(xmin_99_103, xmax_99_103)
         plt.yscale("log")
@@ -310,7 +309,7 @@ def main():
         O_Am241, O_Am241_err = np.nan, np.nan
     else:
         O_Am241 = C_60/C_99_103
-        O_Am241_err = np.sqrt((C_60_err/C_99_103)**2 + (C_60*C_99_103_err/C_99_103**2)**2)
+        O_Am241_err = np.sqrt((C_60_err/C_60)**2 + (C_99_103_err/C_99_103)**2)*O_Am241
     print("O_Am241 = " , O_Am241, " +/- ", O_Am241_err)
 
 
@@ -388,7 +387,7 @@ def gauss_count(a,mu,sigma, bin_width):
 
     #_____3sigma_____
     #integral_60_3sigma_list = quad(peak_fitting.gauss,mu-3*sigma, mu+3*sigma, args=(mu,sigma,a))
-    integral_list = quad(peak_fitting.gauss,0, 120, args=(mu,sigma,a))
+    integral_list = quad(peak_fitting.gauss,0,120, args=(mu,sigma,a))
     integral = integral_list[0]/bin_width
     integral_err = integral_list[1]/bin_width
 
@@ -425,6 +424,31 @@ def Am_60(x, mu_59, sigma_59, a_59, mu_57, sigma_57, a_57, mu_53, sigma_53, a_53
     f = peak_59 + peak_57 + bump_53 + step
 
     return f
+
+
+def Am_double(x,a1,mu1,sigma1,a2,mu2,sigma2,a3,mu3,sigma3,b,s,
+              components=False) :
+    """
+    A Fit function exclusevly for a 241Am 99keV and 103keV lines situation
+    Consists of
+     - three gaussian peaks (two lines + one bkg line in between)
+     - two steps (for the two lines)
+     - two tails (for the two lines)
+    """
+
+    step1 = peak_fitting.step(x,mu1,sigma1,b,s)
+
+    gaus1 = peak_fitting.gauss(x,mu1,sigma1,a1)
+    gaus2 = peak_fitting.gauss(x,mu2,sigma2,a2)
+    gaus3 = peak_fitting.gauss(x,mu3,sigma3,a3)
+
+
+    double_f = step1 + gaus1 + gaus2 + gaus3
+
+    if components:
+       return double_f, gaus1, gaus2, gaus3, step1,
+    else:
+       return double_f
 
 if __name__ =="__main__":
     main()
