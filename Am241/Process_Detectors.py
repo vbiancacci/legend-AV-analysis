@@ -23,7 +23,7 @@ def main():
     PlotSpectra = True #Pre-reqs: needs all above stages
 
     #Get detector list
-    detector_list = CodePath+"/../../detector_list.json"
+    detector_list = CodePath+"/../detector_list.json"
     with open(detector_list) as json_file:
         detector_list_data = json.load(json_file)
 
@@ -66,9 +66,9 @@ def main():
             if Gamma_line_count_data == True:
 
                 if cuts == "False":
-                    calibration = CodePath+"/../../Ba133/data_calibration/"+detector+"/calibration_run"+str(run)+".json"
+                    calibration = CodePath+"/data_calibration/"+detector+"/calibration_run"+str(run)+".json"
                 else:
-                    calibration = CodePath+"/../../Ba133/data_calibration/"+detector+"/calibration_run2_cuts.json"
+                    calibration = CodePath+"/data_calibration/"+detector+"/calibration_run1_cuts.json"
 
 
                 os.system("python3 "+CodePath+"/GammaLine_Counting_Am241.py --data "+detector+" "+calibration+" "+energy_filter+" "+cuts+" "+str(run))
@@ -115,9 +115,9 @@ def main():
             if PlotSpectra == True:
 
                 if cuts == "False":
-                    calibration = CodePath+"/../../Ba133/data_calibration/"+detector+"/calibration_run"+str(run)+".json"
+                    calibration = CodePath+"/data_calibration/"+detector+"/calibration_run"+str(run)+".json"
                 else:
-                    calibration = CodePath+"/../../Ba133/data_calibration/"+detector+"/calibration_run2_cuts.json"
+                    calibration = CodePath+"/data_calibration/"+detector+"/calibration_run1_cuts.json"
 
                 DLF=1.0
 

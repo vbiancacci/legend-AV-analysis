@@ -12,7 +12,6 @@ from datetime import datetime
 from scipy.integrate import quad
 import fnmatch
 
-import pygama.io.lh5 as lh5
 from pygama.analysis import histograms
 from pygama.analysis import peak_fitting
 
@@ -60,7 +59,7 @@ def main():
             os.makedirs(dir+"/PeakCounts/"+detector+"/plots/data/")
 
         #Get data and concoatonate into df
-        df=pd.read_hdf(dir+"/data_calibration/"+detector+"/test_calibrated_energy.hdf5", key='energy')
+        df=pd.read_hdf(dir+"/data_calibration/"+detector+"/loaded_energy_"+detector+"_"+energy_filter+"_run"+str(run)+".hdf5", key='energy')
         energy_filter_data=df['energy_filter']
 
         #Get Calibration
@@ -136,7 +135,7 @@ def main():
         bkg_99, bkg_103, s_99, s_103 = coeff[9], coeff[10], coeff[11], coeff[12]
         a_99_err, mu_99_err, sigma_99_err, a_103_err, mu_103_err, sigma_103_err, a_small_err, mu_small_err, sigma_small_err = np.sqrt(cov_matrix[0][0]), np.sqrt(cov_matrix[1][1]), np.sqrt(cov_matrix[2][2]), np.sqrt(cov_matrix[3][3]), np.sqrt(cov_matrix[4][4]), np.sqrt(cov_matrix[5][5]), np.sqrt(cov_matrix[6][6]), np.sqrt(cov_matrix[7][7]), np.sqrt(cov_matrix[8][8])
         bkg_99_err , bkg_103_err , s_99_err , s_103_err = np.sqrt(cov_matrix[9][9]), np.sqrt(cov_matrix[10][10]), np.sqrt(cov_matrix[11][11]), np.sqrt(cov_matrix[12][12])
-
+        print (cov_matrix[9][9],cov_matrix[10][10],cov_matrix[11][11],cov_matrix[12][12])
         #compute chi sq of fit
         chi_sq, p_value, residuals, dof = chi_sq_calc(bins_centres_peak, hist_peak, np.sqrt(hist_peak), peak_fitting.Am_double, coeff)
         print("r chi sq: ", chi_sq/dof)
@@ -348,37 +347,6 @@ def main():
                 with open(dir+"/PeakCounts/"+detector+"/PeakCounts_data_"+detector+"_cuts_"+energy_filter+"_run"+str(run)+"_"+str(sigma_cuts)+"sigma.json", "w") as outfile:
                     json.dump(PeakCounts, outfile, indent=4)
 
-
-
-
-def read_all_dsp_lh5(t2_folder, cuts, cut_file_path=None, run="all", sigma=4):
-
-    sto = lh5.Store()
-    files = os.listdir(t2_folder)
-    files = fnmatch.filter(files, "*lh5")
-    if run == 1:
-        files = fnmatch.filter(files, "*run0001*")
-    if run == 2:
-        files = fnmatch.filter(files, "*run0002*")
-
-    df_list = []
-    if cuts == False:
-        for file in files:
-
-            #get data, no cuts
-            tb = sto.read_object("raw",t2_folder+file)[0]
-            df = lh5.Table.get_dataframe(tb)
-            df_list.append(df)
-
-        df_total = pd.concat(df_list, axis=0, ignore_index=True)
-        return df_total
-
-    else: #apply cuts
-        files = [t2_folder+file for file in files] #get list of full paths
-        lh5_group = "raw"
-        df_total_cuts, failed_cuts = cut.load_df_with_cuts(files, lh5_group, cut_file = cut_file_path, cut_parameters= {'bl_mean':sigma,'bl_std':sigma, 'pz_std':sigma}, verbose=True)
-
-        return df_total_cuts
 
 def chi_sq_calc(xdata, ydata, yerr, fit_func, coeff):
     "calculate chi sq and p-val of a fit given the data points and fit parameters, e.g. fittype ='linear'"

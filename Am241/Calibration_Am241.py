@@ -23,10 +23,9 @@ def main():
         sys.exit()
 
     detector = sys.argv[1]
-    #data_path = sys.argv[2]
-    energy_filter = sys.argv[3]
-    cuts = sys.argv[4]
-    run = int(sys.argv[5])
+    energy_filter = sys.argv[2]
+    cuts = sys.argv[3]
+    run = int(sys.argv[4])
 
     print("")
     print("detector: ", detector)
@@ -47,7 +46,7 @@ def main():
     print(" ")
     print("Loading data")
 
-    output_file=CodePath+"/data_calibration/"+detector+"/loaded_energy_"+detector+"_"+energy_filter+"_run"+str(run)+".hdf5
+    output_file=CodePath+"/data_calibration/"+detector+"/loaded_energy_"+detector+"_"+energy_filter+"_run"+str(run)+".hdf5"
     energy_data_file=pd.read_hdf(output_file, key='energy')
     energy_filter_data=energy_data_file['energy_filter']
 
@@ -58,13 +57,19 @@ def main():
     #========Compute calibration coefficients===========
     print("Calibrating...")
 
-    glines    = [59.5409, 98.97, 102.98, 208.05, 335.37] # gamma lines used for calibration
-    range_keV = [(1,1),(1.5,1.5),(2,2),(3,3),(3,3)] # side bands width
+    #glines    = [59.5409, 73., 74., 98.97, 102.98, 123.05, 208.05, 335.37]#, 662.40] # gamma lines used for calibration
+    #range_keV = [(3,3),(1.,1.),(1.,1.),(1.5,1.5),(1.5,1.5),(1.,1.),(1.,1.),(1.,1.)]#,(1,1)] # side bands width
 
-    guess = 335/(energy_filter_data.quantile(0.9))
+    glines=[59.5409, 98.97,102.98,123.05]
+    range_keV=[(1.5,1.5),(1.5,1.5),(1.5,1.5),(1.5,1.5)]
+
+    #guess = 60/(energy_filter_data.quantile(0.9))
+    print(energy_filter_data.quantile(0.9))
+
+    guess=0.057
 
     print("Find peaks and compute calibration curve...",end=' ')
-    pars, cov, results = cal.hpge_E_calibration(energy_filter_data,glines,guess,deg=1,range_keV = range_keV,funcs = [pgp.gauss_step,pgp.gauss_step,pgp.gauss_step,pgp.gauss_step,pgp.gauss_step,pgp.gauss_step,pgp.gauss_step],verbose=True)
+    pars, cov, results = cal.hpge_E_calibration(energy_filter_data, glines, guess, deg=1, range_keV = range_keV, funcs = [pgp.gauss_step,pgp.gauss_step,pgp.gauss_step,pgp.gauss_step,pgp.gauss_step,pgp.gauss_step,pgp.gauss_step,pgp.gauss_step,pgp.gauss_step],verbose=True)
     print("cal pars: ", pars)
 
 
@@ -75,7 +80,7 @@ def main():
 
     xpb = 0.1
     xlo = 0
-    xhi = 400
+    xhi = 120
 
     nb = int((xhi-xlo)/xpb)
     hist_pass, bin_edges = np.histogram(ecal_pass, range=(xlo, xhi), bins=nb)

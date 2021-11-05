@@ -10,7 +10,6 @@ import os
 from scipy import optimize
 from scipy import stats
 
-from GammaLine_Counting_Am241 import read_all_dsp_lh5
 
 #Script to plot spectra of MC (best fit FCCD) and data
 
@@ -56,7 +55,7 @@ def main():
     print("start...")
 
     #GET DATA
-    energy_data_file=pd.read_hdf(dir+"/data_calibration/"+detector+"/loaded_energy_"+detector+"_"+energy_filter+"_run"+str(run)+".hdf5, key='energy')
+    energy_data_file=pd.read_hdf(dir+"/data_calibration/"+detector+"/loaded_energy_"+detector+"_"+energy_filter+"_run"+str(run)+".hdf5", key='energy')
     energy_filter_data=energy_data_file['energy_filter']
 
     #Get Calibration

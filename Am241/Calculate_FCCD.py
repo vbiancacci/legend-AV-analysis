@@ -98,6 +98,7 @@ def main():
     #plot and fit exp decay
     xdata, ydata = np.array(FCCD_list), np.array(O_Am241_list)
     yerr = O_Am241_err_pct_list*ydata/100 #get absolute error, not percentage
+
     aguess = max(ydata)
     bguess = 1
     cguess = min(ydata)
@@ -105,7 +106,6 @@ def main():
     #bounds=([0, 0, 0, 0, -np.inf], [np.inf]*5)
     popt, pcov = optimize.curve_fit(exponential_decay, xdata, ydata, p0=p_guess, sigma = yerr, maxfev = 10**7, method ="trf") #, bounds = bounds)
     a,b,c = popt[0],popt[1],popt[2]
-    print(a, b, c)
     a_err, b_err, c_err = np.sqrt(pcov[0][0]), np.sqrt(pcov[1][1]), np.sqrt(pcov[2][2])
     chi_sq, p_value, residuals, dof = chi_sq_calc(xdata, ydata, yerr, exponential_decay, popt)
 
@@ -136,10 +136,8 @@ def main():
 
     #calculate error on FCCD
     a_up, b_up, c_up = popt_up[0], popt_up[1], popt_up[2]
-    print(a_up, b_up, c_up)
     FCCD_data_err_up = (1/b_up)*np.log(a_up/(O_Am241_data-c_up))-FCCD_data
     a_low, b_low, c_low = popt_low[0], popt_low[1], popt_low[2]
-    print(a_low, b_low, c_low)
     FCCD_data_err_low = FCCD_data - (1/b_low)*np.log(a_low/(O_Am241_data-c_low))
     #FCCD_data_err = np.sqrt((1/(a**2*b**4*(c-O_Am241_data)**2))*(a**2*(b_err**2*(c-O_Am241_data)**2)*(np.log(-a/(c-O_Am241_data))**2) + b**2*(c_err**2+O_Am241_err_data**2) + a_err**2*b**2*(c-O_Am241_data)**2)) #wolfram alpha
 
@@ -221,8 +219,8 @@ def StatisticalError(C_60, C_99_103):
 
     O_Am241 = C_60/C_99_103
     sigma_60, sigma_99_103 = np.sqrt(C_60), np.sqrt(C_99_103)
-    se = (sigma_60/C_99_103)**2 + (C_60*sigma_99_103/C_99_103)**2 #error propagation
-    se_rel = np.sqrt(se)/O_Am241
+    se = (sigma_60/C_60)**2 + (sigma_99_103/C_99_103)**2 #error propagation
+    se_rel = np.sqrt(se)*O_Am241
 
     return se_rel
 
