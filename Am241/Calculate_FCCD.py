@@ -220,7 +220,7 @@ def StatisticalError(C_60, C_99_103):
     O_Am241 = C_60/C_99_103
     sigma_60, sigma_99_103 = np.sqrt(C_60), np.sqrt(C_99_103)
     se = (sigma_60/C_60)**2 + (sigma_99_103/C_99_103)**2 #error propagation
-    se_rel = np.sqrt(se)*O_Am241
+    se_rel = np.sqrt(se)
 
     return se_rel
 
