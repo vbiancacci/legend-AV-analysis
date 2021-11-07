@@ -78,6 +78,7 @@ def main():
             C_60 = PeakCounts['C_60']
             C_99_103 = PeakCounts['C_99_103']
             O_Am241_data = PeakCounts['O_Am241']
+            O_Am241_data_err = StatisticalError(C_60,C_99_103)*O_Am241_data   #statistical error (data)
     else:
         cuts_sigma = 4 #default =4, change by hand here if interested
         print("data cuts sigma: ", str(cuts_sigma))
@@ -87,12 +88,15 @@ def main():
                 C_60 = PeakCounts['C_60']
                 C_99_103 = PeakCounts['C_99_103']
                 O_Am241_data = PeakCounts['O_Am241']
+                print(StatisticalError(C_60,C_99_103))
+                O_Am241_data_err = StatisticalError(C_60,C_99_103)*O_Am241_data   #statistical error (data)
         else:
             with open(dir+"/PeakCounts/"+detector+"/PeakCounts_data_"+detector+"_cuts_"+energy_filter+"_run"+str(run)+"_"+str(sigma_cuts)+"sigma.json") as json_file:
                 PeakCounts = json.load(json_file)
                 C_60 = PeakCounts['C_60']
                 C_99_103 = PeakCounts['C_99_103']
                 O_Am241_data = PeakCounts['O_Am241']
+                O_Am241_data_err = StatisticalError(C_60,C_99_103)*O_Am241_data   #statistical error (data)
 
 
     #plot and fit exp decay
@@ -101,12 +105,13 @@ def main():
 
     aguess = max(ydata)
     bguess = 1
-    cguess = min(ydata)
-    p_guess = [aguess,bguess,cguess]
+    #cguess = min(ydata)
+    p_guess = [aguess,bguess]#,cguess]
     #bounds=([0, 0, 0, 0, -np.inf], [np.inf]*5)
     popt, pcov = optimize.curve_fit(exponential_decay, xdata, ydata, p0=p_guess, sigma = yerr, maxfev = 10**7, method ="trf") #, bounds = bounds)
-    a,b,c = popt[0],popt[1],popt[2]
-    a_err, b_err, c_err = np.sqrt(pcov[0][0]), np.sqrt(pcov[1][1]), np.sqrt(pcov[2][2])
+    a,b = popt[0],popt[1]#,popt[2]
+    print(a,b)
+    a_err, b_err = np.sqrt(pcov[0][0]), np.sqrt(pcov[1][1])#,np.sqrt(pcov[2][2])
     chi_sq, p_value, residuals, dof = chi_sq_calc(xdata, ydata, yerr, exponential_decay, popt)
 
     fig, ax = plt.subplots()
@@ -118,40 +123,39 @@ def main():
 
     #fit exp decay of error bars:
     y_uplim = ydata+yerr
-    p_guess_up = [max(y_uplim), 1, min(y_uplim)]
+    p_guess_up = [max(y_uplim), 1]#, min(y_uplim)]
     popt_up, pcov_up = optimize.curve_fit(exponential_decay, xdata, y_uplim, p0=p_guess_up, maxfev = 10**7, method ="trf") #, bounds = bounds)
     yfit_up = exponential_decay(xfit,*popt_up)
     plt.plot(xfit, yfit_up, color='grey', linestyle='dashed', linewidth=1)
 
     y_lowlim = ydata-yerr
-    p_guess_low = [max(y_lowlim), 1, min(y_lowlim)]
+    p_guess_low = [max(y_lowlim), 1]#, min(y_lowlim)]
     popt_low, pcov_low = optimize.curve_fit(exponential_decay, xdata, y_lowlim, p0=p_guess_low, maxfev = 10**7, method ="trf") #, bounds = bounds)
     yfit_low = exponential_decay(xfit,*popt_low)
     plt.plot(xfit, yfit_low, color='grey', linestyle='dashed', linewidth=1)
 
 
     #calculate FCCD of data - invert eq
-    FCCD_data = (1/b)*np.log(a/(O_Am241_data-c))
-
+    FCCD_data = (1/b)*np.log(a/O_Am241_data)
 
     #calculate error on FCCD
-    a_up, b_up, c_up = popt_up[0], popt_up[1], popt_up[2]
-    FCCD_data_err_up = (1/b_up)*np.log(a_up/(O_Am241_data-c_up))-FCCD_data
-    a_low, b_low, c_low = popt_low[0], popt_low[1], popt_low[2]
-    FCCD_data_err_low = FCCD_data - (1/b_low)*np.log(a_low/(O_Am241_data-c_low))
+    a_up, b_up = popt_up[0], popt_up[1]#, popt_up[2]
+    FCCD_data_err_up = (1/b_up)*np.log(a_up/(O_Am241_data-O_Am241_data_err))-FCCD_data
+    a_low, b_low = popt_low[0], popt_low[1]#, popt_low[2]
+    FCCD_data_err_low = FCCD_data - (1/b_low)*np.log(a_low/(O_Am241_data+O_Am241_data_err))
     #FCCD_data_err = np.sqrt((1/(a**2*b**4*(c-O_Am241_data)**2))*(a**2*(b_err**2*(c-O_Am241_data)**2)*(np.log(-a/(c-O_Am241_data))**2) + b**2*(c_err**2+O_Am241_err_data**2) + a_err**2*b**2*(c-O_Am241_data)**2)) #wolfram alpha
 
     print('FCCD of data extrapolated: '+str(FCCD_data) +" + "+ str(FCCD_data_err_up) +" - "+str(FCCD_data_err_low))
 
 
     props = dict(boxstyle='round', alpha=0.5)
-    info_str = '\n'.join((r'$a=%.3f \pm %.3f$' % (a, np.sqrt(pcov[0][0])), r'$b=%.3f \pm %.3f$' % (b, np.sqrt(pcov[1][1])), r'$c=%.3f \pm %.3f$' % (c, np.sqrt(pcov[2][2])), r'$\chi^2/dof=%.2f/%.0f$'%(chi_sq, dof), r'FCCD_data=$%.3f^{+%.3f}_{-%.3f}$ mm' % (FCCD_data, FCCD_data_err_up, FCCD_data_err_low)))
+    info_str = '\n'.join((r'$a=%.3f \pm %.3f$' % (a, np.sqrt(pcov[0][0])), r'$b=%.3f \pm %.3f$' % (b, np.sqrt(pcov[1][1])), r'$\chi^2/dof=%.2f/%.0f$'%(chi_sq, dof), r'FCCD_data=$%.3f^{+%.3f}_{-%.3f}$ mm' % (FCCD_data, FCCD_data_err_up, FCCD_data_err_low)))
     plt.text(0.625, 0.275, info_str, transform=ax.transAxes, fontsize=9,verticalalignment='top', bbox=props) #ax.text..ax.tra
 
     #plot data line
     plt.hlines(O_Am241_data, 0, FCCD_list[-1], colors="orange", label = 'data')
-    # plt.plot(xfit, [O_Am241_data+O_Am241_err_data]*(len(xfit)), label = 'data bounds', color = 'grey', linestyle = 'dashed', linewidth = '1.0')
-    # plt.plot(xfit, [O_Am241_data-O_Am241_err_data]*(len(xfit)), color = 'grey', linestyle = 'dashed', linewidth = '1.0')
+    plt.plot(xfit, [O_Am241_data+O_Am241_data_err]*(len(xfit)), label = 'data bounds', color = 'grey', linestyle = 'dashed', linewidth = '1.0')
+    plt.plot(xfit, [O_Am241_data-O_Am241_data_err]*(len(xfit)), color = 'grey', linestyle = 'dashed', linewidth = '1.0')
 
 
     plt.vlines(FCCD_data, 0, O_Am241_data, colors='orange', linestyles='dashed')
@@ -173,7 +177,15 @@ def main():
 
 
     #Save interpolated fccd for data to a json file
-    FCCD_data_dict = {"FCCD": FCCD_data,"FCCD_err_up": FCCD_data_err_up, "FCCD_err_low": FCCD_data_err_low}
+    FCCD_data_dict = {
+        "FCCD": FCCD_data,
+        "FCCD_err_up": FCCD_data_err_up,
+        "FCCD_err_low": FCCD_data_err_low,
+        "O_Am241_data": O_Am241_data,
+        "O_Am241_data_err": O_Am241_data_err,
+        "a": a,
+        "a_err": a_err
+    }
 
     if cuts == False:
         with open(dir+"/FCCD/FCCD_data"+MC_id+"_"+smear+"_"+TL_model+"_fracFCCDbore"+frac_FCCDbore+"_"+energy_filter+"_run"+str(run)+".json", "w") as outfile:
@@ -188,13 +200,13 @@ def main():
 
     print("done")
 
-def exponential_decay(x, a, b ,c):
-    f = a*np.exp(-b*x) + c
+def exponential_decay(x, a, b):
+    f = a*np.exp(-b*x)
     return f
 
 def uncertainty(C_60, C_99_103):
 
-    #values from Bjoern's thesis - Barium source
+    #values from Bjoern's thesis - Am source
     #all percentages
     gamma_line=1.81
     geant4=2.
@@ -217,7 +229,7 @@ def uncertainty(C_60, C_99_103):
 def StatisticalError(C_60, C_99_103):
 #error on a peak is sqrt(N) where N is the # counts of the peak
 
-    O_Am241 = C_60/C_99_103
+    #O_Am241 = C_60/C_99_103
     sigma_60, sigma_99_103 = np.sqrt(C_60), np.sqrt(C_99_103)
     se = (sigma_60/C_60)**2 + (sigma_99_103/C_99_103)**2 #error propagation
     se_rel = np.sqrt(se)

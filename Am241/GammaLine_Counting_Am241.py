@@ -27,7 +27,7 @@ def main():
                                   usage="python GammaLine_Counting.py [OPERATION: -d -s] [arguments: ]"
     )
     arg, st, sf = par.add_argument, "store_true", "store_false"
-    arg("-d", "--data",  nargs=5, help="fit data, usage: python GammaLine_Counting.py --data <detector> <calibration> <energy_filter> <cuts> <run>")
+    arg("-d", "--data",  nargs=4, help="fit data, usage: python GammaLine_Counting.py --data <detector> <energy_filter> <cuts> <run>")
     arg("-s", "--sim", nargs=3, help="fit processed simulations, usage: python GammaLine_Counting.py --sim <detector> <sim_path> <MC_id>")
 
     args=vars(par.parse_args())
@@ -38,11 +38,11 @@ def main():
 
     #========DATA MODE=======:
     if args["data"]:
-        detector, calibration, energy_filter, cuts, run = args["data"][0], args["data"][1], args["data"][2], args["data"][3], args["data"][4]
+        detector, energy_filter, cuts, run = args["data"][0], args["data"][1], args["data"][2], args["data"][3]
         print("")
         print("MODE: Data")
         print("detector: ", detector)
-        print("calibration path: ", calibration)
+        #print("calibration path: ", calibration)
         print("energy filter: ", energy_filter)
         print("applying cuts: ", cuts)
         print("run: ", run)
@@ -61,16 +61,16 @@ def main():
 
         #Get data and concoatonate into df
         df=pd.read_hdf(dir+"/data_calibration/"+detector+"/loaded_energy_"+detector+"_"+energy_filter+"_run"+str(run)+".hdf5", key='energy')
-        energy_filter_data=df['energy_filter']
+        energies=df['energy_filter']
 
         #Get Calibration
-        with open(calibration) as json_file:
-            calibration_coefs = json.load(json_file)
-        m = calibration_coefs[energy_filter]["calibration"][0]
-        c = calibration_coefs[energy_filter]["calibration"][1]
+        #with open(calibration) as json_file:
+        #   calibration_coefs = json.load(json_file)
+        #m = calibration_coefs[energy_filter]["calibration"][0]
+        #c = calibration_coefs[energy_filter]["calibration"][1]
 
         # energies = (energy_filter_data-c)/m
-        energies = energy_filter_data*m + c
+        #energies = energy_filter_data*m + c
 
     #========SIMULATION MODE:==============
     if args["sim"]:
@@ -146,23 +146,26 @@ def main():
         #plot with fit
         xfit = np.linspace(xmin_99_103, xmax_99_103, 1000)
         yfit = Am_double(xfit, *coeff)
-        yfit_step = peak_fitting.step(xfit,mu_99, sigma_99, bkg_99, s_99)
+        #yfit_step = peak_fitting.step(xfit,mu_99, sigma_99, bkg_99, s_99)
+        #yfit_doubleG= double_gauss(xfit, a_99, mu_99, sigma_99, a_103, mu_103, sigma_103)
 
         fig, ax = plt.subplots()
         histograms.plot_hist(hist_peak, bins_peak, var=None, show_stats=False, stats_hloc=0.75, stats_vloc=0.85)
-        plt.plot(xfit, yfit, label=r'gauss($x,\mu_{99},\sigma_{99},Ra$)+gauss($x,\mu_{103},\sigma_{103},a$)+step($x,\mu_{99},\sigma_{99},bkg,s$)')
+        plt.plot(xfit, yfit, label=r'gauss($x,\mu_{99},\sigma_{99},a_{99}$)+gauss($x,\mu_{103},\sigma_{103},a_{103}$)+step($x,\mu_{99},\sigma_{99},bkg,s$)')
+        #plt.plot(xfit, yfit_doubleG, "--", color='red', label =r'double_gauss($x,\mu_{99},\sigma_{99},a_{99},\mu_{103},\sigma_{103},a_{103}$)')
         #plt.plot(xfit, yfit_step, "--", label =r'step($x,\mu_{99},\sigma_{99},bkg,s$))')
 
 
         plt.xlim(xmin_99_103, xmax_99_103)
+        #ax.set_ylim(min(hist_peak),max(hist_peak))
         plt.yscale("log")
         plt.xlabel("Energy (keV)")
         plt.ylabel("Counts")
-        plt.legend(loc="upper left", prop={'size': 8.5})
+        plt.legend(loc="lower left", prop={'size': 8.5})
 
         props = dict(boxstyle='round', alpha=0.5)
         info_str = '\n'.join((r'$\mu_{99}=%.3g \pm %.3g$' % (mu_99, mu_99_err), r'$\mu_{103}=%.3g \pm %.3g$' % (mu_103, mu_103_err), r'$\sigma_{99}=%.3g \pm %.3g$' % (sigma_99, sigma_99_err), r'$\sigma_{103}=%.3g \pm %.3g$' % (sigma_103, sigma_103_err), r'$\chi^2/dof=%.2f/%.0f$'%(chi_sq, dof)))
-        plt.text(0.02, 0.8, info_str, transform=ax.transAxes, fontsize=8,verticalalignment='top', bbox=props)
+        plt.text(0.02, 0.98, info_str, transform=ax.transAxes, fontsize=8,verticalalignment='top', bbox=props)
 
 
     except RuntimeError:
@@ -244,29 +247,29 @@ def main():
             #plot
             xfit = np.linspace(xmin, xmax, 1000)
             yfit = Am_60(xfit, *coeff)
-            yfit_step = peak_fitting.step(xfit ,mu_59, sigma_59, bkg, s)
-            yfit_gaus53 = peak_fitting.gauss(xfit ,mu_53, sigma_53, a_53)
-            yfit_gaus57 = peak_fitting.gauss(xfit ,mu_57, sigma_57, a_57)
+            #yfit_step = peak_fitting.step(xfit ,mu_59, sigma_59, bkg, s)
+            #yfit_gaus53 = peak_fitting.gauss(xfit ,mu_53, sigma_53, a_53)
+            #yfit_gaus57 = peak_fitting.gauss(xfit ,mu_57, sigma_57, a_57)
             yfit_gaus59 = peak_fitting.gauss(xfit ,mu_59, sigma_59, a_59)
 
             fig, ax = plt.subplots()
             histograms.plot_hist(hist_peak, bins_peak, var=None, show_stats=False, stats_hloc=0.75, stats_vloc=0.85)
-            plt.plot(xfit, yfit, label=r'gauss_step: gauss($x,\mu,\sigma,a$)+step($x,\mu,\sigma,bkg,s$)')
+            plt.plot(xfit, yfit, label=r'total_fit: gauss($x,\mu_{59},\sigma_{59},a_{59})+step(x,\mu_{59},\sigma_{59},bkg,s)+gauss_{53}+gauss_{57}$')
             #plt.plot(xfit, yfit_step, "--", label =r'step($x,\mu,\sigma,bkg,s$)')
             #plt.plot(xfit, yfit_gaus53, "--", color='blue', label =r'gaus53($x,\mu,\sigma,a)')
             #plt.plot(xfit, yfit_gaus57, "--", color='green', label =r'gaus57($x,\mu,\sigma,a)')
-            plt.plot(xfit, yfit_gaus59, "--", color='red', label =r'gaus59($x,\mu,\sigma,a)')
+            plt.plot(xfit, yfit_gaus59, "--", color='red', label =r'gauss59: gauss($x,\mu_{59},\sigma_{59},a_{59}$)')
 
             plt.xlim(xmin, xmax)
             plt.yscale("log")
-            ax.set_ylim([10**-3,10**+7])
+            ax.set_ylim(min(hist_peak)*0.8,max(hist_peak)*1.2)
             plt.xlabel("Energy (keV)")
             plt.ylabel("Counts")
             plt.legend(loc="lower left", prop={'size': 8.5})
 
             props = dict(boxstyle='round', alpha=0.5)
-            info_str = '\n'.join((r'$a=%.3g \pm %.3g$' % (a_59, a_59_err), r'$\mu=%.3g \pm %.3g$' % (mu_57, mu_57_err), r'$\chi^2/dof=%.2f/%.0f$'%(chi_sq, dof)))
-            plt.text(0.02, 0.5, info_str, transform=ax.transAxes, fontsize=8,verticalalignment='top', bbox=props)
+            info_str = '\n'.join((r'$\mu_{59}=%.3g \pm %.3g$' % (a_59, a_59_err), r'$\sigma_{59}=%.3g \pm %.3g$' % (sigma_59, sigma_59_err), r'$\chi^2/dof=%.2f/%.0f$'%(chi_sq, dof)))
+            plt.text(0.02, 0.98, info_str, transform=ax.transAxes, fontsize=8,verticalalignment='top', bbox=props)
 
         except RuntimeError:
             print("Error - curve_fit failed")

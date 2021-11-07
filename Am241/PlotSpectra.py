@@ -16,8 +16,8 @@ from scipy import stats
 def main():
 
 
-    if(len(sys.argv) != 10):
-        print('Example usage: python AV_postproc.py <detector> <MC_id> <sim_path> <FCCD> <DLF> <calibration> <cuts> <run>')
+    if(len(sys.argv) != 9):
+        print('Example usage: python AV_postproc.py <detector> <MC_id> <sim_path> <FCCD> <DLF> <cuts> <run>')
         sys.exit()
 
     detector = sys.argv[1] #raw MC folder path - e.g. "/lfs/l1/legend/users/aalexander/legend-g4simple-simulation/legend/simulations/V02160A/ba_HS4/top_0r_78z/hdf5/"
@@ -25,17 +25,15 @@ def main():
     sim_path = sys.argv[3] #path to AV processed sim, e.g. /lfs/l1/legend/users/aalexander/legend-g4simple-simulation/legend/simulations/${detector}/ba_HS4/top_0r_78z/hdf5/AV_processed/${MC_id}.hdf5
     FCCD = sys.argv[4] #FCCD of MC - e.g. 0.69
     DLF = sys.argv[5] #DLF of MC - e.g. 1.0
-    calibration = sys.argv[6] #path to data calibration
-    energy_filter = sys.argv[7] #energy filter - e.g. trapEftp
-    cuts = sys.argv[8] #e.g. False
-    run = int(sys.argv[9]) #data run, e.g. 1 or 2
+    energy_filter = sys.argv[6] #energy filter - e.g. trapEftp
+    cuts = sys.argv[7] #e.g. False
+    run = int(sys.argv[8]) #data run, e.g. 1 or 2
 
     print("detector: ", detector)
     print("MC_id: ", MC_id)
     print("sim_path: ", sim_path)
     print("FCCD: ", str(FCCD))
     print("DLF: ", str(DLF))
-    print("calibration: ", calibration)
     print("energy_filter: ", energy_filter)
     print("applying data cuts: ", cuts)
     print("run: ", run)
@@ -55,20 +53,12 @@ def main():
     print("start...")
 
     #GET DATA
-    energy_data_file=pd.read_hdf(dir+"/data_calibration/"+detector+"/loaded_energy_"+detector+"_"+energy_filter+"_run"+str(run)+".hdf5", key='energy')
-    energy_filter_data=energy_data_file['energy_filter']
-
-    #Get Calibration
-    with open(calibration) as json_file:
-        calibration_coefs = json.load(json_file)
-    m = calibration_coefs[energy_filter]["calibration"][0]
-    c = calibration_coefs[energy_filter]["calibration"][1]
-
-    energy_data = energy_filter_data*m + c
+    df=pd.read_hdf(dir+"/data_calibration/"+detector+"/loaded_energy_"+detector+"_"+energy_filter+"_run"+str(run)+".hdf5", key='energy')
+    energies=df['energy_filter']
 
     #GET MC
-    df =  pd.read_hdf(sim_path, key="procdf")
-    energy_MC = df['energy']
+    df_sim =  pd.read_hdf(sim_path, key="procdf")
+    energy_MC = df_sim['energy']
     print("opened MC")
 
     #Get peak counts C_356 for scaling
