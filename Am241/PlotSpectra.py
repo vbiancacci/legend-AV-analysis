@@ -16,7 +16,7 @@ from scipy import stats
 def main():
 
 
-    if(len(sys.argv) != 9):
+    if(len(sys.argv) != 10):
         print('Example usage: python AV_postproc.py <detector> <MC_id> <sim_path> <FCCD> <DLF> <cuts> <run>')
         sys.exit()
 
@@ -28,6 +28,7 @@ def main():
     energy_filter = sys.argv[6] #energy filter - e.g. trapEftp
     cuts = sys.argv[7] #e.g. False
     run = int(sys.argv[8]) #data run, e.g. 1 or 2
+    source = sys.argv[9]
 
     print("detector: ", detector)
     print("MC_id: ", MC_id)
@@ -37,6 +38,7 @@ def main():
     print("energy_filter: ", energy_filter)
     print("applying data cuts: ", cuts)
     print("run: ", run)
+    print("source: ", source)
 
     if cuts == "False":
         cuts = False
@@ -47,14 +49,14 @@ def main():
     print("working directory: ", dir)
 
     #initialise directories to save spectra
-    if not os.path.exists(dir+"/Spectra/"+detector+"/"):
-        os.makedirs(dir+"/Spectra/"+detector+"/")
+    if not os.path.exists(dir+"/Spectra/"+detector+"/"+source+"/"):
+        os.makedirs(dir+"/Spectra/"+detector+"/"+source+"/")
 
     print("start...")
 
     #GET DATA
-    df=pd.read_hdf(dir+"/data_calibration/"+detector+"/loaded_energy_"+detector+"_"+energy_filter+"_run"+str(run)+".hdf5", key='energy')
-    energies=df['energy_filter']
+    df = pd.read_hdf(dir+"/data_calibration/"+detector+"/"+source+"/loaded_energy_"+detector+"_"+energy_filter+"_run"+str(run)+".hdf5", key='energy')
+    energy_data = df['energy_filter']
 
     #GET MC
     df_sim =  pd.read_hdf(sim_path, key="procdf")
@@ -63,11 +65,11 @@ def main():
 
     #Get peak counts C_356 for scaling
     if cuts == False:
-        PeakCounts_data = dir+"/PeakCounts/"+detector+"/PeakCounts_data_"+detector+"_"+energy_filter+"_run"+str(run)+".json"
+        PeakCounts_data = dir+"/PeakCounts/"+detector+"/"+source+"/PeakCounts_data_"+detector+"_"+energy_filter+"_run"+str(run)+".json"
     else:
-        PeakCounts_data = dir+"/PeakCounts/"+detector+"/PeakCounts_data_"+detector+"_cuts_"+energy_filter+"_run"+str(run)+".json"
+        PeakCounts_data = dir+"/PeakCounts/"+detector+"/"+source+"/PeakCounts_data_"+detector+"_cuts_"+energy_filter+"_run"+str(run)+".json"
 
-    PeakCounts_MC = dir+"/PeakCounts/"+detector+"/PeakCounts_sim_"+MC_id+".json"
+    PeakCounts_MC = dir+"/PeakCounts/"+detector+"/"+source+"/PeakCounts_sim_"+MC_id+".json"
 
     with open(PeakCounts_data) as json_file:
         PeakCounts = json.load(json_file)
@@ -135,9 +137,9 @@ def main():
     # plt.subplots_adjust(hspace=.0)
 
     if cuts == False:
-        plt.savefig(dir+"/Spectra/"+detector+"/DataMC_"+MC_id+"_"+energy_filter+"_run"+str(run)+".png")
+        plt.savefig(dir+"/Spectra/"+detector+"/"+source+"/DataMC_"+MC_id+"_"+energy_filter+"_run"+str(run)+".png")
     else:
-        plt.savefig(dir+"/Spectra/"+detector+"/DataMC_"+MC_id+"_"+energy_filter+"_run"+str(run)+"_cuts.png")
+        plt.savefig(dir+"/Spectra/"+detector+"/"+source+"/DataMC_"+MC_id+"_"+energy_filter+"_run"+str(run)+"_cuts.png")
 
     print("done")
 
