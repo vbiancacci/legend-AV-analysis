@@ -15,8 +15,8 @@ from GammaLine_Counting_Am241 import chi_sq_calc
 
 def main():
 
-    if(len(sys.argv) != 9):
-        print('Example usage: python Am241_Calibration.py <detector> <MC_id> <smear> <TL_model> <frac_FCCDbore> <energy_filter> <cuts> <run>')
+    if(len(sys.argv) != 10):
+        print('Example usage: python Am241_Calibration.py <detector> <MC_id> <smear> <TL_model> <frac_FCCDbore> <energy_filter> <cuts> <run> <source>')
         sys.exit()
 
     detector = sys.argv[1]
@@ -27,6 +27,7 @@ def main():
     energy_filter = sys.argv[6] #e.g trapEftp
     cuts = sys.argv[7] #e.g. False
     run = int(sys.argv[8]) #e.g 1 or 2
+    source = sys.argv[9]
 
     print("detector: ", detector)
     print("MC_id: ", MC_id)
@@ -36,6 +37,7 @@ def main():
     print("energy_filter: ", energy_filter)
     print("applying data cuts: ", cuts)
     print("data run: ", run)
+    print("source: ", source)
 
     if cuts == "False":
         cuts = False
@@ -46,8 +48,8 @@ def main():
     print("working directory: ", dir)
 
     #initialise directories to save
-    if not os.path.exists(dir+"/FCCD/plots/"):
-        os.makedirs(dir+"/FCCD/plots/")
+#    if not os.path.exists(dir+"/FCCD/"+source+"plots/"):
+#        os.makedirs(dir+"/FCCD/"+source+"/plots/")
 
     print("start...")
 
@@ -60,7 +62,7 @@ def main():
     for FCCD in FCCD_list:
 
         #Get count ratio for simulations
-        with open(dir+"/PeakCounts/"+detector+"/PeakCounts_sim_"+MC_id+"_"+smear+"_"+TL_model+"_FCCD"+str(FCCD)+'mm_DLF'+str(DLF)+'_fracFCCDbore'+frac_FCCDbore+'.json') as json_file:
+        with open(dir+"/PeakCounts/"+detector+"/"+source+"/PeakCounts_sim_"+MC_id+"_"+smear+"_"+TL_model+"_FCCD"+str(FCCD)+'mm_DLF'+str(DLF)+'_fracFCCDbore'+frac_FCCDbore+'.json') as json_file:
             PeakCounts = json.load(json_file)
             C_60 = PeakCounts['C_60']
             C_99_103 = PeakCounts['C_99_103']
@@ -73,7 +75,7 @@ def main():
 
     #Get count ratio for data
     if cuts == False:
-        with open(dir+"/PeakCounts/"+detector+"/PeakCounts_data_"+detector+"_"+energy_filter+"_run"+str(run)+".json") as json_file:
+        with open(dir+"/PeakCounts/"+detector+"/"+source+"/PeakCounts_data_"+detector+"_"+energy_filter+"_run"+str(run)+".json") as json_file:
             PeakCounts = json.load(json_file)
             C_60 = PeakCounts['C_60']
             C_99_103 = PeakCounts['C_99_103']
@@ -83,7 +85,7 @@ def main():
         cuts_sigma = 4 #default =4, change by hand here if interested
         print("data cuts sigma: ", str(cuts_sigma))
         if cuts_sigma == 4:
-            with open(dir+"/PeakCounts/"+detector+"/PeakCounts_data_"+detector+"_cuts_"+energy_filter+"_run"+str(run)+".json") as json_file:
+            with open(dir+"/PeakCounts/"+detector+"/"+source+"/PeakCounts_data_"+detector+"_cuts_"+energy_filter+"_run"+str(run)+".json") as json_file:
                 PeakCounts = json.load(json_file)
                 C_60 = PeakCounts['C_60']
                 C_99_103 = PeakCounts['C_99_103']
@@ -91,7 +93,7 @@ def main():
                 print(StatisticalError(C_60,C_99_103))
                 O_Am241_data_err = StatisticalError(C_60,C_99_103)*O_Am241_data   #statistical error (data)
         else:
-            with open(dir+"/PeakCounts/"+detector+"/PeakCounts_data_"+detector+"_cuts_"+energy_filter+"_run"+str(run)+"_"+str(sigma_cuts)+"sigma.json") as json_file:
+            with open(dir+"/PeakCounts/"+detector+"/"+source+"/PeakCounts_data_"+detector+"_cuts_"+energy_filter+"_run"+str(run)+"_"+str(sigma_cuts)+"sigma.json") as json_file:
                 PeakCounts = json.load(json_file)
                 C_60 = PeakCounts['C_60']
                 C_99_103 = PeakCounts['C_99_103']
@@ -101,6 +103,7 @@ def main():
 
     #plot and fit exp decay
     xdata, ydata = np.array(FCCD_list), np.array(O_Am241_list)
+    print(ydata)
     yerr = O_Am241_err_pct_list*ydata/100 #get absolute error, not percentage
 
     aguess = max(ydata)
@@ -117,8 +120,9 @@ def main():
     fig, ax = plt.subplots()
     plt.errorbar(xdata, ydata, xerr=0, yerr =yerr, label = "simulations", elinewidth = 1, fmt='x', ms = 3.0, mew = 3.0)
     xfit = np.linspace(min(xdata), max(xdata), 1000)
-    yfit = exponential_decay(xfit,*popt)
-    plt.plot(xfit, yfit, "g", label = "fit: a*exp(-bx)+c")
+    #yfit = exponential_decay(xfit,*popt)
+    yfit = exponential_decay(xfit,a,b)
+    plt.plot(xfit, yfit, "g", label = "fit: a*exp(-bx)")
 
 
     #fit exp decay of error bars:
@@ -150,7 +154,7 @@ def main():
 
     props = dict(boxstyle='round', alpha=0.5)
     info_str = '\n'.join((r'$a=%.3f \pm %.3f$' % (a, np.sqrt(pcov[0][0])), r'$b=%.3f \pm %.3f$' % (b, np.sqrt(pcov[1][1])), r'$\chi^2/dof=%.2f/%.0f$'%(chi_sq, dof), r'FCCD_data=$%.3f^{+%.3f}_{-%.3f}$ mm' % (FCCD_data, FCCD_data_err_up, FCCD_data_err_low)))
-    plt.text(0.625, 0.275, info_str, transform=ax.transAxes, fontsize=9,verticalalignment='top', bbox=props) #ax.text..ax.tra
+    plt.text(0.625, 0.775, info_str, transform=ax.transAxes, fontsize=9,verticalalignment='top', bbox=props) #ax.text..ax.tra
 
     #plot data line
     plt.hlines(O_Am241_data, 0, FCCD_list[-1], colors="orange", label = 'data')
@@ -163,7 +167,7 @@ def main():
     plt.vlines(FCCD_data-FCCD_data_err_low, 0, O_Am241_data, colors='grey', linestyles='dashed', linewidths=1)
 
 
-    plt.ylabel(r'$O_{Am241} = C_{59.5}/(C_{99_103} C_{103}')
+    plt.ylabel(r'$O_{am\_HS6}=\frac{C_{60keV}}{C_{99keV}+C_{103keV}}$')
     plt.xlabel("FCCD (mm)")
     plt.xlim(0,FCCD_list[-1])
     plt.ylim(0,1000)
@@ -171,9 +175,9 @@ def main():
     plt.legend(loc="upper right", fontsize=8)
 
     if cuts == False:
-        plt.savefig(dir+"/FCCD/plots/FCCD_OAm241_"+MC_id+"_"+smear+"_"+TL_model+"_fracFCCDbore"+frac_FCCDbore+"_"+energy_filter+"_run"+str(run)+".png")
+        plt.savefig(dir+"/FCCD/"+source+"/plots/FCCD_OAm241_"+MC_id+"_"+smear+"_"+TL_model+"_fracFCCDbore"+frac_FCCDbore+"_"+energy_filter+"_run"+str(run)+".png")
     else:
-        plt.savefig(dir+"/FCCD/plots/FCCD_OAm241_"+MC_id+"_"+smear+"_"+TL_model+"_fracFCCDbore"+frac_FCCDbore+"_"+energy_filter+"_run"+str(run)+"_cuts.png")
+        plt.savefig(dir+"/FCCD/"+source+"/plots/FCCD_OAm241_"+MC_id+"_"+smear+"_"+TL_model+"_fracFCCDbore"+frac_FCCDbore+"_"+energy_filter+"_run"+str(run)+"_cuts.png")
 
 
     #Save interpolated fccd for data to a json file
@@ -184,18 +188,20 @@ def main():
         "O_Am241_data": O_Am241_data,
         "O_Am241_data_err": O_Am241_data_err,
         "a": a,
-        "a_err": a_err
+        "a_err": (a_up-a_low)/2,
+        "b": b,
+        "b_err": b_err
     }
 
     if cuts == False:
-        with open(dir+"/FCCD/FCCD_data"+MC_id+"_"+smear+"_"+TL_model+"_fracFCCDbore"+frac_FCCDbore+"_"+energy_filter+"_run"+str(run)+".json", "w") as outfile:
+        with open(dir+"/FCCD/"+source+"/FCCD_data"+MC_id+"_"+smear+"_"+TL_model+"_fracFCCDbore"+frac_FCCDbore+"_"+energy_filter+"_run"+str(run)+".json", "w") as outfile:
             json.dump(FCCD_data_dict, outfile, indent=4)
     else:
         if cuts_sigma ==4:
-            with open(dir+"/FCCD/FCCD_data_"+MC_id+"_"+smear+"_"+TL_model+"_fracFCCDbore"+frac_FCCDbore+"_"+energy_filter+"_run"+str(run)+"_cuts.json", "w") as outfile:
+            with open(dir+"/FCCD/"+source+"/FCCD_data_"+MC_id+"_"+smear+"_"+TL_model+"_fracFCCDbore"+frac_FCCDbore+"_"+energy_filter+"_run"+str(run)+"_cuts.json", "w") as outfile:
                 json.dump(FCCD_data_dict, outfile, indent=4)
         else:
-            with open(dir+"/FCCD/FCCD_data_"+MC_id+"_"+smear+"_"+TL_model+"_fracFCCDbore"+frac_FCCDbore+"_"+energy_filter+"_run"+str(run)+"_cuts_"+str(cuts_sigma)+"sigma.json", "w") as outfile:
+            with open(dir+"/FCCD/"+source+"/FCCD_data_"+MC_id+"_"+smear+"_"+TL_model+"_fracFCCDbore"+frac_FCCDbore+"_"+energy_filter+"_run"+str(run)+"_cuts_"+str(cuts_sigma)+"sigma.json", "w") as outfile:
                 json.dump(FCCD_data_dict, outfile, indent=4)
 
     print("done")
