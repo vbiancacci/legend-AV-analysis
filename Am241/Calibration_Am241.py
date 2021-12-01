@@ -20,7 +20,7 @@ CodePath=os.path.dirname(os.path.realpath(__file__))
 
 def main():
 
-    if(len(sys.argv) != 6):
+    if(len(sys.argv) != 7):
         print('Example usage: python Calibration_Am241.py <detector> <data_path> <energy_filter> <cuts> <run>')
         sys.exit()
 
@@ -29,6 +29,7 @@ def main():
     energy_filter = sys.argv[3]
     cuts = sys.argv[4]
     run = int(sys.argv[5])
+    source = sys.argv[6]
 
     print("")
     print("detector: ", detector)
@@ -36,14 +37,16 @@ def main():
     print("energy_filter: ", energy_filter)
     print("applying cuts: ", cuts)
     print("data run: ", run)
+    print("source: ", source)
+
     if cuts == "False":
         cuts = False
     else:
         cuts = True
 
     #initialise directories for detectors to save
-    if not os.path.exists(CodePath+"/data_calibration/"+detector+"/plots/"):
-        os.makedirs(CodePath+"/data_calibration/"+detector+"/plots/")
+    if not os.path.exists(CodePath+"/data_calibration/"+detector+"/"+source+"/plots/"):
+        os.makedirs(CodePath+"/data_calibration/"+detector+"/"+source+"/plots/")
 
     #====Load data======
     print(" ")
@@ -59,16 +62,42 @@ def main():
 
     print("df_total_lh5: ", df_total_lh5)
     energy_filter_data = df_total_lh5[energy_filter]
+    '''
+    energy_load_data=energy_filter_data.to_frame(name='energy_filter')
+    energy_load_failed=failed_cuts.to_frame(name='failed_cuts')
 
+    output_file=CodePath+"/data_calibration/"+detector+"/"+source+"/loaded_energy_"+detector+"_"+energy_filter+"_run"+str(run)+".hdf5"
+
+    energy_load_data.to_hdf(output_file, key='energy', mode='w')
+    energy_load_failed.to_hdf(output_file, key='failed')
+    '''
 
     #========Compute calibration coefficients===========
+
     print("Calibrating...")
+    #df=pd.read_hdf(CodePath+"/data_calibration/"+detector+"/"+source+"/loaded_energy_"+detector+"_"+energy_filter+"_run"+str(run)+".hdf5", key='energy')
+    #energy_filter_data=df['energy_filter']
 
     glines=[59.5409, 98.97,102.98,123.05]
-    range_keV=[(1.5,1.5),(1.5,1.5),(1.5,1.5),(1.5,1.5)]
+    range_keV=[(3., 3.),(1.5,1.5),(1.5,1.5),(1.5,1.5)]
 
-    #guess = 60/(energy_filter_data.quantile(0.9))
-    guess=0.057
+    #guess = 2621./(energy_filter_data.quantile(0.99))
+    #guess=102.9/(np.nanpercentile(energy_filter_data,0.99))
+    #print(np.nanpercentile(energy_filter_data,0.99))
+    #print(energy_filter_data.quantile(0.99))
+    #print(guess)
+    if detector=='V02160A' or detector=='V05268A':
+        guess= 0.1#0.045#0.1 #V02160A #0.057   0.032 if V07647A  #0.065 7298B
+    elif detector=='V05266A':
+        guess=0.08
+    elif detector=='V05267B':
+        guess=0.07
+    elif detector=='V04545A':
+        guess=0.07
+    #elif detector=='V04549B': #only for am_HS&
+    #    guess=0.1
+    else:
+        guess=0.045
 
     print("Find peaks and compute calibration curve...",end=' ')
     pars, cov, results = cal.hpge_E_calibration(energy_filter_data, glines, guess, deg=1, range_keV = range_keV, funcs = [pgp.gauss_step,pgp.gauss_step,pgp.gauss_step,pgp.gauss_step,pgp.gauss_step,pgp.gauss_step,pgp.gauss_step,pgp.gauss_step,pgp.gauss_step],verbose=True)
@@ -101,7 +130,7 @@ def main():
     plt.tight_layout()
     plt.legend(loc='upper right')
 
-    plt.savefig(CodePath+"/data_calibration/"+detector+"/plots/calibrated_energy_"+energy_filter+"_run"+str(run)+".png")
+    plt.savefig(CodePath+"/data_calibration/"+detector+"/"+source+"/plots/calibrated_energy_"+energy_filter+"_run"+str(run)+".png")
 
     #=========Plot Calibration Curve===========
 
@@ -142,16 +171,16 @@ def main():
 
     fig.suptitle(plot_title)
 
-    plt.savefig(CodePath+"/data_calibration/"+detector+"/plots/calibration_curve_"+energy_filter+"_run"+str(run)+".png")
+    plt.savefig(CodePath+"/data_calibration/"+detector+"/"+source+"/plots/calibration_curve_"+energy_filter+"_run"+str(run)+".png")
 
     #=========Save Calibration Coefficients==========
     dict = {energy_filter: {"resolution": list(fit_pars), "calibration": list(pars)}}
     print(dict)
     if cuts == False:
-        with open(CodePath+"/data_calibration/"+detector+"/calibration_run"+str(run)+".json", "w") as outfile:
+        with open(CodePath+"/data_calibration/"+detector+"/"+source+"/calibration_run"+str(run)+".json", "w") as outfile:
             json.dump(dict, outfile, indent=4)
     else:
-        with open(CodePath+"/data_calibration/"+detector+"/calibration_run"+str(run)+"_cuts.json", "w") as outfile:
+        with open(CodePath+"/data_calibration/"+detector+"/"+source+"/calibration_run"+str(run)+"_cuts.json", "w") as outfile:
             json.dump(dict, outfile, indent=4)
 
     print("done")
@@ -161,7 +190,7 @@ def main():
     energy_calib_data=ecal_pass.to_frame(name='energy_filter')
     energy_calib_failed=ecal_cut.to_frame(name='failed_cuts')
 
-    output_file=CodePath+"/data_calibration/"+detector+"/loaded_energy_"+detector+"_"+energy_filter+"_run"+str(run)+".hdf5"
+    output_file=CodePath+"/data_calibration/"+detector+"/"+source+"/loaded_energy_"+detector+"_"+energy_filter+"_run"+str(run)+".hdf5"
 
     energy_calib_data.to_hdf(output_file, key='energy', mode='w')
     energy_calib_failed.to_hdf(output_file, key='failed')
