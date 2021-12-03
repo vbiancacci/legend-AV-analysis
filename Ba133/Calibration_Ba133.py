@@ -11,7 +11,8 @@ import json
 import fnmatch
 import pandas as pd
 
-import pygama.io.lh5 as lh5
+# import pygama.io.lh5 as lh5
+import pygama.lh5 as lh5
 import pygama.genpar_tmp.cuts as cut
 
 #Script to calibrate Ba133 pygama data and obtain resolution fit coefficients
@@ -189,7 +190,8 @@ def read_all_dsp_lh5(t2_folder, cuts, cut_file_path=None, run="all", sigma=4):
     else: #apply cuts
         files = [t2_folder+file for file in files] #get list of full paths
         lh5_group = "raw"
-        df_total_cuts, failed_cuts = cut.load_df_with_cuts(files, lh5_group, cut_file = cut_file_path, cut_parameters= {'bl_mean':sigma,'bl_std':sigma, 'pz_std':sigma}, verbose=True)
+        # df_total_cuts, failed_cuts = cut.load_df_with_cuts(files, lh5_group, cut_file = cut_file_path, cut_parameters= {'bl_mean':sigma,'bl_std':sigma, 'pz_std':sigma}, verbose=True)
+        df_total_cuts, failed_cuts = cut.load_df_with_cuts(files, lh5_group, cut_parameters= {'bl_mean':sigma,'bl_std':sigma, 'pz_std':sigma}, verbose=True)
         
         return df_total_cuts, failed_cuts       
 

@@ -13,13 +13,13 @@ CodePath=os.path.dirname(os.path.realpath(__file__))
 def main():
 
     #Processing instructions
-    order_list = [7] #List of orders to process
-    Calibrate_Data = False #Pre-reqs: needs dsp pygama data
-    Gamma_line_count_data = False #Pre-reqs: needs calibration
+    order_list = [8] #List of orders to process
+    Calibrate_Data = True #Pre-reqs: needs dsp pygama data
+    Gamma_line_count_data = True #Pre-reqs: needs calibration
     Gamma_line_count_MC = False #Pre-reqs: needs AV post processed MC for range of FCCDs
     Calculate_FCCD = False #Pre-reqs: needs gammaline counts for data and MC
-    Gamma_line_count_MC_bestfitFCCD = True #Pre-reqs: needs AV postprocessed MC for best fit FCCD
-    PlotSpectra = True #Pre-reqs: needs all above stages
+    Gamma_line_count_MC_bestfitFCCD = False #Pre-reqs: needs AV postprocessed MC for best fit FCCD
+    PlotSpectra = False #Pre-reqs: needs all above stages
 
     #Get detector list
     detector_list = CodePath+"/../detector_list.json" 
@@ -30,8 +30,8 @@ def main():
         detectors = detector_list_data["order_"+str(order)]
         for detector in detectors:
 
-            if detector != "V07647A":
-                continue
+            # if detector != "V07647A":
+            #     continue
 
             #========Calibration - DATA==========
             if Calibrate_Data == True:
