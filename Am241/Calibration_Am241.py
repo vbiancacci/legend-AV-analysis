@@ -90,11 +90,13 @@ def main():
         guess= 0.1#0.045#0.1 #V02160A #0.057   0.032 if V07647A  #0.065 7298B
     elif detector=='V05266A':
         guess=0.08
-    elif detector=='V05267B':
+    elif detector=='V05267B'or detector=='V04545A':
         guess=0.07
-    elif detector=='V04545A':
-        guess=0.07
-    #elif detector=='V04549B': #only for am_HS&
+    elif detector=='V08682B':
+        guess=0.03
+    elif detector=='V08682A':
+        guess=0.053
+    #elif detector=='V04549B': #only for am_HS6
     #    guess=0.1
     else:
         guess=0.045
@@ -194,7 +196,7 @@ def main():
 
     energy_calib_data.to_hdf(output_file, key='energy', mode='w')
     energy_calib_failed.to_hdf(output_file, key='failed')
-
+    
 
 
 def read_all_dsp_lh5(t2_folder, cuts, cut_file_path=None, run="all", sigma=4):

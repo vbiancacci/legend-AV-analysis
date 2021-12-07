@@ -13,7 +13,7 @@ CodePath=os.path.dirname(os.path.realpath(__file__))
 def main():
 
     #Processing instructions
-    order_list = [2, 4, 5, 7] #List of orders to process
+    order_list = [8] #[2, 4, 5, 7] #List of orders to process
     Calibrate_Data = False #Pre-reqs: needs load data
     Gamma_line_count_data = False #Pre-reqs: needs calibration
     Gamma_line_count_MC = False #Pre-reqs: needs AV post processed MC for range of FCCDs
@@ -36,12 +36,12 @@ def main():
         #positions=["top_46r_4z","top_82r_5z"]#"top_50r_3z","top_35r_7z",["top_46r_3z","top_46r_3z","top_46r_3z","top_50r_4z","top_45r_4z","top_46r_4z","top_46r_2z"]#["top_46r_3z","top_46r_3z","top_50r_4z"]#["top_68r_4z","top_46r_15z","top_70r_3z","top_65r_7z"]#["top_46r_3z","top_46r_3z","top_46r_3z","top_62r_5z","top_46r_4z","top_46r_4z"]#["top_47r_4z","top_46r_3z","top_48r_4z","top_46r_2z","top_46r_3z"]#["top_47r_4z","top_46r_3z","top_48r_4z","top_46r_2z","top_46r_3z"]#,"top_46r_4z"]
         #for detector, position in zip(detectors,positions):
         for detector in detectors:
-            #if detector != "V07298B":
-            #     continue
+            if detector != "V08682A":
+                 continue
 
             energy_filter="cuspEmax_ctc"
             cuts="True"
-            if detector=='V02160A':# or detector =='V04545A':
+            if detector=='V02160A'or detector=='V08682A':# or detector =='V04545A':
                 run=3
             elif detector=='V02166B' or detector=='V04545A'or detector=='V02162B':
                 run=2
@@ -81,14 +81,14 @@ def main():
                 for FCCD in FCCD_list:
 
                     for DLF in DLF_list:
-                        MC_id=detector+"-"+source+"-"+position.replace("_","-")+"_"+smear+"_"+TL_model+"_FCCD"+str(FCCD)+"mm_DLF"+str(DLF)+"_fracFCCDbore"+str(frac_FCCDbore)
-                        sim_path="/lfs/l1/legend/detector_char/enr/hades/simulations/legend-g4simple-simulation/simulations/"+detector+"/"+source+"/"+position+"/hdf5/AV_processed/"+MC_id+".hdf5"
+                        MC_id=detector+"-"+source+"-"+position+"_"+smear+"_"+TL_model+"_FCCD"+str(FCCD)+"mm_DLF"+str(DLF)+"_fracFCCDbore"+str(frac_FCCDbore)
+                        sim_path="/lfs/l1/legend/detector_char/enr/hades/simulations/legend-g4simple-simulation/simulations/"+detector+"/"+source+"/"+position.replace("-","_")+"/hdf5/AV_processed/"+MC_id+".hdf5"
                         os.system("python3 "+CodePath+"/GammaLine_Counting_Am241.py --sim "+detector+" "+sim_path+" "+MC_id+" "+source)
 
             #=============Calculate FCCD===============
             if Calculate_FCCD == True:
 
-                MC_id=detector+"-"+source+"-"+position.replace("_","-")
+                MC_id=detector+"-"+source+"-"+position
 
                 os.system("python3 "+CodePath+"/Calculate_FCCD_am1.py "+detector+" "+MC_id+" "+smear+" "+TL_model+" "+str(frac_FCCDbore)+" "+energy_filter+" "+cuts+" "+str(run)+" "+source)
 
@@ -98,15 +98,15 @@ def main():
                 DLF=1.0
 
                 if cuts == "False":
-                    with open(CodePath+"/FCCD/"+source+"/FCCD_data_"+detector+"/"+source+"-"+position.replace("_","-")+"_"+smear+"_"+TL_model+"_fracFCCDbore"+str(frac_FCCDbore)+"_"+energy_filter+"_run"+str(run)+".json") as json_file:
+                    with open(CodePath+"/FCCD/"+source+"/FCCD_data_"+detector+"/"+source+"-"+position+"_"+smear+"_"+TL_model+"_fracFCCDbore"+str(frac_FCCDbore)+"_"+energy_filter+"_run"+str(run)+".json") as json_file:
                         FCCD_data = json.load(json_file)
                 else:
-                    with open(CodePath+"/FCCD/"+source+"/FCCD_data_"+detector+"/"+source+"-"+position.replace("_","-")+"_"+smear+"_"+TL_model+"_fracFCCDbore"+str(frac_FCCDbore)+"_"+energy_filter+"_run"+str(run)+"_cuts.json") as json_file:
+                    with open(CodePath+"/FCCD/"+source+"/FCCD_data_"+detector+"/"+source+"-"+position+"_"+smear+"_"+TL_model+"_fracFCCDbore"+str(frac_FCCDbore)+"_"+energy_filter+"_run"+str(run)+"_cuts.json") as json_file:
                         FCCD_data = json.load(json_file)
                 FCCD = round(FCCD_data["FCCD"],2)
 
                 MC_id=detector+"-"+source+"-"+position.replace("_","-")+"_"+smear+"_"+TL_model+"_FCCD"+str(FCCD)+"mm_DLF"+str(DLF)+"_fracFCCDbore"+str(frac_FCCDbore)
-                sim_path="/lfs/l1/legend/detector_char/enr/hades/simulations/legend-g4simple-simulation/simulations/"+detector+"/"+source+"/"+position+"/hdf5/AV_processed/"+MC_id+".hdf5"
+                sim_path="/lfs/l1/legend/detector_char/enr/hades/simulations/legend-g4simple-simulation/simulations/"+detector+"/"+source+"/"+position.replace("-","_")+"/hdf5/AV_processed/"+MC_id+".hdf5"
                 os.system("python3 "+CodePath+"/GammaLine_Counting_Am241.py --sim "+detector+" "+sim_path+" "+MC_id+" "+source)
 
 
@@ -116,15 +116,15 @@ def main():
                 DLF=1.0
 
                 if cuts == "False":
-                    with open(CodePath+"/FCCD/FCCD_data_"+detector+"/"+source+"-"+position.replace("_","-")+"_"+smear+"_"+TL_model+"_fracFCCDbore"+str(frac_FCCDbore)+"_"+energy_filter+"_run"+str(run)+".json") as json_file:
+                    with open(CodePath+"/FCCD/FCCD_data_"+detector+"/"+source+"-"+position+"_"+smear+"_"+TL_model+"_fracFCCDbore"+str(frac_FCCDbore)+"_"+energy_filter+"_run"+str(run)+".json") as json_file:
                         FCCD_data = json.load(json_file)
                 else:
-                    with open(CodePath+"/FCCD/FCCD_data_"+detector+"/"+source+"-"+position.replace("_","-")+"_"+smear+"_"+TL_model+"_fracFCCDbore"+str(frac_FCCDbore)+"_"+energy_filter+"_run"+str(run)+"_cuts.json") as json_file:
+                    with open(CodePath+"/FCCD/FCCD_data_"+detector+"/"+source+"-"+position+"_"+smear+"_"+TL_model+"_fracFCCDbore"+str(frac_FCCDbore)+"_"+energy_filter+"_run"+str(run)+"_cuts.json") as json_file:
                         FCCD_data = json.load(json_file)
                 FCCD = round(FCCD_data["FCCD"],2)
 
                 MC_id=detector+"/"+source+"-"+position.replace("_","-")+"_"+smear+"_"+TL_model+"_FCCD"+str(FCCD)+"mm_DLF"+str(DLF)+"_fracFCCDbore"+str(frac_FCCDbore)
-                sim_path="/lfs/l1/legend/detector_char/enr/hades/simulations/legend-g4simple-simulation/simulations/"+detector+"/"+source+"/"+position+"/hdf5/AV_processed/"+MC_id+".hdf5"
+                sim_path="/lfs/l1/legend/detector_char/enr/hades/simulations/legend-g4simple-simulation/simulations/"+detector+"/"+source+"/"+position.replace("-","_")+"/hdf5/AV_processed/"+MC_id+".hdf5"
 
                 os.system("python3 "+CodePath+"/PlotSpectra.py "+detector+" "+MC_id+" "+sim_path+" "+str(FCCD)+" "+str(DLF)+" "+energy_filter+" "+cuts+" "+str(run)+" "+source)
 
