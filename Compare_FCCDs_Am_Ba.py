@@ -26,7 +26,7 @@ def main():
     detector_list = CodePath+"/detector_list.json"
     with open(detector_list) as json_file:
         detector_list_data = json.load(json_file)
-    order_list = [2,4,5,7]
+    order_list = [2,4,5,7,8]
 
     positions_list=CodePath+"/positions_am1_list.json"
     with open(positions_list) as json_file:
@@ -94,7 +94,8 @@ def main():
             #Am241 HS1
             if detector=='V02160A':
                 run=3
-                continue
+            if detector=='V08682A':
+                run=3
             elif detector=='V02166B' or detector =='V04545A':
                 run=2
             elif detector=='V02162B':
@@ -102,8 +103,7 @@ def main():
             else:
                 run=1
             position=positions_list_data[detector]
-            am1_FCCD_file = CodePath+"/Am241/FCCD/am_HS1/no_correction/FCCD_data_"+detector+"-am_HS1-"+position+"_"+smear+"_"+TL_model+"_fracFCCDbore"+str(frac_FCCDbore)+"_"+energy_filter+"_run"+str(run)+"_cuts.json"
-            #print(am1_FCCD_file)
+            am1_FCCD_file = CodePath+"/Am241/FCCD/am_HS1/weighted_mean/FCCD_data_"+detector+"-am_HS1-"+position+"_"+smear+"_"+TL_model+"_fracFCCDbore"+str(frac_FCCDbore)+"_"+energy_filter+"_run"+str(run)+"_cuts.json"
             try:
                 with open(am1_FCCD_file) as json_file_am1:
                     FCCD_data_am1 = json.load(json_file_am1)
@@ -138,6 +138,8 @@ def main():
         cc=''
         if order==7:
             cc='green'
+        elif order==8:
+            cc='gold'
         elif order==5:
             cc='orangered'
         elif order==4:
@@ -156,7 +158,7 @@ def main():
     plt.grid(linestyle='dashed', linewidth=0.5)
     plt.tight_layout()
     plt.title("FCCDs from Ba-133, Am-241 HS1, Am-241 HS6")
-    plt.savefig(CodePath+"/FCCDs_Ba133_Am241_no_correction.png", bbox_inches='tight')
+    plt.savefig(CodePath+"/FCCDs_Ba133_Am241_new_correction.png", bbox_inches='tight')
     plt.show()
 
 
