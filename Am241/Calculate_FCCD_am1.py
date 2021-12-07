@@ -121,7 +121,7 @@ def main():
     plt.errorbar(xdata, ydata, xerr=0, yerr =yerr, label = "simulations", elinewidth = 1, fmt='x', ms = 3.0, mew = 3.0)
     xfit = np.linspace(min(xdata), max(xdata), 1000)
     #yfit = exponential_decay(xfit,*popt)
-    a=57.52344368283454#59.23103180210723
+    a=59.23103180210723#57.52344368283454
     yfit = exponential_decay(xfit,a,b)
     plt.plot(xfit, yfit, "g", label = "fit: a*exp(-bx)")
 
@@ -130,7 +130,7 @@ def main():
     y_uplim = ydata+yerr
     p_guess_up = [max(y_uplim), 1]#, min(y_uplim)]
     popt_up, pcov_up = optimize.curve_fit(exponential_decay, xdata, y_uplim, p0=p_guess_up, maxfev = 10**7, method ="trf") #, bounds = bounds)
-    arr=2.1571049512349667# 2.1673296109052482
+    arr=2.1673296109052482#2.1571049512349667
     a_up=a+arr
     yfit_up = exponential_decay(xfit,a_up,b)
     plt.plot(xfit, yfit_up, color='grey', linestyle='dashed', linewidth=1)
@@ -182,9 +182,9 @@ def main():
     plt.legend(loc="upper right", fontsize=8)
 
     if cuts == False:
-        plt.savefig(dir+"/FCCD/"+source+"/no_correction/plots/FCCD_OAm241_"+MC_id+"_"+smear+"_"+TL_model+"_fracFCCDbore"+frac_FCCDbore+"_"+energy_filter+"_run"+str(run)+".png")
+        plt.savefig(dir+"/FCCD/"+source+"/weighted_mean/plots/FCCD_OAm241_"+MC_id+"_"+smear+"_"+TL_model+"_fracFCCDbore"+frac_FCCDbore+"_"+energy_filter+"_run"+str(run)+".png")
     else:
-        plt.savefig(dir+"/FCCD/"+source+"/no_correction/plots/FCCD_OAm241_"+MC_id+"_"+smear+"_"+TL_model+"_fracFCCDbore"+frac_FCCDbore+"_"+energy_filter+"_run"+str(run)+"_cuts.png")
+        plt.savefig(dir+"/FCCD/"+source+"/weighted_mean/plots/FCCD_OAm241_"+MC_id+"_"+smear+"_"+TL_model+"_fracFCCDbore"+frac_FCCDbore+"_"+energy_filter+"_run"+str(run)+"_cuts.png")
 
 
     #Save interpolated fccd for data to a json file
@@ -199,14 +199,14 @@ def main():
     }
 
     if cuts == False:
-        with open(dir+"/FCCD/"+source+"/no_correction/FCCD_data"+MC_id+"_"+smear+"_"+TL_model+"_fracFCCDbore"+frac_FCCDbore+"_"+energy_filter+"_run"+str(run)+".json", "w") as outfile:
+        with open(dir+"/FCCD/"+source+"/weighted_mean/FCCD_data"+MC_id+"_"+smear+"_"+TL_model+"_fracFCCDbore"+frac_FCCDbore+"_"+energy_filter+"_run"+str(run)+".json", "w") as outfile:
             json.dump(FCCD_data_dict, outfile, indent=4)
     else:
         if cuts_sigma ==4:
-            with open(dir+"/FCCD/"+source+"/no_correction/FCCD_data_"+MC_id+"_"+smear+"_"+TL_model+"_fracFCCDbore"+frac_FCCDbore+"_"+energy_filter+"_run"+str(run)+"_cuts.json", "w") as outfile:
+            with open(dir+"/FCCD/"+source+"/weighted_mean/FCCD_data_"+MC_id+"_"+smear+"_"+TL_model+"_fracFCCDbore"+frac_FCCDbore+"_"+energy_filter+"_run"+str(run)+"_cuts.json", "w") as outfile:
                 json.dump(FCCD_data_dict, outfile, indent=4)
         else:
-            with open(dir+"/FCCD/"+source+"/no_correction/FCCD_data_"+MC_id+"_"+smear+"_"+TL_model+"_fracFCCDbore"+frac_FCCDbore+"_"+energy_filter+"_run"+str(run)+"_cuts_"+str(cuts_sigma)+"sigma.json", "w") as outfile:
+            with open(dir+"/FCCD/"+source+"/weighted_mean/FCCD_data_"+MC_id+"_"+smear+"_"+TL_model+"_fracFCCDbore"+frac_FCCDbore+"_"+energy_filter+"_run"+str(run)+"_cuts_"+str(cuts_sigma)+"sigma.json", "w") as outfile:
                 json.dump(FCCD_data_dict, outfile, indent=4)
 
     print("done")
