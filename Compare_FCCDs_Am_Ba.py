@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as mc
 import colorsys
 
-#Script to compare FCCDs for each detector - currently just for Ba133
+#Script to compare FCCDs for each detector
 
 CodePath=os.path.dirname(os.path.realpath(__file__))
 
@@ -32,14 +32,12 @@ def main():
     with open(positions_list) as json_file:
         positions_list_data=json.load(json_file)
 
-    plt.rcParams['figure.figsize'] = (12, 8)
-    plt.figure()
+    fig, ax = plt.subplots(figsize=(12,8))
+    colors_orders = {2:'darkviolet', 4:'deepskyblue', 5:'orangered', 7:'green', 8:'gold'}
+    markers_sources = {"ba_HS4": "o", "am_HS1":"s", "am_HS6":"^"}
 
     detectors_all = []
     orders_all = []
-    FCCDs_all =[]
-    FCCD_err_ups_all = []
-    FCCD_err_lows_all = []
 
     for order in order_list:
 
@@ -77,8 +75,12 @@ def main():
             orders_all.append(order)
 
             #Ba133
-            Ba133_FCCD_file = CodePath+"/Ba133/FCCD/FCCD_data_"+detector+"-ba_HS4-top-0r-78z_"+smear+"_"+TL_model+"_fracFCCDbore"+str(frac_FCCDbore)+"_"+energy_filter+"_run"+str(run)+"_cuts.json"
-            #print(Ba133_FCCD_file)
+            if order == 8:
+                source_z = "88z"
+            else:
+                source_z = "78z"
+            Ba133_FCCD_file = CodePath+"/Ba133/FCCD/FCCD_data_"+detector+"-ba_HS4-top-0r-"+source_z+"_"+smear+"_"+TL_model+"_fracFCCDbore"+str(frac_FCCDbore)+"_"+energy_filter+"_run"+str(run)+"_cuts.json"
+        
             try:
                 with open(Ba133_FCCD_file) as json_file_ba:
                     FCCD_data_ba = json.load(json_file_ba)
@@ -119,7 +121,7 @@ def main():
             #Am241 HS6
             run = 1
             am6_FCCD_file = CodePath+"/Am241/FCCD/am_HS6/FCCD_data_"+detector+"-am_HS6-top-0r-198z_"+smear+"_"+TL_model+"_fracFCCDbore"+str(frac_FCCDbore)+"_"+energy_filter+"_run"+str(run)+"_cuts.json"
-            #print(am6_FCCD_file)
+    
             try:
                 with open(am6_FCCD_file) as json_file_am6:
                     FCCD_data_am6 = json.load(json_file_am6)
@@ -131,36 +133,58 @@ def main():
             except:
                 print("no Am241_HS6 analysis for ", detector)
 
+        # cc=''
+        # if order==7:
+        #     cc='green'
+        # elif order==8:
+        #     cc='gold'
+        # elif order==5:
+        #     cc='orangered'
+        # elif order==4:
+        #     cc='deepskyblue'
+        # else:
+        #     cc='darkviolet'
+        # plt.errorbar(detectors_ba,FCCDs_ba, yerr = [FCCD_err_lows_ba, FCCD_err_ups_ba], marker = 'o', color=cc, linestyle = '-', label=f'Order #'+str(order)+' Ba')
+        # plt.errorbar(detectors_am1,FCCDs_am1, yerr = [FCCD_err_lows_am1, FCCD_err_ups_am1], marker = 's', color=lighten_color(cc,1.3) ,linestyle = '-', label=f'Order #'+str(order)+' Am HS1')
+        
 
-            #FCCDs_all.append(FCCD)
-            #FCCD_err_ups_all.append(FCCD_err_up)
-            #FCCD_err_lows_all.append(FCCD_err_low)
-        cc=''
+        cc = colors_orders[order]
+        ax.errorbar(detectors_ba,FCCDs_ba, yerr = [FCCD_err_lows_ba, FCCD_err_ups_ba], marker = markers_sources["ba_HS4"], color=cc, linestyle = '-')
+        ax.errorbar(detectors_am1,FCCDs_am1, yerr = [FCCD_err_lows_am1, FCCD_err_ups_am1], marker = markers_sources["am_HS1"], color=lighten_color(cc,1.2) ,linestyle = '-')
         if order==7:
-            cc='green'
-        elif order==8:
-            cc='gold'
-        elif order==5:
-            cc='orangered'
-        elif order==4:
-            cc='deepskyblue'
-        else:
-            cc='darkviolet'
-        plt.errorbar(detectors_ba,FCCDs_ba, yerr = [FCCD_err_lows_ba, FCCD_err_ups_ba], marker = 'o', color=cc, linestyle = '-', label=f'Order #'+str(order)+' Ba')
-        plt.errorbar(detectors_am1,FCCDs_am1, yerr = [FCCD_err_lows_am1, FCCD_err_ups_am1], marker = 's', color=lighten_color(cc,1.3) ,linestyle = '-', label=f'Order #'+str(order)+' Am HS1')
-        if order==7:
-            plt.errorbar(detectors_am6,FCCDs_am6, yerr = [FCCD_err_lows_am6, FCCD_err_ups_am6], marker = '^', color=lighten_color(cc,0.3), linestyle = '-', label=f'Order #'+str(order)+' Am HS6')
+            # plt.errorbar(detectors_am6,FCCDs_am6, yerr = [FCCD_err_lows_am6, FCCD_err_ups_am6], marker = '^', color=lighten_color(cc,0.3), linestyle = '-', label=f'Order #'+str(order)+' Am HS6')
+            ax.errorbar(detectors_am6,FCCDs_am6, yerr = [FCCD_err_lows_am6, FCCD_err_ups_am6], marker = markers_sources["am_HS6"], color=lighten_color(cc,0.8), linestyle = '-')
 
-    plt.xticks(rotation = 45)
-    plt.xlabel('Detector')
-    plt.ylabel('FCCD (mm)')
-    plt.legend()
-    plt.grid(linestyle='dashed', linewidth=0.5)
+    for order in colors_orders:
+        color = colors_orders[order]
+        ax.plot(np.NaN, np.NaN, c=color, label=f'Order #'+str(order))
+
+    ax2 = ax.twinx()
+    for source in markers_sources:
+        marker = markers_sources[source]
+        ax2.plot(np.NaN, np.NaN, marker=marker,c='grey',label=source)
+    ax2.get_yaxis().set_visible(False)
+
+    ax.legend(loc='upper left', bbox_to_anchor=(0, 1))
+    ax2.legend(loc='upper left', bbox_to_anchor=(0, 0.8))
+
+    ax.tick_params(axis='x', labelrotation=45)
+    ax.set_xlabel('Detector')
+    ax.set_ylabel('FCCD (mm)')
+    ax.grid(linestyle='dashed', linewidth=0.5)
     plt.tight_layout()
-    plt.title("FCCDs from Ba-133, Am-241 HS1, Am-241 HS6")
+    ax.set_title("FCCDs from Ba-133, Am-241 HS1, Am-241 HS6")
     plt.savefig(CodePath+"/FCCDs_Ba133_Am241_new_correction.png", bbox_inches='tight')
     plt.show()
 
+    # plt.xticks(rotation = 45)
+    # ax.xlabel('Detector')
+    # ax.ylabel('FCCD (mm)')
+    # ax.grid(linestyle='dashed', linewidth=0.5)
+    # ax.tight_layout()
+    # ax.title("FCCDs from Ba-133, Am-241 HS1, Am-241 HS6")
+    # plt.savefig(CodePath+"/FCCDs_Ba133_Am241_new_correction.png", bbox_inches='tight')
+    # plt.show()
 
     #Save all values to csv file
     #dict = {"detector": detectors_all, "detector_order": orders_all, "FCCD": FCCDs_all, "FCCD_err_up": FCCD_err_ups_all, "FCCD_err_low": FCCD_err_lows_all}

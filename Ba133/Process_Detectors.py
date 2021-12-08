@@ -14,12 +14,12 @@ def main():
 
     #Processing instructions
     order_list = [8] #List of orders to process
-    Calibrate_Data = True #Pre-reqs: needs dsp pygama data
-    Gamma_line_count_data = True #Pre-reqs: needs calibration
+    Calibrate_Data = False #Pre-reqs: needs dsp pygama data
+    Gamma_line_count_data = False #Pre-reqs: needs calibration
     Gamma_line_count_MC = False #Pre-reqs: needs AV post processed MC for range of FCCDs
     Calculate_FCCD = False #Pre-reqs: needs gammaline counts for data and MC
-    Gamma_line_count_MC_bestfitFCCD = False #Pre-reqs: needs AV postprocessed MC for best fit FCCD
-    PlotSpectra = False #Pre-reqs: needs all above stages
+    Gamma_line_count_MC_bestfitFCCD = True #Pre-reqs: needs AV postprocessed MC for best fit FCCD
+    PlotSpectra = True #Pre-reqs: needs all above stages
 
     #Get detector list
     detector_list = CodePath+"/../detector_list.json" 
@@ -30,8 +30,8 @@ def main():
         detectors = detector_list_data["order_"+str(order)]
         for detector in detectors:
 
-            # if detector != "V07647A":
-            #     continue
+            if detector != "V08682A":
+                continue
 
             #========Calibration - DATA==========
             if Calibrate_Data == True:
@@ -88,18 +88,20 @@ def main():
                 frac_FCCDbore=0.5
                 TL_model="notl"
                 FCCD_list=[0.0,0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 3.0] 
+                source_z = "88z" #top-0r-78z
 
                 for FCCD in FCCD_list:
                     
                     for DLF in DLF_list:
-                        MC_id=detector+"-ba_HS4-top-0r-78z_"+smear+"_"+TL_model+"_FCCD"+str(FCCD)+"mm_DLF"+str(DLF)+"_fracFCCDbore"+str(frac_FCCDbore)
-                        sim_path="/lfs/l1/legend/users/aalexander/legend-g4simple-simulation/legend/simulations/"+detector+"/ba_HS4/top_0r_78z/hdf5/AV_processed/"+MC_id+".hdf5"
+                        MC_id=detector+"-ba_HS4-top-0r-"+source_z+"_"+smear+"_"+TL_model+"_FCCD"+str(FCCD)+"mm_DLF"+str(DLF)+"_fracFCCDbore"+str(frac_FCCDbore)
+                        sim_path="/lfs/l1/legend/users/aalexander/legend-g4simple-simulation/simulations/"+detector+"/ba_HS4/top_0r_"+source_z+"/hdf5/AV_processed/"+MC_id+".hdf5"
                         os.system("python "+CodePath+"/GammaLine_Counting_Ba133.py --sim "+detector+" "+sim_path+" "+MC_id)
 
             #=============Calculate FCCD===============
             if Calculate_FCCD == True:
 
-                MC_id=detector+"-ba_HS4-top-0r-78z"
+                # MC_id=detector+"-ba_HS4-top-0r-78z"
+                MC_id=detector+"-ba_HS4-top-0r-88z"
                 smear="g"
                 TL_model="notl"
                 frac_FCCDbore=0.5
@@ -115,13 +117,11 @@ def main():
             #=========GAMMA LINE COUNTING - MC, best fit FCCD=============
             if Gamma_line_count_MC_bestfitFCCD == True:
 
-                # if detector != "V04549A":
-                #     continue
-
                 DLF=1.0
                 smear="g"
                 frac_FCCDbore=0.5
                 TL_model="notl"
+                source_z = "88z" #top-0r-78z
 
                 energy_filter="cuspEmax_ctc"
                 cuts="True"
@@ -131,23 +131,20 @@ def main():
                     run=1
                 
                 if cuts == "False":
-                    with open(CodePath+"/FCCD/FCCD_data_"+detector+"-ba_HS4-top-0r-78z_"+smear+"_"+TL_model+"_fracFCCDbore"+str(frac_FCCDbore)+"_"+energy_filter+"_run"+str(run)+".json") as json_file:
+                    with open(CodePath+"/FCCD/FCCD_data_"+detector+"-ba_HS4-top-0r-"+source_z+"_"+smear+"_"+TL_model+"_fracFCCDbore"+str(frac_FCCDbore)+"_"+energy_filter+"_run"+str(run)+".json") as json_file:
                         FCCD_data = json.load(json_file)
                 else:
-                    with open(CodePath+"/FCCD/FCCD_data_"+detector+"-ba_HS4-top-0r-78z_"+smear+"_"+TL_model+"_fracFCCDbore"+str(frac_FCCDbore)+"_"+energy_filter+"_run"+str(run)+"_cuts.json") as json_file:
+                    with open(CodePath+"/FCCD/FCCD_data_"+detector+"-ba_HS4-top-0r-"+source_z+"_"+smear+"_"+TL_model+"_fracFCCDbore"+str(frac_FCCDbore)+"_"+energy_filter+"_run"+str(run)+"_cuts.json") as json_file:
                         FCCD_data = json.load(json_file)
                 FCCD = round(FCCD_data["FCCD"],2)
 
-                MC_id=detector+"-ba_HS4-top-0r-78z_"+smear+"_"+TL_model+"_FCCD"+str(FCCD)+"mm_DLF"+str(DLF)+"_fracFCCDbore"+str(frac_FCCDbore)
-                sim_path="/lfs/l1/legend/users/aalexander/legend-g4simple-simulation/legend/simulations/"+detector+"/ba_HS4/top_0r_78z/hdf5/AV_processed/"+MC_id+".hdf5"
+                MC_id=detector+"-ba_HS4-top-0r-"+source_z+"_"+smear+"_"+TL_model+"_FCCD"+str(FCCD)+"mm_DLF"+str(DLF)+"_fracFCCDbore"+str(frac_FCCDbore)
+                sim_path="/lfs/l1/legend/users/aalexander/legend-g4simple-simulation/simulations/"+detector+"/ba_HS4/top_0r_"+source_z+"/hdf5/AV_processed/"+MC_id+".hdf5"
                 os.system("python "+CodePath+"/GammaLine_Counting_Ba133.py --sim "+detector+" "+sim_path+" "+MC_id)
 
             
             #=============Plot Spectra===============
             if PlotSpectra == True:
-
-                # if detector != "V04549A":
-                #     continue
 
                 if order == 2:
                     detector_oldname = "I"+detector[1:]
@@ -174,17 +171,18 @@ def main():
                 smear="g"
                 frac_FCCDbore=0.5
                 TL_model="notl"
+                source_z = "88z" #top-0r-78z
                 
                 if cuts == "False":
-                    with open(CodePath+"/FCCD/FCCD_data_"+detector+"-ba_HS4-top-0r-78z_"+smear+"_"+TL_model+"_fracFCCDbore"+str(frac_FCCDbore)+"_"+energy_filter+"_run"+str(run)+".json") as json_file:
+                    with open(CodePath+"/FCCD/FCCD_data_"+detector+"-ba_HS4-top-0r-"+source_z+"_"+smear+"_"+TL_model+"_fracFCCDbore"+str(frac_FCCDbore)+"_"+energy_filter+"_run"+str(run)+".json") as json_file:
                         FCCD_data = json.load(json_file)
                 else:
-                    with open(CodePath+"/FCCD/FCCD_data_"+detector+"-ba_HS4-top-0r-78z_"+smear+"_"+TL_model+"_fracFCCDbore"+str(frac_FCCDbore)+"_"+energy_filter+"_run"+str(run)+"_cuts.json") as json_file:
+                    with open(CodePath+"/FCCD/FCCD_data_"+detector+"-ba_HS4-top-0r-"+source_z+"_"+smear+"_"+TL_model+"_fracFCCDbore"+str(frac_FCCDbore)+"_"+energy_filter+"_run"+str(run)+"_cuts.json") as json_file:
                         FCCD_data = json.load(json_file)
                 FCCD = round(FCCD_data["FCCD"],2)
                 
-                MC_id=detector+"-ba_HS4-top-0r-78z_"+smear+"_"+TL_model+"_FCCD"+str(FCCD)+"mm_DLF"+str(DLF)+"_fracFCCDbore"+str(frac_FCCDbore)
-                sim_path="/lfs/l1/legend/users/aalexander/legend-g4simple-simulation/legend/simulations/"+detector+"/ba_HS4/top_0r_78z/hdf5/AV_processed/"+MC_id+".hdf5"
+                MC_id=detector+"-ba_HS4-top-0r-"+source_z+"_"+smear+"_"+TL_model+"_FCCD"+str(FCCD)+"mm_DLF"+str(DLF)+"_fracFCCDbore"+str(frac_FCCDbore)
+                sim_path="/lfs/l1/legend/users/aalexander/legend-g4simple-simulation/simulations/"+detector+"/ba_HS4/top_0r_"+source_z+"/hdf5/AV_processed/"+MC_id+".hdf5"
 
                 os.system("python "+CodePath+"/PlotSpectra.py "+detector+" "+MC_id+" "+sim_path+" "+str(FCCD)+" "+str(DLF)+" "+data_path+" "+calibration+" "+energy_filter+" "+cuts+" "+str(run))
 
