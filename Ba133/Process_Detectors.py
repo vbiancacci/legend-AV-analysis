@@ -13,7 +13,7 @@ CodePath=os.path.dirname(os.path.realpath(__file__))
 def main():
 
     #Processing instructions
-    order_list = [8] #List of orders to process
+    order_list = [9] #List of orders to process
     Calibrate_Data = False #Pre-reqs: needs dsp pygama data
     Gamma_line_count_data = False #Pre-reqs: needs calibration
     Gamma_line_count_MC = False #Pre-reqs: needs AV post processed MC for range of FCCDs
@@ -30,8 +30,8 @@ def main():
         detectors = detector_list_data["order_"+str(order)]
         for detector in detectors:
 
-            if detector != "V08682A":
-                continue
+            # if detector == "V09374A":
+            #     continue
 
             #========Calibration - DATA==========
             if Calibrate_Data == True:
@@ -88,7 +88,13 @@ def main():
                 frac_FCCDbore=0.5
                 TL_model="notl"
                 FCCD_list=[0.0,0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 3.0] 
-                source_z = "88z" #top-0r-78z
+
+                if order == 8:
+                    source_z = "88z" #top-0r-78z
+                elif order ==9:
+                    source_z = "74z"
+                else:
+                    source_z = "78z"
 
                 for FCCD in FCCD_list:
                     
@@ -100,8 +106,15 @@ def main():
             #=============Calculate FCCD===============
             if Calculate_FCCD == True:
 
+                if order == 8:
+                    source_z = "88z" #top-0r-78z
+                elif order ==9:
+                    source_z = "74z"
+                else:
+                    source_z = "78z"
+
                 # MC_id=detector+"-ba_HS4-top-0r-78z"
-                MC_id=detector+"-ba_HS4-top-0r-88z"
+                MC_id=detector+"-ba_HS4-top-0r-"+source_z
                 smear="g"
                 TL_model="notl"
                 frac_FCCDbore=0.5
@@ -121,7 +134,13 @@ def main():
                 smear="g"
                 frac_FCCDbore=0.5
                 TL_model="notl"
-                source_z = "88z" #top-0r-78z
+
+                if order == 8:
+                    source_z = "88z" #top-0r-78z
+                elif order ==9:
+                    source_z = "74z"
+                else:
+                    source_z = "78z"
 
                 energy_filter="cuspEmax_ctc"
                 cuts="True"
@@ -136,7 +155,9 @@ def main():
                 else:
                     with open(CodePath+"/FCCD/FCCD_data_"+detector+"-ba_HS4-top-0r-"+source_z+"_"+smear+"_"+TL_model+"_fracFCCDbore"+str(frac_FCCDbore)+"_"+energy_filter+"_run"+str(run)+"_cuts.json") as json_file:
                         FCCD_data = json.load(json_file)
+
                 FCCD = round(FCCD_data["FCCD"],2)
+                TL_model="l"
 
                 MC_id=detector+"-ba_HS4-top-0r-"+source_z+"_"+smear+"_"+TL_model+"_FCCD"+str(FCCD)+"mm_DLF"+str(DLF)+"_fracFCCDbore"+str(frac_FCCDbore)
                 sim_path="/lfs/l1/legend/users/aalexander/legend-g4simple-simulation/simulations/"+detector+"/ba_HS4/top_0r_"+source_z+"/hdf5/AV_processed/"+MC_id+".hdf5"
@@ -171,7 +192,12 @@ def main():
                 smear="g"
                 frac_FCCDbore=0.5
                 TL_model="notl"
-                source_z = "88z" #top-0r-78z
+                if order == 8:
+                    source_z = "88z" #top-0r-78z
+                elif order ==9:
+                    source_z = "74z"
+                else:
+                    source_z = "78z"
                 
                 if cuts == "False":
                     with open(CodePath+"/FCCD/FCCD_data_"+detector+"-ba_HS4-top-0r-"+source_z+"_"+smear+"_"+TL_model+"_fracFCCDbore"+str(frac_FCCDbore)+"_"+energy_filter+"_run"+str(run)+".json") as json_file:
@@ -179,7 +205,9 @@ def main():
                 else:
                     with open(CodePath+"/FCCD/FCCD_data_"+detector+"-ba_HS4-top-0r-"+source_z+"_"+smear+"_"+TL_model+"_fracFCCDbore"+str(frac_FCCDbore)+"_"+energy_filter+"_run"+str(run)+"_cuts.json") as json_file:
                         FCCD_data = json.load(json_file)
+
                 FCCD = round(FCCD_data["FCCD"],2)
+                TL_model="l"
                 
                 MC_id=detector+"-ba_HS4-top-0r-"+source_z+"_"+smear+"_"+TL_model+"_FCCD"+str(FCCD)+"mm_DLF"+str(DLF)+"_fracFCCDbore"+str(frac_FCCDbore)
                 sim_path="/lfs/l1/legend/users/aalexander/legend-g4simple-simulation/simulations/"+detector+"/ba_HS4/top_0r_"+source_z+"/hdf5/AV_processed/"+MC_id+".hdf5"

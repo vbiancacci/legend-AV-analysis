@@ -113,6 +113,8 @@ def main():
 
     #prepare histogram
     xmin_81, xmax_81 = 77, 84
+    if args["data"] and detector == "V09374A":
+        xmin_81, xmax_81 = 73, 87
     bins_peak = np.arange(xmin_81,xmax_81,binwidth)
     hist_peak, bins_peak, var_peak = histograms.get_hist(energies, bins=bins_peak)
     bins_centres_peak = histograms.get_bin_centers(bins_peak)
