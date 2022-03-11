@@ -13,10 +13,10 @@ CodePath=os.path.dirname(os.path.realpath(__file__))
 def main():
 
     #Processing instructions
-    order_list = [9] #List of orders to process
+    order_list = [8] #List of orders to process
     Calibrate_Data = False #Pre-reqs: needs dsp pygama data
     Gamma_line_count_data = False #Pre-reqs: needs calibration
-    Gamma_line_count_MC = False #Pre-reqs: needs AV post processed MC for range of FCCDs
+    Gamma_line_count_MC = True #Pre-reqs: needs AV post processed MC for range of FCCDs
     Calculate_FCCD = False #Pre-reqs: needs gammaline counts for data and MC
     Gamma_line_count_MC_bestfitFCCD = True #Pre-reqs: needs AV postprocessed MC for best fit FCCD
     PlotSpectra = True #Pre-reqs: needs all above stages
