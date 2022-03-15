@@ -26,14 +26,14 @@ def main():
     detector_list = CodePath+"/detector_list.json"
     with open(detector_list) as json_file:
         detector_list_data = json.load(json_file)
-    order_list = [2,4,5,7,8]
+    order_list = [2,4,5,7,8,9]
 
     positions_list=CodePath+"/positions_am1_list.json"
     with open(positions_list) as json_file:
         positions_list_data=json.load(json_file)
 
     fig, ax = plt.subplots(figsize=(12,8))
-    colors_orders = {2:'darkviolet', 4:'deepskyblue', 5:'orangered', 7:'green', 8:'gold'}
+    colors_orders = {2:'darkviolet', 4:'deepskyblue', 5:'orangered', 7:'green', 8:'gold', 9:'magenta'}
     markers_sources = {"ba_HS4": "o", "am_HS1":"s", "am_HS6":"^"}
 
     detectors_all = []
@@ -77,6 +77,8 @@ def main():
             #Ba133
             if order == 8:
                 source_z = "88z"
+            elif order == 9:
+                source_z = "74z"
             else:
                 source_z = "78z"
             Ba133_FCCD_file = CodePath+"/Ba133/FCCD/FCCD_data_"+detector+"-ba_HS4-top-0r-"+source_z+"_"+smear+"_"+TL_model+"_fracFCCDbore"+str(frac_FCCDbore)+"_"+energy_filter+"_run"+str(run)+"_cuts.json"
@@ -165,8 +167,8 @@ def main():
         ax2.plot(np.NaN, np.NaN, marker=marker,c='grey',label=source)
     ax2.get_yaxis().set_visible(False)
 
-    ax.legend(loc='upper left', bbox_to_anchor=(0, 1))
-    ax2.legend(loc='upper left', bbox_to_anchor=(0, 0.8))
+    ax.legend(loc='upper left', bbox_to_anchor=(0, 1), prop={"size":9})
+    ax2.legend(loc='upper left', bbox_to_anchor=(0, 0.8), prop={"size":9})
 
     ax.tick_params(axis='x', labelrotation=45)
     ax.set_xlabel('Detector')
