@@ -96,13 +96,12 @@ def main():
             os.makedirs(dir+"/PeakCounts/"+detector+"/plots/sim/")
 
         #get energies 
-        # MC_file = hdf5_path+"processed_detector_"+MC_file_id+'_FCCD'+str(FCCD)+'mm_DLF'+str(DLF)+'.hdf5'    
         df =  pd.read_hdf(sim_path, key="procdf")
         energies = df['energy']
  
 
     #get total pygama histogram
-    binwidth = 0.5 #keV
+    binwidth = 0.25 #keV
     bins = np.arange(0,1500,binwidth)
     hist, bins, var = histograms.get_hist(energies, bins=bins)
 

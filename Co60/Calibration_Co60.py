@@ -69,7 +69,7 @@ def main():
     plt.figure()
     plt.title(detector+", Co60")
     counts, bins, bars = plt.hist(energy_filter_data, bins=5000, histtype='step', label=energy_filter)
-    plt.legend()
+    plt.legend(loc='upper left')
     # plt.xlim(0,4000)
     plt.xlabel("adc")
     plt.ylabel("Counts")
@@ -113,7 +113,7 @@ def main():
     ecal_pass = pgp.poly(energy_filter_data, pars)
     ecal_cut  = pgp.poly(failed_cuts,  pars)
 
-    xpb = 0.5
+    xpb = 0.25
     xlo = 0
     xhi = 1500
 
@@ -134,7 +134,7 @@ def main():
     plt.title(plot_title)
     plt.yscale('log')
     plt.tight_layout()
-    plt.legend(loc='upper right')
+    plt.legend(loc='upper left')
 
     # plt.show()
     plt.savefig(CodePath+"/data_calibration/"+detector+"/plots/calibrated_energy_"+energy_filter+"_run"+str(run)+".png")
