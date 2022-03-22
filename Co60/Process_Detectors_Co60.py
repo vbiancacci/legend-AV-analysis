@@ -119,7 +119,6 @@ def main():
                 else:
                     source_z = "78z"
 
-                # MC_id=detector+"-ba_HS4-top-0r-78z"
                 MC_id=detector+"-"+source+"-top-0r-"+source_z
                 smear="g"
                 TL_model="notl"

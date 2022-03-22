@@ -264,7 +264,7 @@ def main():
     FCCD_data_dict = {"FCCD_1173": FCCD_data_1173,"FCCD_err_up_1173": FCCD_data_err_up_1173, "FCCD_err_low_1173": FCCD_data_err_low_1173, "FCCD_1332": FCCD_data_1332,"FCCD_err_up_1332": FCCD_data_err_up_1332, "FCCD_err_low_1332": FCCD_data_err_low_1332, "FCCD_av": FCCD_av, "FCCD_av_err_up": FCCD_av_err_up, "FCCD_av_err_low": FCCD_av_err_low}
     
     if cuts == False:
-        with open(dir+"/FCCD/FCCD_data"+MC_id+"_"+smear+"_"+TL_model+"_fracFCCDbore"+frac_FCCDbore+"_"+energy_filter+"_run"+str(run)+".json", "w") as outfile: 
+        with open(dir+"/FCCD/FCCD_data_"+MC_id+"_"+smear+"_"+TL_model+"_fracFCCDbore"+frac_FCCDbore+"_"+energy_filter+"_run"+str(run)+".json", "w") as outfile: 
             json.dump(FCCD_data_dict, outfile, indent=4)
     else:
         if cuts_sigma ==4:

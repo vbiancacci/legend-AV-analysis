@@ -13,18 +13,20 @@ CodePath=os.path.dirname(os.path.realpath(__file__))
 def main():
 
     #Processing instructions
-    order_list = [8] #List of orders to process
+    order_list = [9] #List of orders to process
     Calibrate_Data = False #Pre-reqs: needs dsp pygama data
     Gamma_line_count_data = False #Pre-reqs: needs calibration
-    Gamma_line_count_MC = True #Pre-reqs: needs AV post processed MC for range of FCCDs
-    Calculate_FCCD = False #Pre-reqs: needs gammaline counts for data and MC
-    Gamma_line_count_MC_bestfitFCCD = True #Pre-reqs: needs AV postprocessed MC for best fit FCCD
-    PlotSpectra = True #Pre-reqs: needs all above stages
+    Gamma_line_count_MC = False #Pre-reqs: needs AV post processed MC for range of FCCDs
+    Calculate_FCCD = True #Pre-reqs: needs gammaline counts for data and MC
+    Gamma_line_count_MC_bestfitFCCD = False #Pre-reqs: needs AV postprocessed MC for best fit FCCD
+    PlotSpectra = False #Pre-reqs: needs all above stages
 
     #Get detector list
     detector_list = CodePath+"/../detector_list.json" 
     with open(detector_list) as json_file: 
         detector_list_data = json.load(json_file)
+    
+    cuts = "False"
     
     for order in order_list:
         detectors = detector_list_data["order_"+str(order)]
@@ -43,7 +45,7 @@ def main():
                     data_path="/lfs/l1/legend/legend-prodenv/prod-usr/ggmarsh-test-v03/gen/"+detector+"/tier2/ba_HS4_top_dlt/"
                 
                 energy_filter="cuspEmax_ctc"
-                cuts="True"
+                # cuts="False"
 
                 if order == 7 or order==8:
                     run=2
@@ -65,7 +67,7 @@ def main():
                     # calibration="/lfs/l1/legend/legend-prodenv/prod-usr/ggmarsh-test-v03/genpar/dsp_ecal/"+detector+".json"
                 
                 energy_filter="cuspEmax_ctc"
-                cuts="True"
+                # cuts="False"
 
                 if order == 7 or order==8:
                     run=2
@@ -119,7 +121,7 @@ def main():
                 TL_model="notl"
                 frac_FCCDbore=0.5
                 energy_filter="cuspEmax_ctc"
-                cuts="True"
+                # cuts="False"
                 if order == 7 or order==8:
                     run=2
                 else:
@@ -143,7 +145,7 @@ def main():
                     source_z = "78z"
 
                 energy_filter="cuspEmax_ctc"
-                cuts="True"
+                # cuts="True"
                 if order == 7 or order == 8:
                     run=2
                 else:
@@ -177,7 +179,7 @@ def main():
                     # calibration="/lfs/l1/legend/legend-prodenv/prod-usr/ggmarsh-test-v03/genpar/dsp_ecal/"+detector+".json"
                 
                 energy_filter="cuspEmax_ctc"
-                cuts="True"
+                # cuts="True"
                 if order == 7 or order==8:
                     run=2
                 else:
