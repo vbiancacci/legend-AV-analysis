@@ -83,7 +83,10 @@ def main():
 
     #Scale MC:
     A_source_today = 2.76E3 #Bq
-    data_live_time = 36000 #s
+    if detector == "B00035B":
+        data_live_time = 36000 #s
+    elif detector == "B00000D" or "B00035A":
+        data_live_time = 14400 #s
     N_data = A_source_today*data_live_time
     N_sims = 10*10**7
     R = N_data/N_sims #need to scale sims by this number

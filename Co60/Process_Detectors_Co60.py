@@ -14,10 +14,10 @@ def main():
 
     #Processing instructions
     order_list = ["BEGe"] #List of orders to process
-    Calibrate_Data = True #Pre-reqs: needs dsp pygama data
-    Gamma_line_count_data = True #Pre-reqs: needs calibration
+    Calibrate_Data = False #Pre-reqs: needs dsp pygama data
+    Gamma_line_count_data = False #Pre-reqs: needs calibration
     Gamma_line_count_MC = False #Pre-reqs: needs AV post processed MC for range of FCCDs
-    Calculate_FCCD = False #Pre-reqs: needs gammaline counts for data and MC
+    Calculate_FCCD = True #Pre-reqs: needs gammaline counts for data and MC
     Gamma_line_count_MC_bestfitFCCD = False #Pre-reqs: needs AV postprocessed MC for best fit FCCD
     PlotSpectra = False #Pre-reqs: needs all above stages
 
@@ -32,8 +32,8 @@ def main():
         detectors = detector_list_data["order_"+str(order)]
         for detector in detectors:
 
-            if detector == "B00000D":
-                continue
+            # if detector == "B00035B":
+            #     continue
 
             #========Calibration - DATA==========
             if Calibrate_Data == True:
@@ -75,7 +75,7 @@ def main():
                 else:
                     run=1
 
-                if cuts == "False":
+                if cuts == "True":
                     calibration = CodePath+"/data_calibration/"+detector+"/calibration_run"+str(run)+".json"
                 else:
                     calibration = CodePath+"/data_calibration/"+detector+"/calibration_run"+str(run)+"_cuts.json"
@@ -125,7 +125,7 @@ def main():
                 TL_model="notl"
                 frac_FCCDbore=0.5
                 energy_filter="cuspEmax_ctc"
-                cuts="True"
+                cuts="False"
                 if order == 7 or order==8:
                     run=2
                 else:
@@ -164,8 +164,8 @@ def main():
                     with open(CodePath+"/FCCD/FCCD_data_"+detector+"-"+source+"-top-0r-"+source_z+"_"+smear+"_"+TL_model+"_fracFCCDbore"+str(frac_FCCDbore)+"_"+energy_filter+"_run"+str(run)+"_cuts.json") as json_file:
                         FCCD_data = json.load(json_file)
 
-                FCCD = round(FCCD_data["FCCD_1173"],2)
-                # TL_model="l"
+                FCCD = round(FCCD_data["FCCD_av"],2)
+                TL_model="l"
 
                 MC_id=detector+"-"+source+"-top-0r-"+source_z+"_"+smear+"_"+TL_model+"_FCCD"+str(FCCD)+"mm_DLF"+str(DLF)+"_fracFCCDbore"+str(frac_FCCDbore)
                 sim_path="/lfs/l1/legend/users/aalexander/legend-g4simple-simulation/simulations/"+detector+"/"+source+"/top_0r_"+source_z+"/hdf5/AV_processed/"+MC_id+".hdf5"
@@ -215,8 +215,8 @@ def main():
                     with open(CodePath+"/FCCD/FCCD_data_"+detector+"-"+source+"-top-0r-"+source_z+"_"+smear+"_"+TL_model+"_fracFCCDbore"+str(frac_FCCDbore)+"_"+energy_filter+"_run"+str(run)+"_cuts.json") as json_file:
                         FCCD_data = json.load(json_file)
 
-                FCCD = round(FCCD_data["FCCD_1173"],2)
-                # TL_model="l"
+                FCCD = round(FCCD_data["FCCD_av"],2)
+                TL_model="l"
 
                 # FCCD = 1.75
                 

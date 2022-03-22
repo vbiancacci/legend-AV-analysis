@@ -136,9 +136,11 @@ def main():
     plt.tight_layout()
     plt.legend(loc='upper left')
 
-    # plt.show()
-    plt.savefig(CodePath+"/data_calibration/"+detector+"/plots/calibrated_energy_"+energy_filter+"_run"+str(run)+".png")
-
+    if cuts == True:
+        plt.savefig(CodePath+"/data_calibration/"+detector+"/plots/calibrated_energy_"+energy_filter+"_run"+str(run)+"_cuts.png")
+    else:
+        plt.savefig(CodePath+"/data_calibration/"+detector+"/plots/calibrated_energy_"+energy_filter+"_run"+str(run)+".png")
+   
     # #=========Plot Calibration Curve===========
 
     # fitted_peaks = results['fitted_keV']

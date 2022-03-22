@@ -53,7 +53,10 @@ def main():
 
     #Ratio of data/sim
     A_source_today = 2.76E3 #Bq
-    data_live_time = 36000 #s
+    if detector == "B00035B":
+        data_live_time = 36000 #s
+    elif detector == "B00000D" or "B00035A":
+        data_live_time = 14400 #s
     N_data = A_source_today*data_live_time
     N_sims = 10*10**7
     R = N_data/N_sims #need to scale sims by this number
@@ -252,9 +255,13 @@ def main():
     else:
         plt.savefig(dir+"/FCCD/plots/FCCD_C1332_"+MC_id+"_"+smear+"_"+TL_model+"_fracFCCDbore"+frac_FCCDbore+"_"+energy_filter+"_run"+str(run)+"_cuts.png")
   
+    FCCD_av = (FCCD_data_1173+FCCD_data_1332)/2
+    FCCD_av_err_up = 0.5*np.sqrt(FCCD_data_err_up_1173**2 + FCCD_data_err_up_1332**2)
+    FCCD_av_err_low = 0.5*np.sqrt(FCCD_data_err_low_1173**2 + FCCD_data_err_low_1332**2)
+    print("FCCD average: ", FCCD_av, " + ", FCCD_av_err_up, " - ", FCCD_av_err_low)
 
     #Save interpolated fccd for data to a json file
-    FCCD_data_dict = {"FCCD_1173": FCCD_data_1173,"FCCD_err_up_1173": FCCD_data_err_up_1173, "FCCD_err_low_1173": FCCD_data_err_low_1173, "FCCD_1332": FCCD_data_1332,"FCCD_err_up_1332": FCCD_data_err_up_1332, "FCCD_err_low_1332": FCCD_data_err_low_1332}
+    FCCD_data_dict = {"FCCD_1173": FCCD_data_1173,"FCCD_err_up_1173": FCCD_data_err_up_1173, "FCCD_err_low_1173": FCCD_data_err_low_1173, "FCCD_1332": FCCD_data_1332,"FCCD_err_up_1332": FCCD_data_err_up_1332, "FCCD_err_low_1332": FCCD_data_err_low_1332, "FCCD_av": FCCD_av, "FCCD_av_err_up": FCCD_av_err_up, "FCCD_av_err_low": FCCD_av_err_low}
     
     if cuts == False:
         with open(dir+"/FCCD/FCCD_data"+MC_id+"_"+smear+"_"+TL_model+"_fracFCCDbore"+frac_FCCDbore+"_"+energy_filter+"_run"+str(run)+".json", "w") as outfile: 
