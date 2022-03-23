@@ -18,7 +18,8 @@ import pygama.genpar_tmp.cuts as cut
 def main():
 
     #details:
-    det      = 'V01403A'
+    # det      = 'V01403A'
+    det = "V01406A"
     datatype = 'ba133/'
     # runs = np.arange(1,92,1) #runs 0001-0091 from z = 220 mm to z = 310 mm - runs [0001 - 0091]
     # z_positions = 220*np.ones(91) + runs*((310-220)/90)
@@ -32,70 +33,83 @@ def main():
     # https://elog.legend-exp.org/ORNL/18
     # https://elog.legend-exp.org/ORNL/26
 
-    #====== CROS TOP SCANS ========
-    run = "71" #x-y cross top scans
-    cycs1 = list(range(580,585,1)) #position 1, left of centre
-    cycs2 = list(range(585,590,1)) 
-    cycs3 = list(range(590,595,1)) 
-    cycs4 = list(range(595,600,1)) # centre?
-    cycs5 = list(range(600,605,1)) #right of centre
-    cycs6 = list(range(605,610,1)) 
-    cycs7 = list(range(610,615,1)) 
-    cycs8 = list(range(615,625,1)) #above centre
-    cycs9 = list(range(620,625,1)) 
-    cycs10 = list(range(625,630,1)) 
-    cycs11 = list(range(630,635,1)) #centre
-    cycs12 = list(range(635,640,1)) #below centre
-    cycs13 = list(range(640,645,1)) 
-    cycs14 = list(range(645,650,1)) 
+    if det == "V01403A":
 
-    cycs = cycs1 + cycs2 + cycs3 + cycs4 + cycs5 + cycs6 + cycs7 +cycs8 + cycs9 + cycs10 + cycs11 + cycs12 + cycs13 + cycs14
+        #====== CROS TOP SCANS ========
+        run = "71" #x-y cross top scans
+        cycs1 = list(range(580,585,1)) #position 1, left of centre
+        cycs2 = list(range(585,590,1)) 
+        cycs3 = list(range(590,595,1)) 
+        cycs4 = list(range(595,600,1)) # centre?
+        cycs5 = list(range(600,605,1)) #right of centre
+        cycs6 = list(range(605,610,1)) 
+        cycs7 = list(range(610,615,1)) 
+        cycs8 = list(range(615,625,1)) #above centre
+        cycs9 = list(range(620,625,1)) 
+        cycs10 = list(range(625,630,1)) 
+        cycs11 = list(range(630,635,1)) #centre
+        cycs12 = list(range(635,640,1)) #below centre
+        cycs13 = list(range(640,645,1)) 
+        cycs14 = list(range(645,650,1)) 
 
-    test_files_t2 = []
-    for i,cyc in enumerate(cycs):
-        file_i = fnmatch.filter(files_t2, "*cyc"+str(cyc)+"*")
-        file_i = os.path.join(datapath_t2,file_i[0])
-        test_files_t2.append(file_i)
+        cycs = cycs1 + cycs2 + cycs3 + cycs4 + cycs5 + cycs6 + cycs7 +cycs8 + cycs9 + cycs10 + cycs11 + cycs12 + cycs13 + cycs14
 
-    #====== CIRCLE TOP SCANS ========
-    run = "72" #x-y circle top scans
-    cycs1 = list(range(525,530,1)) 
-    cycs2 = list(range(530,535,1))  
-    cycs3 = list(range(535,540,1)) 
-    cycs4 = list(range(540,545,1)) 
-    cycs5 = list(range(545,550,1)) 
-    cycs6 = list(range(550,555,1)) 
-    cycs7 = list(range(555,560,1)) 
-    cycs8 = list(range(560,565,1)) 
-    cycs9 = list(range(565,570,1))  
-    cycs10 = list(range(570,575,1)) 
-    cycs11 = list(range(575,580,1))  
+        test_files_t2 = []
+        for i,cyc in enumerate(cycs):
+            file_i = fnmatch.filter(files_t2, "*cyc"+str(cyc)+"*")
+            file_i = os.path.join(datapath_t2,file_i[0])
+            test_files_t2.append(file_i)
 
-    cycs = cycs1 + cycs2 + cycs3 + cycs4 + cycs5 + cycs6 + cycs7 +cycs8 + cycs9 + cycs10 + cycs11 
+        #====== CIRCLE TOP SCANS ========
+        run = "72" #x-y circle top scans
+        cycs1 = list(range(525,530,1)) 
+        cycs2 = list(range(530,535,1))  
+        cycs3 = list(range(535,540,1)) 
+        cycs4 = list(range(540,545,1)) 
+        cycs5 = list(range(545,550,1)) 
+        cycs6 = list(range(550,555,1)) 
+        cycs7 = list(range(555,560,1)) 
+        cycs8 = list(range(560,565,1)) 
+        cycs9 = list(range(565,570,1))  
+        cycs10 = list(range(570,575,1)) 
+        cycs11 = list(range(575,580,1))  
 
-    for i,cyc in enumerate(cycs):
-        file_i = fnmatch.filter(files_t2, "*cyc"+str(cyc)+"*")
-        file_i = os.path.join(datapath_t2,file_i[0])
-        test_files_t2.append(file_i)
+        cycs = cycs1 + cycs2 + cycs3 + cycs4 + cycs5 + cycs6 + cycs7 +cycs8 + cycs9 + cycs10 + cycs11 
 
+        for i,cyc in enumerate(cycs):
+            file_i = fnmatch.filter(files_t2, "*cyc"+str(cyc)+"*")
+            file_i = os.path.join(datapath_t2,file_i[0])
+            test_files_t2.append(file_i)
 
+    elif det == "V01406A":
 
+        #RUNS 85 AND 86 only ??
+        test_files_t2 = []
+        for i, file_i in enumerate(files_t2[10:15]):
+            file_i = os.path.join(datapath_t2,file_i)
+            test_files_t2.append(file_i)
+
+    print(test_files_t2)
 
     dfs_uncal = []
     for i, file_t2 in enumerate(test_files_t2):
         sto=lh5.Store()
-        # print(sto.ls(file_t2, 'icpcs/icpc1/dsp/'))
-        df_uncal = lh5.load_dfs(file_t2, par_list = ["trapEmax", "cuspE", "zacE"], lh5_group='icpcs/icpc1/dsp/', verbose=False)
+        # print(sto.ls(file_t2, 'icpc1/dsp/'))
+        if det == "V01403A":
+            df_uncal = lh5.load_dfs(file_t2, par_list = ["trapEmax", "cuspE", "zacE"], lh5_group='icpcs/icpc1/dsp/', verbose=False)
+        elif det == "V01406A":
+            df_uncal = lh5.load_dfs(file_t2, par_list = ["trapEmax"], lh5_group='icpc1/dsp', verbose=False)
         dfs_uncal.append(df_uncal)
 
     df_uncal_total = pd.concat(dfs_uncal, axis=0, ignore_index=True)
 
     plt.figure()
-    plt.title("ORNL - V01403A")
+    plt.title("ORNL - "+det)
     # counts, bins, bars = plt.hist(uncal_data, bins=5000, histtype='step', label=energy_filter)
     counts, bins, bars = plt.hist(df_uncal_total["trapEmax"], bins=10000, histtype='step', label="trapEmax")
-    counts, bins, bars = plt.hist(df_uncal_total["cuspE"], bins=10000, histtype='step', label="cuspE")
-    counts, bins, bars = plt.hist(df_uncal_total["zacE"], bins=10000, histtype='step', label="zacE")
+    if det == "V01403A":
+        counts, bins, bars = plt.hist(df_uncal_total["cuspE"], bins=10000, histtype='step', label="cuspE")
+        counts, bins, bars = plt.hist(df_uncal_total["zacE"], bins=10000, histtype='step', label="zacE")
     plt.legend()
     # plt.xlim(0,4000)
     plt.xlabel("adc")
@@ -110,7 +124,7 @@ def main():
     uncal_data_cut = df_uncal_cut[energy_filter] 
 
     plt.figure()
-    plt.title("ORNL - V01403A")
+    plt.title("ORNL - "+ det)
     counts, bins, bars = plt.hist(uncal_data_cut, bins=5000, histtype='step', label=energy_filter)
     plt.legend()
     # plt.xlim(0,4000)
