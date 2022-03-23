@@ -62,7 +62,7 @@ def main():
     for FCCD in FCCD_list:
 
         #Get count ratio for simulations
-        with open(dir+"/PeakCounts/"+detector+"/"+source+"/PeakCounts_sim_"+MC_id+"_"+smear+"_"+TL_model+"_FCCD"+str(FCCD)+'mm_DLF'+str(DLF)+'_fracFCCDbore'+frac_FCCDbore+'.json') as json_file:
+        with open(dir+"/PeakCounts/"+detector+"/"+source+"/new/PeakCounts_sim_"+MC_id+"_"+smear+"_"+TL_model+"_FCCD"+str(FCCD)+'mm_DLF'+str(DLF)+'_fracFCCDbore'+frac_FCCDbore+'.json') as json_file:
             PeakCounts = json.load(json_file)
             C_60 = PeakCounts['C_60']
             C_99_103 = PeakCounts['C_99_103']
@@ -75,7 +75,7 @@ def main():
 
     #Get count ratio for data
     if cuts == False:
-        with open(dir+"/PeakCounts/"+detector+"/"+source+"/PeakCounts_data_"+detector+"_"+energy_filter+"_run"+str(run)+".json") as json_file:
+        with open(dir+"/PeakCounts/"+detector+"/"+source+"/new/PeakCounts_data_"+detector+"_"+energy_filter+"_run"+str(run)+".json") as json_file:
             PeakCounts = json.load(json_file)
             C_60 = PeakCounts['C_60']
             C_99_103 = PeakCounts['C_99_103']
@@ -85,7 +85,7 @@ def main():
         cuts_sigma = 4 #default =4, change by hand here if interested
         print("data cuts sigma: ", str(cuts_sigma))
         if cuts_sigma == 4:
-            with open(dir+"/PeakCounts/"+detector+"/"+source+"/PeakCounts_data_"+detector+"_cuts_"+energy_filter+"_run"+str(run)+".json") as json_file:
+            with open(dir+"/PeakCounts/"+detector+"/"+source+"/new/PeakCounts_data_"+detector+"_cuts_"+energy_filter+"_run"+str(run)+".json") as json_file:
                 PeakCounts = json.load(json_file)
                 C_60 = PeakCounts['C_60']
                 C_99_103 = PeakCounts['C_99_103']
@@ -93,7 +93,7 @@ def main():
                 print(StatisticalError(C_60,C_99_103))
                 O_Am241_data_err = StatisticalError(C_60,C_99_103)*O_Am241_data   #statistical error (data)
         else:
-            with open(dir+"/PeakCounts/"+detector+"/"+source+"/PeakCounts_data_"+detector+"_cuts_"+energy_filter+"_run"+str(run)+"_"+str(sigma_cuts)+"sigma.json") as json_file:
+            with open(dir+"/PeakCounts/"+detector+"/"+source+"/new/PeakCounts_data_"+detector+"_cuts_"+energy_filter+"_run"+str(run)+"_"+str(sigma_cuts)+"sigma.json") as json_file:
                 PeakCounts = json.load(json_file)
                 C_60 = PeakCounts['C_60']
                 C_99_103 = PeakCounts['C_99_103']
@@ -121,7 +121,10 @@ def main():
     plt.errorbar(xdata, ydata, xerr=0, yerr =yerr, label = "simulations", elinewidth = 1, fmt='x', ms = 3.0, mew = 3.0)
     xfit = np.linspace(min(xdata), max(xdata), 1000)
     #yfit = exponential_decay(xfit,*popt)
-    a=59.23103180210723#57.52344368283454
+    a=60.05239428860399  #58.18886615638756 #59.23103180210723 #57.04617122422738  #59.23103180210723 #57.52344368283454
+    #59.23 is the IC calib, 57.52 is the IC calib without exp correction, 57.04 is the BEGe calib
+
+
     yfit = exponential_decay(xfit,a,b)
     plt.plot(xfit, yfit, "g", label = "fit: a*exp(-bx)")
 
@@ -130,7 +133,8 @@ def main():
     y_uplim = ydata+yerr
     p_guess_up = [max(y_uplim), 1]#, min(y_uplim)]
     popt_up, pcov_up = optimize.curve_fit(exponential_decay, xdata, y_uplim, p0=p_guess_up, maxfev = 10**7, method ="trf") #, bounds = bounds)
-    arr=2.1673296109052482#2.1571049512349667
+    arr= 2.051958705758966 #2.944003054128919 #2.1673296109052482 #2.1571049512349667
+    #2.16 is the IC calib, 2.15 is the IC calib without exp correction, 2.94 is the BEGe calib
     a_up=a+arr
     yfit_up = exponential_decay(xfit,a_up,b)
     plt.plot(xfit, yfit_up, color='grey', linestyle='dashed', linewidth=1)
@@ -182,9 +186,9 @@ def main():
     plt.legend(loc="upper right", fontsize=8)
 
     if cuts == False:
-        plt.savefig(dir+"/FCCD/"+source+"/weighted_mean/plots/FCCD_OAm241_"+MC_id+"_"+smear+"_"+TL_model+"_fracFCCDbore"+frac_FCCDbore+"_"+energy_filter+"_run"+str(run)+".png")
+        plt.savefig(dir+"/FCCD/"+source+"/plots/FCCD_OAm241_"+MC_id+"_"+smear+"_"+TL_model+"_fracFCCDbore"+frac_FCCDbore+"_"+energy_filter+"_run"+str(run)+".png")
     else:
-        plt.savefig(dir+"/FCCD/"+source+"/weighted_mean/plots/FCCD_OAm241_"+MC_id+"_"+smear+"_"+TL_model+"_fracFCCDbore"+frac_FCCDbore+"_"+energy_filter+"_run"+str(run)+"_cuts.png")
+        plt.savefig(dir+"/FCCD/"+source+"/plots/FCCD_OAm241_"+MC_id+"_"+smear+"_"+TL_model+"_fracFCCDbore"+frac_FCCDbore+"_"+energy_filter+"_run"+str(run)+"_cuts.png")
 
 
     #Save interpolated fccd for data to a json file
@@ -199,11 +203,11 @@ def main():
     }
 
     if cuts == False:
-        with open(dir+"/FCCD/"+source+"/weighted_mean/FCCD_data"+MC_id+"_"+smear+"_"+TL_model+"_fracFCCDbore"+frac_FCCDbore+"_"+energy_filter+"_run"+str(run)+".json", "w") as outfile:
+        with open(dir+"/FCCD/"+source+"/FCCD_data"+MC_id+"_"+smear+"_"+TL_model+"_fracFCCDbore"+frac_FCCDbore+"_"+energy_filter+"_run"+str(run)+".json", "w") as outfile:
             json.dump(FCCD_data_dict, outfile, indent=4)
     else:
         if cuts_sigma ==4:
-            with open(dir+"/FCCD/"+source+"/weighted_mean/FCCD_data_"+MC_id+"_"+smear+"_"+TL_model+"_fracFCCDbore"+frac_FCCDbore+"_"+energy_filter+"_run"+str(run)+"_cuts.json", "w") as outfile:
+            with open(dir+"/FCCD/"+source+"/FCCD_data_"+MC_id+"_"+smear+"_"+TL_model+"_fracFCCDbore"+frac_FCCDbore+"_"+energy_filter+"_run"+str(run)+"_cuts.json", "w") as outfile:
                 json.dump(FCCD_data_dict, outfile, indent=4)
         else:
             with open(dir+"/FCCD/"+source+"/weighted_mean/FCCD_data_"+MC_id+"_"+smear+"_"+TL_model+"_fracFCCDbore"+frac_FCCDbore+"_"+energy_filter+"_run"+str(run)+"_cuts_"+str(cuts_sigma)+"sigma.json", "w") as outfile:
