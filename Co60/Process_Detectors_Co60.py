@@ -22,6 +22,7 @@ def main():
     PlotSpectra = False #Pre-reqs: needs all above stages
 
     source = "co_HS5"
+    cuts = "False"
 
     #Get detector list
     detector_list = CodePath+"/../detector_list.json" 
@@ -47,7 +48,7 @@ def main():
                     data_path="/lfs/l1/legend/legend-prodenv/prod-usr/ggmarsh-test-v03/gen/"+detector+"/tier2/"+source+"_top_dlt/"
                 
                 energy_filter="cuspEmax_ctc"
-                cuts="True"
+                # cuts="True"
 
                 if order == 7 or order==8:
                     run=2
@@ -68,7 +69,7 @@ def main():
                     data_path="/lfs/l1/legend/legend-prodenv/prod-usr/ggmarsh-test-v03/gen/"+detector+"/tier2/"+source+"_top_dlt/"
                     
                 energy_filter="cuspEmax_ctc"
-                cuts="True"
+                # cuts="True"
 
                 if order == 7 or order==8:
                     run=2
@@ -124,7 +125,7 @@ def main():
                 TL_model="notl"
                 frac_FCCDbore=0.5
                 energy_filter="cuspEmax_ctc"
-                cuts="False"
+                # cuts="False"
                 if order == 7 or order==8:
                     run=2
                 else:
@@ -150,7 +151,7 @@ def main():
                     source_z = "78z"
 
                 energy_filter="cuspEmax_ctc"
-                cuts="True"
+                # cuts="True"
                 if order == 7 or order == 8:
                     run=2
                 else:
@@ -183,7 +184,7 @@ def main():
                     data_path="/lfs/l1/legend/legend-prodenv/prod-usr/ggmarsh-test-v03/gen/"+detector+"/tier2/"+source+"_top_dlt/"
                     
                 energy_filter="cuspEmax_ctc"
-                cuts="True"
+                # cuts="True"
                 if order == 7 or order==8:
                     run=2
                 else:

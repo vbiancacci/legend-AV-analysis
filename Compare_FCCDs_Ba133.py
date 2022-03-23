@@ -6,6 +6,8 @@ from datetime import datetime
 import pandas as pd
 import matplotlib.pyplot as plt
 
+
+#old
 #Script to compare FCCDs for each detector - currently just for Ba133
 
 CodePath=os.path.dirname(os.path.realpath(__file__))

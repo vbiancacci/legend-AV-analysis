@@ -135,21 +135,6 @@ def main():
             except:
                 print("no Am241_HS6 analysis for ", detector)
 
-        # cc=''
-        # if order==7:
-        #     cc='green'
-        # elif order==8:
-        #     cc='gold'
-        # elif order==5:
-        #     cc='orangered'
-        # elif order==4:
-        #     cc='deepskyblue'
-        # else:
-        #     cc='darkviolet'
-        # plt.errorbar(detectors_ba,FCCDs_ba, yerr = [FCCD_err_lows_ba, FCCD_err_ups_ba], marker = 'o', color=cc, linestyle = '-', label=f'Order #'+str(order)+' Ba')
-        # plt.errorbar(detectors_am1,FCCDs_am1, yerr = [FCCD_err_lows_am1, FCCD_err_ups_am1], marker = 's', color=lighten_color(cc,1.3) ,linestyle = '-', label=f'Order #'+str(order)+' Am HS1')
-        
-
         cc = colors_orders[order]
         ax.errorbar(detectors_ba,FCCDs_ba, yerr = [FCCD_err_lows_ba, FCCD_err_ups_ba], marker = markers_sources["ba_HS4"], color=cc, linestyle = '-')
         ax.errorbar(detectors_am1,FCCDs_am1, yerr = [FCCD_err_lows_am1, FCCD_err_ups_am1], marker = markers_sources["am_HS1"], color=lighten_color(cc,1.2) ,linestyle = '-')
@@ -179,20 +164,6 @@ def main():
     plt.savefig(CodePath+"/FCCDs_Ba133_Am241_new_correction.png", bbox_inches='tight')
     plt.show()
 
-    # plt.xticks(rotation = 45)
-    # ax.xlabel('Detector')
-    # ax.ylabel('FCCD (mm)')
-    # ax.grid(linestyle='dashed', linewidth=0.5)
-    # ax.tight_layout()
-    # ax.title("FCCDs from Ba-133, Am-241 HS1, Am-241 HS6")
-    # plt.savefig(CodePath+"/FCCDs_Ba133_Am241_new_correction.png", bbox_inches='tight')
-    # plt.show()
-
-    #Save all values to csv file
-    #dict = {"detector": detectors_all, "detector_order": orders_all, "FCCD": FCCDs_all, "FCCD_err_up": FCCD_err_ups_all, "FCCD_err_low": FCCD_err_lows_all}
-    #df = pd.DataFrame(dict)
-    #print(df)
-    #df.to_csv(CodePath+"/FCCDs_Ba133.csv")
 
 
 
