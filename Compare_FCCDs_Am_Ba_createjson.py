@@ -37,6 +37,8 @@ def main():
     fig, ax = plt.subplots(figsize=(12,8))
     colors_orders = {2:'darkviolet', 4:'deepskyblue', 5:'orangered', 7:'green', 8:'gold', 9:'magenta'}
     markers_sources = {"ba_HS4": "o", "am_HS1":"s", "am_HS1_BEGe_cal":"^"}
+    #markers_sources = {"Ba-133": "o", "Am-241":"^"} #abi plot
+
 
     smear = "g"
     TL_model = "notl"
@@ -74,7 +76,7 @@ def main():
         detectors_am1_BEGe = []
 
         for detector in detectors:
-            #det[detector] = detector
+
             det[detector]={}
 
             detectors_all.append(detector)
@@ -174,9 +176,14 @@ def main():
                 json.dump(det, f, indent=4)
 
         cc = colors_orders[order]
+
         ax.errorbar(detectors_ba,FCCDs_ba, yerr = [FCCD_err_lows_ba, FCCD_err_ups_ba], marker = markers_sources["ba_HS4"], color=cc, linestyle = '-')
         ax.errorbar(detectors_am1,FCCDs_am1, yerr = [FCCD_err_lows_am1, FCCD_err_ups_am1], marker = markers_sources["am_HS1"], color=lighten_color(cc,0.5) ,linestyle = '-')
         ax.errorbar(detectors_am1_BEGe,FCCDs_am1_BEGe, yerr = [FCCD_err_lows_am1_BEGe, FCCD_err_ups_am1_BEGe], marker = markers_sources["am_HS1_BEGe_cal"], color=lighten_color(cc,1.2) ,linestyle = '-')
+
+        # #abi plot: _BEGe_corrections.png
+        # ax.errorbar(detectors_ba,FCCDs_ba, yerr = [FCCD_err_lows_ba, FCCD_err_ups_ba], marker = markers_sources["Ba-133"], color=cc, linestyle = '-')
+        # ax.errorbar(detectors_am1_BEGe,FCCDs_am1_BEGe, yerr = [FCCD_err_lows_am1_BEGe, FCCD_err_ups_am1_BEGe], marker = markers_sources["Am-241"], color=lighten_color(cc,1.2) ,linestyle = '-')
 
 
     for order in colors_orders:
@@ -189,16 +196,17 @@ def main():
         ax2.plot(np.NaN, np.NaN, marker=marker,c='grey',label=source)
     ax2.get_yaxis().set_visible(False)
 
-    ax.legend(loc='upper left', bbox_to_anchor=(0, 1))
-    ax2.legend(loc='upper left', bbox_to_anchor=(0, 0.8))
+    ax.legend(loc='upper left', bbox_to_anchor=(0, 1), fontsize=11)
+    ax2.legend(loc='upper left', bbox_to_anchor=(0, 0.77), fontsize=11)
 
     ax.tick_params(axis='x', labelrotation=45)
-    ax.set_xlabel('Detector')
-    ax.set_ylabel('FCCD (mm)')
+    ax.set_xlabel('Detector', fontsize=13)
+    ax.set_ylabel('FCCD (mm)', fontsize=13)
     ax.grid(linestyle='dashed', linewidth=0.5)
     plt.tight_layout()
-    ax.set_title("FCCDs from Ba-133, Am-241 HS1") #, Am-241 HS6")
+    ax.set_title("FCCDs from Ba-133 HS4 and Am-241 HS1", fontsize=14) #, Am-241 HS6")
     plt.savefig(CodePath+"/FCCDs_Ba133_Am241_both_corrections.png", bbox_inches='tight')
+    #plt.savefig(CodePath+"/FCCDs_Ba133_Am241_BEGe_corrections.png", bbox_inches='tight') #abi plot
     plt.show()
 
 
