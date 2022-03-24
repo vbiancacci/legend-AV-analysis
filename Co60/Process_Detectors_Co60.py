@@ -13,7 +13,7 @@ CodePath=os.path.dirname(os.path.realpath(__file__))
 def main():
 
     #Processing instructions
-    order_list = ["BEGe"] #List of orders to process
+    order_list = [1] #List of orders to process
     Calibrate_Data = False #Pre-reqs: needs dsp pygama data
     Gamma_line_count_data = False #Pre-reqs: needs calibration
     Gamma_line_count_MC = False #Pre-reqs: needs AV post processed MC for range of FCCDs
@@ -23,6 +23,9 @@ def main():
 
     source = "co_HS5"
     cuts = "False"
+
+    if order == 1:
+        order = "BEGe"
 
     #Get detector list
     detector_list = CodePath+"/../detector_list.json" 
