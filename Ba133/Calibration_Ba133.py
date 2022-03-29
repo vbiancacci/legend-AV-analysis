@@ -63,7 +63,7 @@ def main():
     # plt.hist(energy_filter_data, bins=5000)
     # plt.show()
 
-    
+
     #========Compute calibration coefficients===========
     print("Calibrating...")
     glines    = [80.9979, 160.61, 223.24, 276.40, 302.85, 356.01, 383.85] # gamma lines used for calibration
@@ -155,10 +155,10 @@ def main():
     dict = {energy_filter: {"resolution": list(fit_pars), "calibration": list(pars)}}
     print(dict)
     if cuts == False:
-        with open(CodePath+"/data_calibration/"+detector+"/calibration_run"+str(run)+".json", "w") as outfile: 
+        with open(CodePath+"/data_calibration/"+detector+"/calibration_run"+str(run)+".json", "w") as outfile:
             json.dump(dict, outfile, indent=4)
     else:
-        with open(CodePath+"/data_calibration/"+detector+"/calibration_run"+str(run)+"_cuts.json", "w") as outfile: 
+        with open(CodePath+"/data_calibration/"+detector+"/calibration_run"+str(run)+"_cuts.json", "w") as outfile:
             json.dump(dict, outfile, indent=4)
 
     print("done")
@@ -173,17 +173,19 @@ def read_all_dsp_lh5(t2_folder, cuts, cut_file_path=None, run="all", sigma=4):
         files = fnmatch.filter(files, "*run0001*")
     if run == 2:
         files = fnmatch.filter(files, "*run0002*")
+    if run == 3:
+        files = fnmatch.filter(files, "*run0003*")
 
     df_list = []
-    
+
     if cuts == False:
         for file in files:
-        
+
             #get data, no cuts
             tb = sto.read_object("raw",t2_folder+file)[0]
             df = lh5.Table.get_dataframe(tb)
             df_list.append(df)
-    
+
         df_total = pd.concat(df_list, axis=0, ignore_index=True)
         return df_total
 
@@ -191,9 +193,9 @@ def read_all_dsp_lh5(t2_folder, cuts, cut_file_path=None, run="all", sigma=4):
         files = [t2_folder+file for file in files] #get list of full paths
         lh5_group = "raw"
         # df_total_cuts, failed_cuts = cut.load_df_with_cuts(files, lh5_group, cut_file = cut_file_path, cut_parameters= {'bl_mean':sigma,'bl_std':sigma, 'pz_std':sigma}, verbose=True)
-        df_total_cuts, failed_cuts = cut.load_df_with_cuts(files, lh5_group, cut_parameters= {'bl_mean':sigma,'bl_std':sigma, 'pz_std':sigma}, verbose=True)
-        
-        return df_total_cuts, failed_cuts       
+        df_total_cuts, failed_cuts = cut.load_df_with_cuts(files, lh5_group, cut_parameters= {'bl_mean':sigma,'bl_std':sigma}, verbose=True) #, 'pz_std':sigma
+
+        return df_total_cuts, failed_cuts
 
 def fwhm_slope(x, m0, m1, m2):
     """
