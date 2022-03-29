@@ -61,8 +61,8 @@ def main():
             os.makedirs(dir+"/PeakCounts/"+detector+"/"+source+"/new/plots/data/")
 
         #Get data and concoatonate into df
-        df=pd.read_hdf(dir+"/data_calibration/"+detector+"/"+source+"/loaded_energy_"+detector+"_"+energy_filter+"_run"+str(run)+".hdf5", key='energy')
-        energies=df['energy_filter']
+        #df=pd.read_hdf(dir+"/data_calibration/"+detector+"/"+source+"/loaded_energy_"+detector+"_"+energy_filter+"_nocuts_run"+str(run)+".hdf5", key='energy')
+        #energies=df['energy_filter']
 
         #Get Calibration
         #with open(calibration) as json_file:
@@ -121,8 +121,8 @@ def main():
 
     #fit function initial guess
     R =  0.0203/0.0195
-    mu_99_guess, sigma_99_guess, a_99_guess, bkg_99_guess, s_99_guess = 99., 0.7, max(hist_peak)*R, min(hist_peak), min(hist_peak)
-    mu_103_guess, sigma_103_guess, a_103_guess = 103., 0.6, max(hist_peak)
+    mu_99_guess, sigma_99_guess, a_99_guess, bkg_99_guess, s_99_guess = 99., 0.8, max(hist_peak)*R, min(hist_peak), min(hist_peak)
+    mu_103_guess, sigma_103_guess, a_103_guess = 103., 0.5, max(hist_peak)
     #mu_small_guess, sigma_small_guess, a_small_guess = 101., 0.6, max(hist_peak)*0.05
     double_guess = [a_99_guess, mu_99_guess, sigma_99_guess,
                     a_103_guess, mu_103_guess, sigma_103_guess,
