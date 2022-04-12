@@ -53,9 +53,9 @@ def main():
 
     #Ratio of data/sim
     A_source_today = 2.76E3 #Bq
-    if detector == "B00035B":
-        data_live_time = 36000 #s
-    elif detector == "B00000D" or "B00035A":
+    if detector == "B00035B" or detector == "B00061C":
+        data_live_time = 36000 #s, check here: /lfs/l1/legend/detector_char/enr/hades/char_data/B00061C/tier0/co_HS5_top_dlt/meta/char_data-B00061C-co_HS5_top_dlt-run0001.json 
+    elif detector == "B00000D" or detector == "B00035A" or detector == "B00076C":
         data_live_time = 14400 #s
     N_data = A_source_today*data_live_time
     N_sims = 10*10**7

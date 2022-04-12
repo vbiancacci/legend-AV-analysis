@@ -85,6 +85,7 @@ def main():
 
         #RUNS 85 AND 86 only ??
         test_files_t2 = []
+        # for i, file_i in enumerate(files_t2):
         for i, file_i in enumerate(files_t2[10:15]):
             file_i = os.path.join(datapath_t2,file_i)
             test_files_t2.append(file_i)
@@ -103,90 +104,101 @@ def main():
 
     df_uncal_total = pd.concat(dfs_uncal, axis=0, ignore_index=True)
 
+    no_bins = 10000
+
     plt.figure()
     plt.title("ORNL - "+det)
     # counts, bins, bars = plt.hist(uncal_data, bins=5000, histtype='step', label=energy_filter)
-    counts, bins, bars = plt.hist(df_uncal_total["trapEmax"], bins=10000, histtype='step', label="trapEmax")
-    if det == "V01403A":
-        counts, bins, bars = plt.hist(df_uncal_total["cuspE"], bins=10000, histtype='step', label="cuspE")
-        counts, bins, bars = plt.hist(df_uncal_total["zacE"], bins=10000, histtype='step', label="zacE")
+    counts, bins, bars = plt.hist(df_uncal_total["trapEmax"], bins=no_bins, histtype='step', label="trapEmax")
+    # if det == "V01403A":
+    #     counts, bins, bars = plt.hist(df_uncal_total["cuspE"], bins=10000, histtype='step', label="cuspE")
+    #     counts, bins, bars = plt.hist(df_uncal_total["zacE"], bins=10000, histtype='step', label="zacE")
     plt.legend()
-    # plt.xlim(0,4000)
     plt.xlabel("adc")
     plt.ylabel("Counts")
     plt.yscale('log')
 
-    energy_filter = "trapEmax"
-    uncal_data = df_uncal_total[energy_filter]
+    
 
-    #cut high energy end
-    df_uncal_cut = df_uncal_total.loc[(df_uncal_total[energy_filter] < 5000)]
-    uncal_data_cut = df_uncal_cut[energy_filter] 
+    hist, bins, var = histograms.get_hist(df_uncal_total["trapEmax"], bins=no_bins)
+    bin_centres = histograms.get_bin_centers(bins)
 
-    plt.figure()
-    plt.title("ORNL - "+ det)
-    counts, bins, bars = plt.hist(uncal_data_cut, bins=5000, histtype='step', label=energy_filter)
-    plt.legend()
-    # plt.xlim(0,4000)
-    plt.xlabel("adc")
-    plt.ylabel("Counts")
-    plt.yscale('log') 
-
-    #compare with a hades uncal:
-    t2_hades_folder = "/lfs/l1/legend/legend-prodenv/prod-usr/ggmarsh-test-v03/gen/V08682A/tier2/ba_HS4_top_dlt/"
-    df_hades = read_all_dsp_lh5(t2_hades_folder, cuts=False, run=2)
-    df_hades_cut = df_hades.loc[(df_hades["trapEmax"] < 5000)]
-    plt.figure()
-    plt.title("HADES - V08682A")
-    plt.hist(df_hades_cut["trapEmax"], bins=5000, histtype='step', label=energy_filter)
-    # plt.xlim(0,4000)
-    plt.xlabel("adc")
-    plt.ylabel("Counts")
-    plt.yscale('log')
-
-    print("no.events ORNL: ", str(df_uncal_total.shape))
-    print("no.events hades: ", str(df_hades.shape))
+    # df_save = pd.DataFrame({"adc_bin_centre": bin_centres, "counts": counts})
+    # print(df_save)
+    # df_save.to_csv(r'/lfs/l1/legend/users/aalexander/ORNL_detchar_data/'+det+'/'+det+'_ba133_cycs815-819_run86_'+str(no_bins)+'bins.txt', header=None, index=None, sep=' ', mode='a')
 
 
+    # energy_filter = "trapEmax"
+    # uncal_data = df_uncal_total[energy_filter]
+
+    # #cut high energy end
+    # df_uncal_cut = df_uncal_total.loc[(df_uncal_total[energy_filter] < 5000)]
+    # uncal_data_cut = df_uncal_cut[energy_filter] 
+
+    # plt.figure()
+    # plt.title("ORNL - "+ det)
+    # counts, bins, bars = plt.hist(uncal_data_cut, bins=5000, histtype='step', label=energy_filter)
+    # plt.legend()
+    # # plt.xlim(0,4000)
+    # plt.xlabel("adc")
+    # plt.ylabel("Counts")
+    # plt.yscale('log') 
+
+    # #compare with a hades uncal:
+    # t2_hades_folder = "/lfs/l1/legend/legend-prodenv/prod-usr/ggmarsh-test-v03/gen/V08682A/tier2/ba_HS4_top_dlt/"
+    # df_hades = read_all_dsp_lh5(t2_hades_folder, cuts=False, run=2)
+    # df_hades_cut = df_hades.loc[(df_hades["trapEmax"] < 5000)]
+    # plt.figure()
+    # plt.title("HADES - V08682A")
+    # plt.hist(df_hades_cut["trapEmax"], bins=5000, histtype='step', label=energy_filter)
+    # # plt.xlim(0,4000)
+    # plt.xlabel("adc")
+    # plt.ylabel("Counts")
+    # plt.yscale('log')
+
+    # print("no.events ORNL: ", str(df_uncal_total.shape))
+    # print("no.events hades: ", str(df_hades.shape))
 
 
-    #calibrate 
-    glines    = [80.9979,160.61, 223.24, 276.40, 302.85, 356.01, 383.85] # gamma lines used for calibration
-    range_keV = [(1,1),(1.5,1.5),(2,2),(2.5,2.5),(3,3),(3,3),(3,3)] # side bands width
-    # glines    = [160.61, 223.24, 276.40, 302.85, 356.01, 383.85] # gamma lines used for calibration
-    # range_keV = [(1.5,1.5),(2,2),(2.5,2.5),(3,3),(3,3),(3,3)] # side bands width
 
-    guess = 383/(uncal_data.quantile(0.9))
-    print(guess)
-    idx = np.where(counts == np.max(counts))[0][0]
-    max_x = bins[idx]
-    guess = 81/max_x
-    print(guess)
 
-    try:
-        pars, cov, results = cal.hpge_E_calibration(uncal_data_cut,glines,guess,deg=1,range_keV = range_keV, funcs = [pgp.gauss_step,pgp.gauss_step,pgp.gauss_step,pgp.gauss_step,pgp.gauss_step,pgp.gauss_step,pgp.gauss_step],verbose=True)
-        # pars, cov, results = cal.hpge_E_calibration(uncal_data,glines,guess,deg=1,range_keV = range_keV, funcs = [pgp.gauss_step,pgp.gauss_step,pgp.gauss_step,pgp.gauss_step,pgp.gauss_step,pgp.gauss_step],verbose=True)
+    # #calibrate 
+    # glines    = [80.9979,160.61, 223.24, 276.40, 302.85, 356.01, 383.85] # gamma lines used for calibration
+    # range_keV = [(1,1),(1.5,1.5),(2,2),(2.5,2.5),(3,3),(3,3),(3,3)] # side bands width
+    # # glines    = [160.61, 223.24, 276.40, 302.85, 356.01, 383.85] # gamma lines used for calibration
+    # # range_keV = [(1.5,1.5),(2,2),(2.5,2.5),(3,3),(3,3),(3,3)] # side bands width
+
+    # guess = 383/(uncal_data.quantile(0.9))
+    # print(guess)
+    # idx = np.where(counts == np.max(counts))[0][0]
+    # max_x = bins[idx]
+    # guess = 81/max_x
+    # print(guess)
+
+    # try:
+    #     pars, cov, results = cal.hpge_E_calibration(uncal_data_cut,glines,guess,deg=1,range_keV = range_keV, funcs = [pgp.gauss_step,pgp.gauss_step,pgp.gauss_step,pgp.gauss_step,pgp.gauss_step,pgp.gauss_step,pgp.gauss_step],verbose=True)
+    #     # pars, cov, results = cal.hpge_E_calibration(uncal_data,glines,guess,deg=1,range_keV = range_keV, funcs = [pgp.gauss_step,pgp.gauss_step,pgp.gauss_step,pgp.gauss_step,pgp.gauss_step,pgp.gauss_step],verbose=True)
         
-        print("cal pars: ", pars)
+    #     print("cal pars: ", pars)
 
-        ecal_pass = pgp.poly(uncal_data, pars)
+    #     ecal_pass = pgp.poly(uncal_data, pars)
 
-        xpb = 0.1
-        xlo = 0
-        xhi = 450
+    #     xpb = 0.1
+    #     xlo = 0
+    #     xhi = 450
 
-        plt.figure()
-        nb = int((xhi-xlo)/xpb)
-        hist_pass, bin_edges = np.histogram(ecal_pass, range=(xlo, xhi), bins=nb)
-        bins_pass = pgh.get_bin_centers(bin_edges)
-        plt.plot(bins_pass, hist_pass, label='QC pass', lw=1, c='b')
-        plt.xlabel("Energy (keV)",     ha='right', x=1)
-        plt.ylabel("Counts / keV",     ha='right', y=1)
-        plt.yscale('log')
-        plt.tight_layout()
-        plt.legend(loc='upper right')
-    except:
-        print("could not calibrate")
+    #     plt.figure()
+    #     nb = int((xhi-xlo)/xpb)
+    #     hist_pass, bin_edges = np.histogram(ecal_pass, range=(xlo, xhi), bins=nb)
+    #     bins_pass = pgh.get_bin_centers(bin_edges)
+    #     plt.plot(bins_pass, hist_pass, label='QC pass', lw=1, c='b')
+    #     plt.xlabel("Energy (keV)",     ha='right', x=1)
+    #     plt.ylabel("Counts / keV",     ha='right', y=1)
+    #     plt.yscale('log')
+    #     plt.tight_layout()
+    #     plt.legend(loc='upper right')
+    # except:
+    #     print("could not calibrate")
 
     plt.show()
 
