@@ -22,7 +22,7 @@ def main():
     PlotSpectra = True #Pre-reqs: needs all above stages
 
     source = "co_HS5"
-    cuts = "True"
+    cuts = "False"
 
 
     #Get detector list
@@ -39,7 +39,7 @@ def main():
 
         for detector in detectors:
 
-            if detector != "B00061C":
+            if detector != "B00002C":
                 continue
 
             #========Calibration - DATA==========
