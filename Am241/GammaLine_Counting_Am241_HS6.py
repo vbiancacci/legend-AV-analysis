@@ -36,43 +36,6 @@ def main():
     dir=os.path.dirname(os.path.realpath(__file__))
     print("working directory: ", dir)
 
-    #========DATA MODE=======:
-    if args["data"]:
-        detector, energy_filter, cuts, run, source = args["data"][0], args["data"][1], args["data"][2], args["data"][3], args["data"][4]
-        print("")
-        print("MODE: Data")
-        print("detector: ", detector)
-        #print("calibration path: ", calibration)
-        print("energy filter: ", energy_filter)
-        print("applying cuts: ", cuts)
-        print("run: ", run)
-        print("source: ", source)
-        print("")
-
-        if cuts == "False":
-            cuts = False
-        else:
-            cuts = True
-            sigma_cuts = 4
-
-
-        #initialise directories for detectors to save
-        if not os.path.exists(dir+"/PeakCounts/"+detector+"/"+source+"/new/plots/data/"):
-            os.makedirs(dir+"/PeakCounts/"+detector+"/"+source+"/new/plots/data/")
-
-        #Get data and concoatonate into df
-        #df=pd.read_hdf(dir+"/data_calibration/"+detector+"/"+source+"/loaded_energy_"+detector+"_"+energy_filter+"_nocuts_run"+str(run)+".hdf5", key='energy')
-        #energies=df['energy_filter']
-
-        #Get Calibration
-        #with open(calibration) as json_file:
-        #   calibration_coefs = json.load(json_file)
-        #m = calibration_coefs[energy_filter]["calibration"][0]
-        #c = calibration_coefs[energy_filter]["calibration"][1]
-
-        # energies = (energy_filter_data-c)/m
-        #energies = energy_filter_data*m + c
-
     #========SIMULATION MODE:==============
     if args["sim"]:
         detector, sim_path, MC_id, source = args["sim"][0], args["sim"][1], args["sim"][2], args["sim"][3]
@@ -104,7 +67,7 @@ def main():
     print("99/103 keV")
 
     #prepare histogram
-    xmin_99_103, xmax_99_103 = 95, 107
+    xmin_99_103, xmax_99_103 = 97, 105
     bins_peak = np.arange(xmin_99_103,xmax_99_103,binwidth)
     #print(bins_peak)
     hist_peak, bins_peak, var_peak = histograms.get_hist(energies, bins=bins_peak)
@@ -121,7 +84,7 @@ def main():
 
     #fit function initial guess
     R =  0.0203/0.0195
-    mu_99_guess, sigma_99_guess, a_99_guess, bkg_99_guess, s_99_guess = 99., 0.8, max(hist_peak)*R, min(hist_peak), min(hist_peak)
+    mu_99_guess, sigma_99_guess, a_99_guess, bkg_99_guess, s_99_guess = 99., 0.5, max(hist_peak)*R, min(hist_peak), min(hist_peak)
     mu_103_guess, sigma_103_guess, a_103_guess = 103., 0.5, max(hist_peak)
     #mu_small_guess, sigma_small_guess, a_small_guess = 101., 0.6, max(hist_peak)*0.05
     double_guess = [a_99_guess, mu_99_guess, sigma_99_guess,
@@ -142,7 +105,10 @@ def main():
 
         #Counting - integrate gaussian signal part
 
-        C_99_103, C_99_103_err = double_gauss_count(a_99, mu_99,sigma_99, a_103, mu_103, sigma_103, binwidth)
+        C_99, C_99_err = gauss_count(a_99, mu_99, sigma_99, a_99_err, binwidth)
+        C_103, C_103_err = gauss_count(a_103, mu_103, sigma_103, a_103_err, binwidth)
+        C_99_103=C_99+C_103
+        C_99_103_err=np.sqrt(C_99_err**2+C_103_err**2)
         print("peak count 99-103 = ", str(C_99_103)," +/- ", str(C_99_103_err))
 
         #plot with fit
@@ -152,8 +118,8 @@ def main():
         #yfit_doubleG= double_gauss(xfit, a_99, mu_99, sigma_99, a_103, mu_103, sigma_103)
 
         fig, ax = plt.subplots()
-        histograms.plot_hist(hist_peak, bins_peak, var=None, show_stats=False, stats_hloc=0.75, stats_vloc=0.85)
-        plt.plot(xfit, yfit, label=r'gauss($x,\mu_{99},\sigma_{99},a_{99}$)+gauss($x,\mu_{103},\sigma_{103},a_{103}$)+step($x,\mu_{99},\sigma_{99},bkg,s$)')
+        histograms.plot_hist(hist_peak, bins_peak, label='Data', var=None, show_stats=False, stats_hloc=0.75, stats_vloc=0.85)
+        plt.plot(xfit, yfit, label=r'Gauss$_{99kev}$ + Gauss$_{103keV}$ + Step$_{99keV}$ + Linear')
         #plt.plot(xfit, yfit_doubleG, "--", color='red', label =r'double_gauss($x,\mu_{99},\sigma_{99},a_{99},\mu_{103},\sigma_{103},a_{103}$)')
         #plt.plot(xfit, yfit_step, "--", label =r'step($x,\mu_{99},\sigma_{99},bkg,s$))')
 
@@ -161,13 +127,13 @@ def main():
         plt.xlim(xmin_99_103, xmax_99_103)
         #ax.set_ylim(min(hist_peak),max(hist_peak))
         plt.yscale("log")
-        plt.xlabel("Energy (keV)")
-        plt.ylabel("Counts")
+        plt.xlabel("Energy [keV]")
+        plt.ylabel("Counts / 0.1keV")
         plt.legend(loc="lower left", prop={'size': 8.5})
 
         props = dict(boxstyle='round', alpha=0.5)
         info_str = '\n'.join((r'$\mu_{99}=%.3g \pm %.3g$' % (mu_99, mu_99_err), r'$\mu_{103}=%.3g \pm %.3g$' % (mu_103, mu_103_err), r'$\sigma_{99}=%.3g \pm %.3g$' % (sigma_99, sigma_99_err), r'$\sigma_{103}=%.3g \pm %.3g$' % (sigma_103, sigma_103_err), r'$a_{99}=%.3g \pm %.3g$' % (a_99, a_99_err), r'$a_{103}=%.3g \pm %.3g$' % (a_103, a_103_err), r'$\chi^2/dof=%.2f/%.0f$'%(chi_sq, dof)))
-        plt.text(0.02, 0.98, info_str, transform=ax.transAxes, fontsize=8,verticalalignment='top', bbox=props)
+        #plt.text(0.02, 0.98, info_str, transform=ax.transAxes, fontsize=8,verticalalignment='top', bbox=props)
 
 
     except RuntimeError:
@@ -182,30 +148,19 @@ def main():
         histograms.plot_hist(hist_peak, bins_peak, var=None, show_stats=False, stats_hloc=0.75, stats_vloc=0.85)
         plt.xlim(xmin_99_103, xmax_99_103)
         plt.yscale("log")
-        plt.xlabel("Energy (keV)")
-        plt.ylabel("Counts")
+        plt.xlabel("Energy [keV]")
+        plt.ylabel("Counts / 0.1keV")
         plt.legend(loc="upper left", prop={'size': 8.5})
 
 
     #Save fig
     if args["sim"]:
-        ax.set_title(MC_id, fontsize=9)
+        #ax.set_title(MC_id, fontsize=9)
         plt.savefig(dir+"/PeakCounts/"+detector+"/"+source+"/new/plots/sim/"+MC_id+"_103keV.png")
 
-    if args["data"]:
-        ax.set_title("Data: "+detector, fontsize=9)
-        if cuts == False:
-            plt.savefig(dir+"/PeakCounts/"+detector+"/"+source+"/plots/data/"+detector+"_103keV_"+energy_filter+"_run"+str(run)+".png")
-        else:
-            if sigma_cuts ==4:
-                plt.savefig(dir+"/PeakCounts/"+detector+"/"+source+"/new/plots/data/"+detector+"_103keV_cuts_"+energy_filter+"_run"+str(run)+".png")
-
-
     #___________Fit single peaks_________________:
-    peak_counts = []
-    peak_counts_err = []
-    peak_ranges =[[52,62]]# , [122, 124], [124, 126], [207,209], [334,336], [661,663]] #Rough by eye
-    peaks = [60] # 123, 125, 208, 335, 662] #
+    peak_ranges =[[52,62]]
+    peaks = [60]
 
     for index, i in enumerate(peak_ranges):
 
@@ -241,10 +196,8 @@ def main():
             print("r chi sq: ", chi_sq/dof)
 
             #Counting - integrate gaussian signal part +/- 3 sigma
-            C, C_err = gauss_count(a_59, mu_59 ,sigma_59, binwidth)
-            print("peak counts = ", str(C)," +/- ", str(C_err))
-            peak_counts.append(C)
-            peak_counts_err.append(C_err)
+            C_60, C_60_err = gauss_count(a_59, mu_59 ,sigma_59, a_59_err, binwidth)
+            print("peak counts = ", str(C_60)," +/- ", str(C_60_err))
 
             #plot
             xfit = np.linspace(xmin, xmax, 1000)
@@ -255,8 +208,8 @@ def main():
             yfit_gaus59 = peak_fitting.gauss(xfit ,mu_59, sigma_59, a_59)
 
             fig, ax = plt.subplots()
-            histograms.plot_hist(hist_peak, bins_peak, var=None, show_stats=False, stats_hloc=0.75, stats_vloc=0.85)
-            plt.plot(xfit, yfit, label=r'total_fit: gauss($x,\mu_{59},\sigma_{59},a_{59})+step(x,\mu_{59},\sigma_{59},bkg,s)+gauss_{53}+gauss_{57}$')
+            histograms.plot_hist(hist_peak, bins_peak, label="Data", var=None, show_stats=False, stats_hloc=0.75, stats_vloc=0.85)
+            plt.plot(xfit, yfit, label=r'Total fit: Gauss$_{59.5keV}$ + Step$_{59.5keV}$ + Gauss$_{53keV}$ + Gauss$_{57keV}$')
             #plt.plot(xfit, yfit_step, "--", label =r'step($x,\mu,\sigma,bkg,s$)')
             #plt.plot(xfit, yfit_gaus53, "--", color='blue', label =r'gaus53($x,\mu,\sigma,a)')
             #plt.plot(xfit, yfit_gaus57, "--", color='green', label =r'gaus57($x,\mu,\sigma,a)')
@@ -265,22 +218,20 @@ def main():
             plt.xlim(xmin, xmax)
             #ax.set_ylim(min(hist_peak)*0.8,max(hist_peak)*1.2)
             plt.yscale("log")
-            plt.xlabel("Energy (keV)")
-            plt.ylabel("Counts")
+            plt.xlabel("Energy [keV]")
+            plt.ylabel("Counts / 0.1keV")
             plt.legend(loc="lower left", prop={'size': 8.5})
 
             props = dict(boxstyle='round', alpha=0.5)
             info_str = '\n'.join((r'$\mu_{59}=%.3g \pm %.3g$' % (mu_59, mu_59_err), r'$\sigma_{59}=%.3g \pm %.3g$' % (sigma_59, sigma_59_err),r'$a_{59}=%.3g \pm %.3g$' % (a_59, a_59_err), r'$\chi^2/dof=%.2f/%.0f$'%(chi_sq, dof)))
-            plt.text(0.02, 0.98, info_str, transform=ax.transAxes, fontsize=8,verticalalignment='top', bbox=props)
+            #plt.text(0.02, 0.98, info_str, transform=ax.transAxes, fontsize=8,verticalalignment='top', bbox=props)
 
         except RuntimeError:
             print("Error - curve_fit failed")
 
             #counting - nan values
-            C, C_err = np.nan, np.nan
-            print("peak counts = ", str(C)," +/- ", str(C_err))
-            peak_counts.append(C)
-            peak_counts_err.append(C_err)
+            C_60, C_60_err = np.nan, np.nan
+            print("peak counts = ", str(C_60)," +/- ", str(C_60_err))
 
             #plot without fit
             fig, ax = plt.subplots()
@@ -294,22 +245,11 @@ def main():
 
         #Save fig
         if args["sim"]:
-            ax.set_title(MC_id, fontsize=9)
+            #ax.set_title(MC_id, fontsize=9)
             plt.savefig(dir+"/PeakCounts/"+detector+"/"+source+"/new/plots/sim/"+MC_id+"_"+str(peaks[index])+'keV.png')
-
-        if args["data"]:
-            ax.set_title("Data: "+detector, fontsize=9)
-            if cuts == False:
-                plt.savefig(dir+"/PeakCounts/"+detector+"/"+source+"/plots/data/"+detector+"_"+str(peaks[index])+'keV_'+energy_filter+'_run'+str(run)+'.png')
-            else:
-                if sigma_cuts ==4:
-                    plt.savefig(dir+"/PeakCounts/"+detector+"/"+source+"/new/plots/data/"+detector+"_"+str(peaks[index])+'keV_cuts_'+energy_filter+'_run'+str(run)+'.png')
-
-
 
     #Comput count ratio O_Am241
     print("")
-    C_60, C_60_err = peak_counts[0], peak_counts_err[0]
     if (C_60 == np.nan) or (C_99_103 == np.nan):
         O_Am241, O_Am241_err = np.nan, np.nan
     else:
@@ -320,18 +260,10 @@ def main():
 
     #Save count values to json file
     PeakCounts = {
-        "C_60" : peak_counts[0],
-        "C_60_err" : peak_counts_err[0],
+        "C_60" : C_60,
+        "C_60_err" : C_60_err,
         "C_99_103" : C_99_103,
         "C_99_103_err" : C_99_103_err,
-#        "C_103" : C_103,
-#        "C_103_err" : C_103_err,
-#        "C_208" : peak_counts[3],
-#        "C_208_err" : peak_counts_err[3],
-#        "C_335" : peak_counts[4],
-#        "C_335_err" : peak_counts_err[4],
-#        "C_662" : peak_counts[5],
-#        "C_662_err" : peak_counts_err[5],
         "O_Am241" : O_Am241,
         "O_Am241_err" : O_Am241_err,
     }
@@ -339,18 +271,6 @@ def main():
     if args["sim"]:
         with open(dir+"/PeakCounts/"+detector+"/"+source+"/new/PeakCounts_sim_"+MC_id+".json", "w") as outfile:
             json.dump(PeakCounts, outfile, indent=4)
-    if args["data"]:
-        if cuts == False:
-            with open(dir+"/PeakCounts/"+detector+"/"+source+"/PeakCounts_data_"+detector+"_"+energy_filter+"_run"+str(run)+".json", "w") as outfile:
-                json.dump(PeakCounts, outfile, indent=4)
-        else:
-            if sigma_cuts ==4:
-                with open(dir+"/PeakCounts/"+detector+"/"+source+"/new/PeakCounts_data_"+detector+"_cuts_"+energy_filter+"_run"+str(run)+".json", "w") as outfile:
-                    json.dump(PeakCounts, outfile, indent=4)
-            else:
-                with open(dir+"/PeakCounts/"+detector+"/"+source+"/PeakCounts_data_"+detector+"_cuts_"+energy_filter+"_run"+str(run)+"_"+str(sigma_cuts)+"sigma.json", "w") as outfile:
-                    json.dump(PeakCounts, outfile, indent=4)
-
 
 def chi_sq_calc(xdata, ydata, yerr, fit_func, coeff):
     "calculate chi sq and p-val of a fit given the data points and fit parameters, e.g. fittype ='linear'"
@@ -383,36 +303,15 @@ def chi_sq_calc(xdata, ydata, yerr, fit_func, coeff):
 
     return chi_sq, p_value, residuals, dof
 
-def gauss_count(a,mu,sigma, bin_width):
+def gauss_count(a,mu,sigma, err_a, bin_width):
     "count/integrate gaussian peak"
 
-    #height = a/sigma/np.sqrt(2*np.pi)
-    #integral = a/bin_width
-    #integral_err = a_err/bin_width
-
-    #_____3sigma_____
-    #integral_60_3sigma_list = quad(peak_fitting.gauss,mu-3*sigma, mu+3*sigma, args=(mu,sigma,a))
     integral_list = quad(peak_fitting.gauss,0,120, args=(mu,sigma,a))
     integral = integral_list[0]/bin_width
-    integral_err = integral_list[1]/bin_width
+    integral_err = err_a/bin_width
 
     return integral, integral_err
 
-def double_gauss_count(a_99,mu_99,sigma_99, a_103, mu_103, sigma_103, bin_width):
-    "count/integrate double gaussian peak"
-
-    integral_list = quad(double_gauss, 0, 120, args=(a_99,mu_99,sigma_99, a_103, mu_103, sigma_103))
-    integral = integral_list[0]/bin_width
-    integral_err = integral_list[1]/bin_width
-
-    return integral, integral_err
-
-def double_gauss(x, a_99,mu_99,sigma_99, a_103, mu_103, sigma_103):
-    peak_99 = peak_fitting.gauss(x,mu_99, sigma_99, a_99)
-    peak_103 = peak_fitting.gauss(x,mu_103, sigma_103, a_103)
-    double_peak = peak_99 + peak_103
-
-    return double_peak
 
 def Am_60(x, mu_59, sigma_59, a_59, mu_57, sigma_57, a_57, mu_53, sigma_53, a_53, bkg, s):
 
