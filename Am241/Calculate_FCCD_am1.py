@@ -238,7 +238,7 @@ def exponential_decay(x, a, b):
     f = a*np.exp(-b*x)
     return f
 
-def uncertainty(C_60, C_99_103):
+def uncertainty(O_Am241, O_Am241_err):
 
     #values from Bjoern's thesis - Am source
     #all percentages

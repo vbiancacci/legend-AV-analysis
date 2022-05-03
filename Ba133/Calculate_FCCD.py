@@ -52,7 +52,8 @@ def main():
     print("start...")
 
     #Get O_ba133 for each FCCD
-    FCCD_list = [0.0, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 3.0] #mm
+    FCCD_list = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0] #mm
+    # [0.0, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 3.0] #mm
     O_Ba133_list = []
     O_Ba133_err_pct_list = []
     DLF = 1.0 #considering 0 TL
@@ -81,7 +82,7 @@ def main():
             C_79 = PeakCounts['C_79']
             C_81 = PeakCounts['C_81']
             O_Ba133_data = PeakCounts['O_Ba133']
-            O_Ba133_err = PeakCounts ['O_Ba133_err']
+            O_Ba133_data_err = PeakCounts ['O_Ba133_err']
     else:
         cuts_sigma = 4 #default =4, change by hand here if interested
         print("data cuts sigma: ", str(cuts_sigma))
@@ -92,7 +93,7 @@ def main():
                 C_79 = PeakCounts['C_79']
                 C_81 = PeakCounts['C_81']
                 O_Ba133_data = PeakCounts['O_Ba133']
-                O_Ba133_err = PeakCounts ['O_Ba133_err']
+                O_Ba133_data_err = PeakCounts ['O_Ba133_err']
         else:
             with open(dir+"/PeakCounts/"+detector+"/PeakCounts_data_"+detector+"_cuts_"+energy_filter+"_run"+str(run)+"_"+str(sigma_cuts)+"sigma.json") as json_file:
                 PeakCounts = json.load(json_file)
@@ -100,7 +101,7 @@ def main():
                 C_79 = PeakCounts['C_79']
                 C_81 = PeakCounts['C_81']
                 O_Ba133_data = PeakCounts['O_Ba133']
-                O_Ba133_err = PeakCounts ['O_Ba133_err']
+                O_Ba133_data_err = PeakCounts ['O_Ba133_err']
 
 
     #plot and fit exp decay
@@ -143,13 +144,13 @@ def main():
     FCCD_data = (1/b)*np.log(a/(O_Ba133_data-c))
 
     a_up, b_up, c_up = popt_up[0], popt_up[1], popt_up[2]
-    FCCD_data_err_up = (1/b_up)*np.log(a_up/(O_Ba133_data-c_up))-FCCD_data
+    FCCD_data_err_up = (1/b_up)*np.log(a_up/(O_Ba133_data-O_Ba133_data_err-c_up))-FCCD_data
     a_low, b_low, c_low = popt_low[0], popt_low[1], popt_low[2]
-    FCCD_data_err_low = FCCD_data - (1/b_low)*np.log(a_low/(O_Ba133_data-c_low))
+    FCCD_data_err_low = FCCD_data - (1/b_low)*np.log(a_low/(O_Ba133_data+O_Ba133_data_err-c_low))
     print('FCCD of data extrapolated: '+str(FCCD_data) +" + "+ str(FCCD_data_err_up) +" - "+str(FCCD_data_err_low))
     #calculate uncorrelated error on FCCD
-    FCCD_data_uncerr_up = (1/b)*np.log(a/(O_Ba133_data-O_Ba133_data_err))-FCCD_data
-    FCCD_data_uncerr_low = FCCD_data - (1/b)*np.log(a/(O_Ba133_data+O_Ba133_data_err))
+    FCCD_data_uncerr_up = (1/b)*np.log(a/(O_Ba133_data-O_Ba133_data_err-c))-FCCD_data
+    FCCD_data_uncerr_low = FCCD_data - (1/b)*np.log(a/(O_Ba133_data+O_Ba133_data_err-c))
     print('uncorrelated error:  + '+ str(FCCD_data_uncerr_up) +" - "+str(FCCD_data_uncerr_low))
     #calculate correlated error on FCCD
     FCCD_data_corerr_up=np.sqrt(FCCD_data_err_up**2-FCCD_data_uncerr_up**2)
@@ -159,7 +160,7 @@ def main():
 
     props = dict(boxstyle='round', alpha=0.5)
     #info_str = '\n'.join((r'$a=%.3f \pm %.3f$' % (a, np.sqrt(pcov[0][0])), r'$b=%.3f \pm %.3f$' % (b, np.sqrt(pcov[1][1])), r'$c=%.3f \pm %.3f$' % (c, np.sqrt(pcov[2][2])), r'$\chi^2/dof=%.2f/%.0f$'%(chi_sq, dof), r'FCCD_data=$%.3f^{+%.3f}_{-%.3f}$ mm' % (FCCD_data, FCCD_data_err_up, FCCD_data_err_low)))
-    info_str = '\n'.join((r'$a=%.3f \pm %.3f$' % (a, np.sqrt(pcov[0][0])), r'$b=%.3f \pm %.3f$' % (b, np.sqrt(pcov[1][1])), r'$\chi^2/dof=%.2f/%.0f$'%(chi_sq, dof), r'FCCD_data=$%.3f^{+%.2f}_{-%.2f}$ mm' % (FCCD_data, FCCD_data_err_up, FCCD_data_err_low)))
+    info_str = '\n'.join((r'$a=%.3f \pm %.3f$' % (a, np.sqrt(pcov[0][0])), r'$b=%.3f \pm %.3f$' % (b, np.sqrt(pcov[1][1])), r'$\chi^2/dof=%.2f/%.0f$'%(chi_sq, dof), r'FCCD_data=$%.f^{+%.2f}_{-%.2f}$ mm' % (FCCD_data, FCCD_data_err_up, FCCD_data_err_low)))
     plt.text(0.625, 0.275, info_str, transform=ax.transAxes, fontsize=9,verticalalignment='top', bbox=props) #ax.text..ax.tra
 
     #plot data line
@@ -221,7 +222,7 @@ def exponential_decay(x, a, b ,c):
     f = a*np.exp(-b*x) + c
     return f
 
-def uncertainty(C_79, C_81, C_356):
+def uncertainty(O_Ba133, O_Ba133_err):
 
     #values from Bjoern's thesis - Barium source
     #all percentages
@@ -234,7 +235,7 @@ def uncertainty(C_79, C_81, C_356):
     detector_cup_material=0.03
 
     #compute statistical error
-    MC_statistics = O_Am241_err/O_Am241*100
+    MC_statistics = O_Ba133_err/O_Ba133*100
 
     #sum squared of all the contributions
     tot_error=np.sqrt(gamma_line**2+geant4**2+source_thickness**2+source_material**2+endcap_thickness**2+detector_cup_thickness**2+detector_cup_material**2+MC_statistics**2)
