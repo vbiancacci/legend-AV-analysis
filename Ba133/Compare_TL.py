@@ -16,8 +16,8 @@ CodePath=dir=os.path.dirname(os.path.realpath(__file__))
 
 def main():
 
-    detector = "V07647B" 
-    FCCD = 0.75
+    detector = "V07302B" 
+    FCCD = 0.86
 
     #==========DATA==========
     #Parameters
@@ -74,7 +74,7 @@ def main():
             MC_id=detector+"-ba_HS4-top-0r-78z_"+smear+"_notl_FCCD"+str(FCCD)+"mm_DLF"+str(DLF)+"_fracFCCDbore"+str(frac_FCCDbore)
         else:
             MC_id=detector+"-ba_HS4-top-0r-78z_"+smear+"_"+TL_model+"_FCCD"+str(FCCD)+"mm_DLF"+str(DLF)+"_fracFCCDbore"+str(frac_FCCDbore)
-        sim_path="/lfs/l1/legend/users/aalexander/legend-g4simple-simulation/legend/simulations/"+detector+"/ba_HS4/top_0r_78z/hdf5/AV_processed/"+MC_id+".hdf5"
+        sim_path="/lfs/l1/legend/users/aalexander/legend-g4simple-simulation/simulations/"+detector+"/ba_HS4/top_0r_78z/hdf5/AV_processed/"+MC_id+".hdf5"
         df =  pd.read_hdf(sim_path, key="procdf")
         energy_MC = df['energy']
 

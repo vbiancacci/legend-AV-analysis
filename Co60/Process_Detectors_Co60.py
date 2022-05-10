@@ -14,12 +14,12 @@ def main():
 
     #Processing instructions
     order_list = [1] #List of orders to process
-    Calibrate_Data = False #Pre-reqs: needs dsp pygama data
-    Gamma_line_count_data = False #Pre-reqs: needs calibration
+    Calibrate_Data = True #Pre-reqs: needs dsp pygama data
+    Gamma_line_count_data = True #Pre-reqs: needs calibration
     Gamma_line_count_MC = False #Pre-reqs: needs AV post processed MC for range of FCCDs
-    Calculate_FCCD = False #Pre-reqs: needs gammaline counts for data and MC
-    Gamma_line_count_MC_bestfitFCCD = True #Pre-reqs: needs AV postprocessed MC for best fit FCCD
-    PlotSpectra = True #Pre-reqs: needs all above stages
+    Calculate_FCCD = True #Pre-reqs: needs gammaline counts for data and MC
+    Gamma_line_count_MC_bestfitFCCD = False #Pre-reqs: needs AV postprocessed MC for best fit FCCD
+    PlotSpectra = False #Pre-reqs: needs all above stages
 
     source = "co_HS5"
     cuts = "False"
