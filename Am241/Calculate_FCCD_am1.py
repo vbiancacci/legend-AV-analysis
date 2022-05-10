@@ -9,7 +9,7 @@ import os
 from scipy import optimize
 from scipy import stats
 
-from GammaLine_Counting_Am241 import chi_sq_calc
+from GammaLine_Counting_Am241_HS1 import chi_sq_calc
 
 #script to determine the FCCD of a detector using the count ratio observable, ignoring TL for now
 
@@ -47,6 +47,15 @@ def main():
     dir=os.path.dirname(os.path.realpath(__file__))
     print("working directory: ", dir)
 
+    calibration="BEGe"
+    a=0
+    a_err=0
+    if calibration=="BEGe":
+        a=57.751173630527326
+        arr=2.892691574705301
+    else: #IC
+        a=58.18886615638756
+        arr=2.1024957776256397
     #initialise directories to save
 #    if not os.path.exists(dir+"/FCCD/"+source+"plots/"):
 #        os.makedirs(dir+"/FCCD/"+source+"/plots/")
@@ -67,10 +76,11 @@ def main():
             C_60 = PeakCounts['C_60']
             C_99_103 = PeakCounts['C_99_103']
             O_Am241 = PeakCounts['O_Am241']
+            O_Am241_err = PeakCounts ['O_Am241_err']
             O_Am241_list.append(O_Am241)
 
             #get errors:
-            O_Am241_err_pct = uncertainty(C_99_103, C_60)
+            O_Am241_err_pct = uncertainty(O_Am241, O_Am241_err)
             O_Am241_err_pct_list.append(O_Am241_err_pct)
 
     #Get count ratio for data
@@ -80,7 +90,7 @@ def main():
             C_60 = PeakCounts['C_60']
             C_99_103 = PeakCounts['C_99_103']
             O_Am241_data = PeakCounts['O_Am241']
-            O_Am241_data_err = StatisticalError(C_60,C_99_103)*O_Am241_data   #statistical error (data)
+            O_Am241_data_err = PeakCounts ['O_Am241_err']
     else:
         cuts_sigma = 4 #default =4, change by hand here if interested
         print("data cuts sigma: ", str(cuts_sigma))
@@ -90,16 +100,14 @@ def main():
                 C_60 = PeakCounts['C_60']
                 C_99_103 = PeakCounts['C_99_103']
                 O_Am241_data = PeakCounts['O_Am241']
-                print(StatisticalError(C_60,C_99_103))
-                O_Am241_data_err = StatisticalError(C_60,C_99_103)*O_Am241_data   #statistical error (data)
+                O_Am241_data_err = PeakCounts ['O_Am241_err']
         else:
             with open(dir+"/PeakCounts/"+detector+"/"+source+"/new/PeakCounts_data_"+detector+"_cuts_"+energy_filter+"_run"+str(run)+"_"+str(sigma_cuts)+"sigma.json") as json_file:
                 PeakCounts = json.load(json_file)
                 C_60 = PeakCounts['C_60']
                 C_99_103 = PeakCounts['C_99_103']
                 O_Am241_data = PeakCounts['O_Am241']
-                O_Am241_data_err = StatisticalError(C_60,C_99_103)*O_Am241_data   #statistical error (data)
-
+                O_Am241_data_err = PeakCounts ['O_Am241_err']
 
     #plot and fit exp decay
     xdata, ydata = np.array(FCCD_list), np.array(O_Am241_list)
@@ -121,7 +129,7 @@ def main():
     plt.errorbar(xdata, ydata, xerr=0, yerr =yerr, label = "simulations", elinewidth = 1, fmt='x', ms = 3.0, mew = 3.0)
     xfit = np.linspace(min(xdata), max(xdata), 1000)
     #yfit = exponential_decay(xfit,*popt)
-    a=60.05239428860399  #58.18886615638756 #59.23103180210723 #57.04617122422738  #59.23103180210723 #57.52344368283454
+    #a=60.05239428860399  #58.18886615638756 #59.23103180210723 #57.04617122422738  #59.23103180210723 #57.52344368283454
     #59.23 is the IC calib, 57.52 is the IC calib without exp correction, 57.04 is the BEGe calib
 
 
@@ -133,7 +141,7 @@ def main():
     y_uplim = ydata+yerr
     p_guess_up = [max(y_uplim), 1]#, min(y_uplim)]
     popt_up, pcov_up = optimize.curve_fit(exponential_decay, xdata, y_uplim, p0=p_guess_up, maxfev = 10**7, method ="trf") #, bounds = bounds)
-    arr= 2.051958705758966 #2.944003054128919 #2.1673296109052482 #2.1571049512349667
+    #arr= 2.051958705758966 #2.944003054128919 #2.1673296109052482 #2.1571049512349667
     #2.16 is the IC calib, 2.15 is the IC calib without exp correction, 2.94 is the BEGe calib
     a_up=a+arr
     yfit_up = exponential_decay(xfit,a_up,b)
@@ -157,13 +165,20 @@ def main():
     b_low = popt_low[1]
     #a_low, b_low = popt_low[0], popt_low[1]
     FCCD_data_err_low = FCCD_data - (1/b_low)*np.log(a_low/(O_Am241_data+O_Am241_data_err))
-    #FCCD_data_err = np.sqrt((1/(a**2*b**4*(c-O_Am241_data)**2))*(a**2*(b_err**2*(c-O_Am241_data)**2)*(np.log(-a/(c-O_Am241_data))**2) + b**2*(c_err**2+O_Am241_err_data**2) + a_err**2*b**2*(c-O_Am241_data)**2)) #wolfram alpha
-
     print('FCCD of data extrapolated: '+str(FCCD_data) +" + "+ str(FCCD_data_err_up) +" - "+str(FCCD_data_err_low))
+    #calculate uncorrelated error on FCCD
+    FCCD_data_uncerr_up = (1/b)*np.log(a/(O_Am241_data-O_Am241_data_err))-FCCD_data
+    FCCD_data_uncerr_low = FCCD_data - (1/b)*np.log(a/(O_Am241_data+O_Am241_data_err))
+    print('uncorrelated error:  + '+ str(FCCD_data_uncerr_up) +" - "+str(FCCD_data_uncerr_low))
+    #calculate correlated error on FCCD
+    FCCD_data_corerr_up=np.sqrt(FCCD_data_err_up**2-FCCD_data_uncerr_up**2)
+    FCCD_data_corerr_low=np.sqrt(FCCD_data_err_low**2-FCCD_data_uncerr_low**2)
+    print('correlated error:  + '+ str(FCCD_data_corerr_up) +" - "+str(FCCD_data_corerr_low))
+
 
 
     props = dict(boxstyle='round', alpha=0.5)
-    info_str = '\n'.join((r'$a=%.3f \pm %.3f$' % (a,arr), r'$b=%.3f \pm %.3f$' % (b, np.sqrt(pcov[1][1])), r'$\chi^2/dof=%.2f/%.0f$'%(chi_sq, dof), r'FCCD_data=$%.3f^{+%.3f}_{-%.3f}$ mm' % (FCCD_data, FCCD_data_err_up, FCCD_data_err_low)))
+    info_str = '\n'.join((r'$a=%.3f \pm %.3f$' % (a,arr), r'$b=%.3f \pm %.3f$' % (b, np.sqrt(pcov[1][1])), r'$\chi^2/dof=%.2f/%.0f$'%(chi_sq, dof), r'FCCD_data=$%.2f^{+%.2f}_{-%.2f}$ mm' % (FCCD_data, FCCD_data_err_up, FCCD_data_err_low)))
     plt.text(0.625, 0.775, info_str, transform=ax.transAxes, fontsize=9,verticalalignment='top', bbox=props) #ax.text..ax.tra
 
     #plot data line
@@ -179,16 +194,16 @@ def main():
 
 #    plt.ylabel(r'$O_{Am241} = C_{59.5}/(C_{99_103} C_{103}$')
     plt.ylabel(r'$O_{am\_HS1}=\frac{C_{60keV}}{C_{99keV}+C_{103keV}}$')
-    plt.xlabel("FCCD (mm)")
+    plt.xlabel("FCCD [mm]")
     plt.xlim(0,FCCD_list[-1])
     plt.ylim(0,70)
-    plt.title(detector)
+    #plt.title(detector)
     plt.legend(loc="upper right", fontsize=8)
 
     if cuts == False:
         plt.savefig(dir+"/FCCD/"+source+"/plots/FCCD_OAm241_"+MC_id+"_"+smear+"_"+TL_model+"_fracFCCDbore"+frac_FCCDbore+"_"+energy_filter+"_run"+str(run)+".png")
     else:
-        plt.savefig(dir+"/FCCD/"+source+"/plots/FCCD_OAm241_"+MC_id+"_"+smear+"_"+TL_model+"_fracFCCDbore"+frac_FCCDbore+"_"+energy_filter+"_run"+str(run)+"_cuts.png")
+        plt.savefig(dir+"/FCCD/"+source+"/test/plots/FCCD_OAm241_"+MC_id+"_"+smear+"_"+TL_model+"_fracFCCDbore"+frac_FCCDbore+"_"+energy_filter+"_run"+str(run)+"_cuts.png")
 
 
     #Save interpolated fccd for data to a json file
@@ -196,6 +211,10 @@ def main():
         "FCCD": FCCD_data,
         "FCCD_err_up": FCCD_data_err_up,
         "FCCD_err_low": FCCD_data_err_low,
+        "FCCD_uncorr_err_up": FCCD_data_uncerr_up,
+        "FCCD_uncorr_err_low": FCCD_data_uncerr_low,
+        "FCCD_corr_err_up": FCCD_data_corerr_up,
+        "FCCD_corr_err_low": FCCD_data_corerr_low,
         "O_Am241_data": O_Am241_data,
         "O_Am241_data_err": O_Am241_data_err,
         "a": a,
@@ -210,7 +229,7 @@ def main():
             with open(dir+"/FCCD/"+source+"/FCCD_data_"+MC_id+"_"+smear+"_"+TL_model+"_fracFCCDbore"+frac_FCCDbore+"_"+energy_filter+"_run"+str(run)+"_cuts.json", "w") as outfile:
                 json.dump(FCCD_data_dict, outfile, indent=4)
         else:
-            with open(dir+"/FCCD/"+source+"/weighted_mean/FCCD_data_"+MC_id+"_"+smear+"_"+TL_model+"_fracFCCDbore"+frac_FCCDbore+"_"+energy_filter+"_run"+str(run)+"_cuts_"+str(cuts_sigma)+"sigma.json", "w") as outfile:
+            with open(dir+"/FCCD/"+source+"/test/FCCD_data_"+MC_id+"_"+smear+"_"+TL_model+"_fracFCCDbore"+frac_FCCDbore+"_"+energy_filter+"_run"+str(run)+"_cuts_"+str(cuts_sigma)+"sigma.json", "w") as outfile:
                 json.dump(FCCD_data_dict, outfile, indent=4)
 
     print("done")
@@ -232,8 +251,7 @@ def uncertainty(C_60, C_99_103):
     detector_cup_material=0.01
 
     #compute statistical error
-    se_rel = StatisticalError(C_60, C_99_103)
-    MC_statistics = se_rel*100
+    MC_statistics = O_Am241_err/O_Am241*100
 
     #sum squared of all the contributions
     tot_error=np.sqrt(gamma_line**2+geant4**2+source_thickness**2+source_material**2+endcap_thickness**2+detector_cup_thickness**2+detector_cup_material**2+MC_statistics**2)
@@ -241,15 +259,6 @@ def uncertainty(C_60, C_99_103):
     return tot_error #NB: tot_error is a percentage error
 
 
-def StatisticalError(C_60, C_99_103):
-#error on a peak is sqrt(N) where N is the # counts of the peak
-
-    #O_Am241 = C_60/C_99_103
-    sigma_60, sigma_99_103 = np.sqrt(C_60), np.sqrt(C_99_103)
-    se = (sigma_60/C_60)**2 + (sigma_99_103/C_99_103)**2 #error propagation
-    se_rel = np.sqrt(se)
-
-    return se_rel
 
 
 if __name__ == "__main__":

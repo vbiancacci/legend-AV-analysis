@@ -62,7 +62,7 @@ def main():
 
     print("df_total_lh5: ", df_total_lh5)
     energy_filter_data = df_total_lh5[energy_filter]
-    '''
+
     energy_load_data=energy_filter_data.to_frame(name='energy_filter')
     energy_load_failed=failed_cuts.to_frame(name='failed_cuts')
 
@@ -70,7 +70,7 @@ def main():
 
     energy_load_data.to_hdf(output_file, key='energy', mode='w')
     energy_load_failed.to_hdf(output_file, key='failed')
-    '''
+
 
     #========Compute calibration coefficients===========
 
@@ -78,23 +78,18 @@ def main():
     #df=pd.read_hdf(CodePath+"/data_calibration/"+detector+"/"+source+"/loaded_energy_"+detector+"_"+energy_filter+"_run"+str(run)+".hdf5", key='energy')
     #energy_filter_data=df['energy_filter']
 
-    glines=[59.5409, 98.97,102.98,123.05]
+    glines=[59.5409, 98.97, 102.98 ,123.05]
     range_keV=[(3., 3.),(1.5,1.5),(1.5,1.5),(1.5,1.5)]
 
-    #guess = 2621./(energy_filter_data.quantile(0.99))
-    #guess=102.9/(np.nanpercentile(energy_filter_data,0.99))
-    #print(np.nanpercentile(energy_filter_data,0.99))
-    #print(energy_filter_data.quantile(0.99))
-    #print(guess)
     if detector=='V02160A' or detector=='V05268A':
         guess= 0.1#0.045#0.1 #V02160A #0.057   0.032 if V07647A  #0.065 7298B
-    elif detector=='V05266A':
+    elif detector=='V05266A'or detector=="B00035A":
         guess=0.08
-    elif detector=='V05267B'or detector=='V04545A':
+    elif detector=='V05267B'or detector=='V04545A'or detector=='V09372A' or detector=="B00035B" :
         guess=0.07
     elif detector=='V08682B':
         guess=0.03
-    elif detector=='V08682A':
+    elif detector=='V08682A'or detector=='V09374A':
         guess=0.053
     #elif detector=='V04549B': #only for am_HS6
     #    guess=0.1
@@ -102,14 +97,27 @@ def main():
         guess=0.045
 
     print("Find peaks and compute calibration curve...",end=' ')
-    pars, cov, results = cal.hpge_E_calibration(energy_filter_data, glines, guess, deg=1, range_keV = range_keV, funcs = [pgp.gauss_step,pgp.gauss_step,pgp.gauss_step,pgp.gauss_step,pgp.gauss_step,pgp.gauss_step,pgp.gauss_step,pgp.gauss_step,pgp.gauss_step],verbose=True)
-    print("cal pars: ", pars)
+    try:
+        pars, cov, results = cal.hpge_E_calibration(energy_filter_data, glines, guess, deg=1, range_keV = range_keV, funcs = [pgp.gauss_step,pgp.gauss_step,pgp.gauss_step,pgp.gauss_step,pgp.gauss_step,pgp.gauss_step,pgp.gauss_step,pgp.gauss_step,pgp.gauss_step],verbose=True)
+        print("cal pars: ", pars)
 
 
-    #======Plot calibrated energy=======
+#======Plot calibrated energy=======
 
-    ecal_pass = pgp.poly(energy_filter_data, pars)
-    ecal_cut  = pgp.poly(failed_cuts,  pars)
+        ecal_pass = pgp.poly(energy_filter_data, pars)
+        ecal_cut  = pgp.poly(failed_cuts,  pars)
+        calib_pars=True
+
+    except IndexError:
+        calibration="/lfs/l1/legend/legend-prodenv/prod-usr/ggmarsh-full_dl-v01/pargen/dsp_ecal/"+detector+".json"
+        print("calibration with Th file:", calibration)
+        with open(calibration) as json_file:
+            calibration_coefs = json.load(json_file)
+        m = calibration_coefs[energy_filter]["Calibration_pars"][0]
+        c = calibration_coefs[energy_filter]["Calibration_pars"][1]
+        ecal_pass = energy_filter_data*m + c
+        ecal_cut = failed_cuts*m+c
+        calib_pars=False
 
     xpb = 0.1
     xlo = 0
@@ -131,63 +139,65 @@ def main():
     plt.yscale('log')
     plt.tight_layout()
     plt.legend(loc='upper right')
-
-    plt.savefig(CodePath+"/data_calibration/"+detector+"/"+source+"/plots/calibrated_energy_"+energy_filter+"_run"+str(run)+".png")
+    if cuts == True:
+        plt.savefig(CodePath+"/data_calibration/"+detector+"/"+source+"/plots/calibrated_energy_"+energy_filter+"_run"+str(run)+".png")
+    else:
+        plt.savefig(CodePath+"/data_calibration/"+detector+"/"+source+"/plots/calibrated_energy_"+energy_filter+"_nocuts_run"+str(run)+".png")
 
     #=========Plot Calibration Curve===========
+    if calib_pars==True:
+        fitted_peaks = results['fitted_keV']
+        pk_pars      = results['pk_pars']
+        mus          = np.array([pars[1] for pars in pk_pars]).astype(float)
+        fwhms        = np.array([pars[2] for pars in pk_pars]).astype(float)*pars[0]*2.*math.sqrt(2.*math.log(2.))
+        pk_covs      = results['pk_covs']
+        dfwhms       = np.array([], dtype=np.float32)
+        for i,covsi in enumerate(pk_covs):
+            covsi    = np.asarray(covsi, dtype=float)
+            parsigsi = np.sqrt(covsi.diagonal())
+            dfwhms   = np.append(dfwhms,parsigsi[2]*pars[0]*2.*math.sqrt(2.*math.log(2.)))
 
-    fitted_peaks = results['fitted_keV']
-    pk_pars      = results['pk_pars']
-    mus          = np.array([pars[1] for pars in pk_pars]).astype(float)
-    fwhms        = np.array([pars[2] for pars in pk_pars]).astype(float)*pars[0]*2.*math.sqrt(2.*math.log(2.))
-    pk_covs      = results['pk_covs']
-    dfwhms       = np.array([], dtype=np.float32)
-    for i,covsi in enumerate(pk_covs):
-        covsi    = np.asarray(covsi, dtype=float)
-        parsigsi = np.sqrt(covsi.diagonal())
-        dfwhms   = np.append(dfwhms,parsigsi[2]*pars[0]*2.*math.sqrt(2.*math.log(2.)))
-
-    fwhm_peaks   = np.array([], dtype=np.float32)
-    for i,peak in enumerate(fitted_peaks):
-        fwhm_peaks = np.append(fwhm_peaks,peak)
-
-
-    param_guess  = [0.2,0.001,0.000001]
-    param_bounds = (0, [10., 1. ,0.1])
-    fit_pars, fit_covs = curve_fit(fwhm_slope, fwhm_peaks, fwhms, sigma=dfwhms, p0=param_guess, bounds=param_bounds)
-    print('FWHM curve fit: ',fit_pars)
-    fit_vals = fwhm_slope(fwhm_peaks,fit_pars[0],fit_pars[1],fit_pars[2])
-    print('FWHM fit values: ',fit_vals)
-    fit_qbb = fwhm_slope(2039.0,fit_pars[0],fit_pars[1],fit_pars[2])
-    print('FWHM energy resolution at Qbb: %1.2f keV' % fit_qbb)
+        fwhm_peaks   = np.array([], dtype=np.float32)
+        for i,peak in enumerate(fitted_peaks):
+            fwhm_peaks = np.append(fwhm_peaks,peak)
 
 
-    fig, (ax1, ax2) = plt.subplots(2, 1, constrained_layout=True, sharex=True)
-    ax1.errorbar(fwhm_peaks,fwhms,yerr=dfwhms, marker='o',lw=0, c='b')
-    ax1.plot(fwhm_peaks,fit_vals,lw=1, c='g')
-    ax1.set_ylabel("FWHM energy resolution (keV)", ha='right', y=1)
+        param_guess  = [0.2,0.001,0.000001]
+        param_bounds = (0, [10., 1. ,0.1])
+        fit_pars, fit_covs = curve_fit(fwhm_slope, fwhm_peaks, fwhms, sigma=dfwhms, p0=param_guess, bounds=param_bounds)
+        print('FWHM curve fit: ',fit_pars)
+        fit_vals = fwhm_slope(fwhm_peaks,fit_pars[0],fit_pars[1],fit_pars[2])
+        print('FWHM fit values: ',fit_vals)
+        fit_qbb = fwhm_slope(2039.0,fit_pars[0],fit_pars[1],fit_pars[2])
+        print('FWHM energy resolution at Qbb: %1.2f keV' % fit_qbb)
 
-    ax2.plot(fitted_peaks,pgp.poly(mus, pars)-fitted_peaks, lw=1, c='b')
-    ax2.set_xlabel("Energy (keV)",    ha='right', x=1)
-    ax2.set_ylabel("Residuals (keV)", ha='right', y=1)
 
-    fig.suptitle(plot_title)
+        fig, (ax1, ax2) = plt.subplots(2, 1, constrained_layout=True, sharex=True)
+        ax1.errorbar(fwhm_peaks,fwhms,yerr=dfwhms, marker='o',lw=0, c='b')
+        ax1.plot(fwhm_peaks,fit_vals,lw=1, c='g')
+        ax1.set_ylabel("FWHM energy resolution (keV)", ha='right', y=1)
 
-    plt.savefig(CodePath+"/data_calibration/"+detector+"/"+source+"/plots/calibration_curve_"+energy_filter+"_run"+str(run)+".png")
+        ax2.plot(fitted_peaks,pgp.poly(mus, pars)-fitted_peaks, lw=1, c='b')
+        ax2.set_xlabel("Energy (keV)",    ha='right', x=1)
+        ax2.set_ylabel("Residuals (keV)", ha='right', y=1)
 
-    #=========Save Calibration Coefficients==========
-    dict = {energy_filter: {"resolution": list(fit_pars), "calibration": list(pars)}}
-    print(dict)
-    if cuts == False:
-        with open(CodePath+"/data_calibration/"+detector+"/"+source+"/calibration_run"+str(run)+".json", "w") as outfile:
-            json.dump(dict, outfile, indent=4)
-    else:
-        with open(CodePath+"/data_calibration/"+detector+"/"+source+"/calibration_run"+str(run)+"_cuts.json", "w") as outfile:
-            json.dump(dict, outfile, indent=4)
+        fig.suptitle(plot_title)
 
-    print("done")
-    print("")
+        plt.savefig(CodePath+"/data_calibration/"+detector+"/"+source+"/plots/calibration_curve_"+energy_filter+"_run"+str(run)+".png")
 
+        #=========Save Calibration Coefficients==========
+        dict = {energy_filter: {"resolution": list(fit_pars), "calibration": list(pars)}}
+        print(dict)
+        if cuts == False:
+            with open(CodePath+"/data_calibration/"+detector+"/"+source+"/calibration_run"+str(run)+".json", "w") as outfile:
+                json.dump(dict, outfile, indent=4)
+        else:
+            with open(CodePath+"/data_calibration/"+detector+"/"+source+"/calibration_run"+str(run)+"_cuts.json", "w") as outfile:
+                json.dump(dict, outfile, indent=4)
+
+        print("done")
+        print("")
+    '''
     #===================Store calibrated data =====================
     energy_calib_data=ecal_pass.to_frame(name='energy_filter')
     energy_calib_failed=ecal_cut.to_frame(name='failed_cuts')
@@ -195,8 +205,19 @@ def main():
     output_file=CodePath+"/data_calibration/"+detector+"/"+source+"/loaded_energy_"+detector+"_"+energy_filter+"_run"+str(run)+".hdf5"
 
     energy_calib_data.to_hdf(output_file, key='energy', mode='w')
-    energy_calib_failed.to_hdf(output_file, key='failed')
-    
+    energy_calib_failed.to_hdf(output_file, key='failed', mode='w')
+
+    '''
+    if cuts== True :
+        output_file=CodePath+"/data_calibration/"+detector+"/"+source+"/loaded_energy_"+detector+"_"+energy_filter+"_run"+str(run)+".hdf5"
+    else:
+        output_file=CodePath+"/data_calibration/"+detector+"/"+source+"/loaded_energy_"+detector+"_"+energy_filter+"_nocuts_run"+str(run)+".hdf5"
+    energy_calib_data=ecal_pass.to_frame(name='energy_filter')
+    energy_calib_data.to_hdf(output_file, key='energy', mode='w')
+    #if cuts==True:
+    #    energy_calib_failed=ecal_cut.to_frame(name='failed_cuts')
+    #    energy_calib_failed.to_hdf(output_file, key='failed', mode='w')
+
 
 
 def read_all_dsp_lh5(t2_folder, cuts, cut_file_path=None, run="all", sigma=4):
@@ -208,6 +229,10 @@ def read_all_dsp_lh5(t2_folder, cuts, cut_file_path=None, run="all", sigma=4):
         files = fnmatch.filter(files, "*run0001*")
     if run == 2:
         files = fnmatch.filter(files, "*run0002*")
+    if run == 3:
+        files = fnmatch.filter(files, "*run0003*")
+    if run == 4:
+        files = fnmatch.filter(files, "*run0004*")
 
     df_list = []
 
@@ -225,7 +250,7 @@ def read_all_dsp_lh5(t2_folder, cuts, cut_file_path=None, run="all", sigma=4):
     else: #apply cuts
         files = [t2_folder+file for file in files] #get list of full paths
         lh5_group = "raw"
-        df_total_cuts, failed_cuts = cut.load_df_with_cuts(files, lh5_group, cut_file = cut_file_path, cut_parameters= {'bl_mean':sigma,'bl_std':sigma, 'pz_std':sigma}, verbose=True)
+        df_total_cuts, failed_cuts = cut.load_df_with_cuts(files, lh5_group, cut_file = cut_file_path, cut_parameters= {'bl_mean':sigma,'bl_std':sigma}, verbose=True)
 
         return df_total_cuts, failed_cuts
 

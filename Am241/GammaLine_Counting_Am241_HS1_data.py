@@ -28,7 +28,6 @@ def main():
     )
     arg, st, sf = par.add_argument, "store_true", "store_false"
     arg("-d", "--data",  nargs=5, help="fit data, usage: python GammaLine_Counting.py --data <detector> <energy_filter> <cuts> <run>")
-    arg("-s", "--sim", nargs=4, help="fit processed simulations, usage: python GammaLine_Counting.py --sim <detector> <sim_path> <MC_id>")
 
     args=vars(par.parse_args())
 
@@ -131,7 +130,10 @@ def main():
 
         #Counting - integrate gaussian signal part
 
-        C_99_103, C_99_103_err = double_gauss_count(a_99, mu_99,sigma_99, a_103, mu_103, sigma_103, binwidth)
+        C_99, C_99_err = gauss_count(a_99, mu_99, sigma_99, a_99_err, binwidth)
+        C_103, C_103_err = gauss_count(a_103, mu_103, sigma_103, a_103_err, binwidth)
+        C_99_103=C_99+C_103
+        C_99_103_err=np.sqrt(C_99_err**2+C_103_err**2)
         print("peak count 99-103 = ", str(C_99_103)," +/- ", str(C_99_103_err))
 
         #plot with fit
@@ -188,10 +190,8 @@ def main():
 
 
     #___________Fit single peaks_________________:
-    peak_counts = []
-    peak_counts_err = []
-    peak_ranges =[[56,62]]# , [122, 124], [124, 126], [207,209], [334,336], [661,663]] #Rough by eye
-    peaks = [60] # 123, 125, 208, 335, 662] #
+    peak_ranges =[[56,62]]
+    peaks = [60]
 
     for index, i in enumerate(peak_ranges):
 
@@ -205,14 +205,8 @@ def main():
 
         #fit function initial guess
         mu_59_guess, sigma_59_guess, a_59_guess = 59.5, 0.3, max(hist_peak)
-        #par3_guess, par4_guess, par5_guess, bkg_guess =3.41740e+04/2.21898e+05*max(hist_peak),  3.74798e+00/2.21898e+05*max(hist_peak),2.95373e-01/2.21898e+05*max(hist_peak), 8.20347e+02 /2.21898e+05*max(hist_peak) #  1000., 1., 1., 100.
-        #bkg_guess, s_guess = min(hist_peak), min(hist_peak)
-        #mu_57_guess, sigma_57_guess, a_57_guess = 57.8, 0.5, max(hist_peak)*0.8    #1.2, *0.8
-        #mu_53_guess, sigma_53_guess, a_53_guess = 53, 0.5, max(hist_peak)*0.5      #1.2, *0.8
         s_guess, tail_guess, tau_guess, bkg_guess = 800, 7000, 1., 1.5#0., 0.5, 0.5, min(hist_peak)
-        #gauss_step_guess = [mu_59_guess, sigma_59_guess, s_guess, tail_guess, tau_guess, bkg_guess, a_59_guess]
         gauss_step_guess = [a_59_guess, mu_59_guess, sigma_59_guess, tail_guess, tau_guess, bkg_guess,  s_guess]
-        #gauss_step_guess = [mu_59_guess, sigma_59_guess, s_guess, tail_guess, tau_guess, bkg_guess, a_59_guess] #par3_guess, par4_guess, par5_guess, bkg_guess]
         bounds = ([0, 0, 0, 0, 0, 0, 0], [np.inf, np.inf, np.inf, np.inf,  np.inf,  np.inf,  np.inf])
 
         #fit - gauss step
@@ -220,21 +214,16 @@ def main():
             coeff, cov_matrix = peak_fitting.fit_hist(peak_fitting.gauss_cdf, hist_peak, bins_peak, var=None, guess=gauss_step_guess, poissonLL=False, integral=None, method=None, bounds=bounds)
             mu_59, sigma_59, a_59 = coeff[1], coeff[2], coeff[0]
             print(sigma_59, a_59)
-            #bkg, s = coeff[3], coeff [4]
-            #par3, par4, par5, bkg = coeff[3], coeff[4], coeff[5], coeff[6]
             s, tail, tau, bkg = coeff[6], coeff[3], coeff[4], coeff[5]
             mu_59_err, sigma_59_err, a_59_err = np.sqrt(cov_matrix[1][1]), np.sqrt(cov_matrix[2][2]), np.sqrt(cov_matrix[0][0])
             s_err, tail_err, tau_err, bkg_err = np.sqrt(cov_matrix[6][6]), np.sqrt(cov_matrix[3][3]), np.sqrt(cov_matrix[4][4]), np.sqrt(cov_matrix[5][5])
-            #par3_err, par4_err, par5_err, bkg_err = np.sqrt(cov_matrix[3][3]), np.sqrt(cov_matrix[4][4]), np.sqrt(cov_matrix[5][5]), np.sqrt(cov_matrix[6][6])
             #compute chi sq of fit
             chi_sq, p_value, residuals, dof = chi_sq_calc(bins_centres_peak, hist_peak, np.sqrt(hist_peak), peak_fitting.gauss_cdf, coeff)
             print("r chi sq: ", chi_sq/dof)
 
             #Counting - integrate gaussian signal part +/- 3 sigma
-            C, C_err = gauss_count(a_59, mu_59 ,sigma_59, binwidth)
-            print("peak counts = ", str(C)," +/- ", str(C_err))
-            peak_counts.append(C)
-            peak_counts_err.append(C_err)
+            C_60, C_60_err = gauss_count(a_59, mu_59 ,sigma_59, a_59_err, binwidth)
+            print("peak counts = ", str(C_60)," +/- ", str(C_60_err))
 
             #plot
             xfit = np.linspace(xmin, xmax, 1000)
@@ -267,10 +256,8 @@ def main():
             print("Error - curve_fit failed")
 
             #counting - nan values
-            C, C_err = np.nan, np.nan
-            print("peak counts = ", str(C)," +/- ", str(C_err))
-            peak_counts.append(C)
-            peak_counts_err.append(C_err)
+            C_60, C_60_err = np.nan, np.nan
+            print("peak counts = ", str(C_60)," +/- ", str(C_60_err))
 
             #plot without fit
             fig, ax = plt.subplots()
@@ -295,7 +282,6 @@ def main():
 
     #Comput count ratio O_Am241
     print("")
-    C_60, C_60_err = peak_counts[0], peak_counts_err[0]
     if (C_60 == np.nan) or (C_99_103 == np.nan):
         O_Am241, O_Am241_err = np.nan, np.nan
     else:
@@ -306,18 +292,10 @@ def main():
 
     #Save count values to json file
     PeakCounts = {
-        "C_60" : peak_counts[0],
-        "C_60_err" : peak_counts_err[0],
+        "C_60" : C_60,
+        "C_60_err" : C_60_err,
         "C_99_103" : C_99_103,
         "C_99_103_err" : C_99_103_err,
-#        "C_103" : C_103,
-#        "C_103_err" : C_103_err,
-#        "C_208" : peak_counts[3],
-#        "C_208_err" : peak_counts_err[3],
-#        "C_335" : peak_counts[4],
-#        "C_335_err" : peak_counts_err[4],
-#        "C_662" : peak_counts[5],
-#        "C_662_err" : peak_counts_err[5],
         "O_Am241" : O_Am241,
         "O_Am241_err" : O_Am241_err,
     }
@@ -366,36 +344,17 @@ def chi_sq_calc(xdata, ydata, yerr, fit_func, coeff):
 
     return chi_sq, p_value, residuals, dof
 
-def gauss_count(a,mu,sigma, bin_width):
+
+def gauss_count(a,mu,sigma, err_A, bin_width):
     "count/integrate gaussian peak"
 
-    #height = a/sigma/np.sqrt(2*np.pi)
-    #integral = a/bin_width
-    #integral_err = a_err/bin_width
-
-    #_____3sigma_____
-    #integral_60_3sigma_list = quad(peak_fitting.gauss,mu-3*sigma, mu+3*sigma, args=(mu,sigma,a))
-    integral_list = quad(peak_fitting.gauss,0,120, args=(mu,sigma,a))
+    integral_list = quad(peak_fitting.gauss, 0,120, args=(mu,sigma,a))
     integral = integral_list[0]/bin_width
-    integral_err = integral_list[1]/bin_width
+    integral_err = err_A/bin_width
 
     return integral, integral_err
 
-def double_gauss_count(a_99,mu_99,sigma_99, a_103, mu_103, sigma_103, bin_width):
-    "count/integrate double gaussian peak"
 
-    integral_list = quad(double_gauss, 0, 120, args=(a_99,mu_99,sigma_99, a_103, mu_103, sigma_103))
-    integral = integral_list[0]/bin_width
-    integral_err = integral_list[1]/bin_width
-
-    return integral, integral_err
-
-def double_gauss(x, a_99,mu_99,sigma_99, a_103, mu_103, sigma_103):
-    peak_99 = peak_fitting.gauss(x,mu_99, sigma_99, a_99)
-    peak_103 = peak_fitting.gauss(x,mu_103, sigma_103, a_103)
-    double_peak = peak_99 + peak_103
-
-    return double_peak
 
 
 def Am_double(x,a1,mu1,sigma1,a2,mu2,sigma2,a3,mu3,sigma3,b,s,

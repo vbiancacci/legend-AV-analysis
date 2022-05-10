@@ -1,0 +1,11 @@
+{
+    "FCCD": NaN,
+    "FCCD_err_up": NaN,
+    "FCCD_err_low": NaN,
+    "O_Am241_data": NaN,
+    "O_Am241_data_err": NaN,
+    "a": 787.138772378068,
+    "a_err": 22.78652770248806,
+    "b": 0.9877384486453286,
+    "b_err": 0.022398206330052878
+}
