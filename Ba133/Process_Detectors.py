@@ -1,3 +1,4 @@
+from pickle import TRUE
 import sys
 import os
 import json
@@ -13,10 +14,10 @@ CodePath=os.path.dirname(os.path.realpath(__file__))
 def main():
 
     #Processing instructions
-    order_list = [7] #List of orders to process
+    order_list = [0] #List of orders to process
     Calibrate_Data = False  #Pre-reqs: needs dsp pygama data
     Gamma_line_count_data = False #Pre-reqs: needs calibration
-    Gamma_line_count_MC = False #Pre-reqs: needs AV post processed MC for range of FCCDs
+    Gamma_line_count_MC = True #Pre-reqs: needs AV post processed MC for range of FCCDs
     Calculate_FCCD =  True #Pre-reqs: needs gammaline counts for data and MC
     Gamma_line_count_MC_bestfitFCCD = False #Pre-reqs: needs AV postprocessed MC for best fit FCCD
     PlotSpectra = False #Pre-reqs: needs all above stages
@@ -33,17 +34,19 @@ def main():
         detectors = detector_list_data["order_"+str(order)]
         for detector in detectors:
 
-            if detector != "V07302B":
-                continue
+            # if detector != "B00000B":
+            #     continue
 
             # get correct run
             if order == 7 or order==8:
                 run=2
+            elif order == 0: #abi testing 78 mm for BEGes
+                run=2 #78mm
+                if detector == "B00032B": #run 1 = 78mm
+                    run = 1
             else:
                 run=1
-            # if detector=="B00035A":
-            #     run=3
-
+            
             # get correct source z position for sims
             if order == 8:
                 source_z = "88z" #top-0r-78z
@@ -53,6 +56,9 @@ def main():
                 source_z = "78z"
                 # source_z="81z" #BEGe
 
+            if order == 0:
+                energy_filter = "trapEmax"
+
             
             #========Calibration - DATA==========
             if Calibrate_Data == True:
@@ -60,10 +66,13 @@ def main():
                 if order == 2:
                     detector_oldname = "I"+detector[1:]
                     data_path = "/lfs/l1/legend/legend-prodenv/prod-usr/ggmarsh-test-v03/gen/"+detector_oldname+"/tier2/ba_HS4_top_dlt/"
+                elif order == 0:
+                    data_path="/lfs/l1/legend/legend-prodenv/prod-usr/ggmarsh-test-v02/gen/"+detector+"/tier2/ba_HS4_top_dlt/" #gerda BEGe batch 1
+                elif order == 1:
+                    data_path = "/lfs/l1/legend/legend-prodenv/prod-usr/ggmarsh-full_dl-v01/gen/"+detector+"/tier2/ba_HS4_top_dlt/" #gerda BEGe batch 2
                 else:
                     data_path="/lfs/l1/legend/legend-prodenv/prod-usr/ggmarsh-test-v03/gen/"+detector+"/tier2/ba_HS4_top_dlt/"
-                    #data_path = "/lfs/l1/legend/legend-prodenv/prod-usr/ggmarsh-full_dl-v01/gen/"+detector+"/tier2/ba_HS4_top_dlt/" #gerda BEGe
-
+                    
                 os.system("python "+CodePath+"/Calibration_Ba133.py "+detector+" "+data_path+" "+energy_filter+" "+cuts+" "+str(run))
 
             #========GAMMA LINE COUNTING - DATA==========
@@ -72,11 +81,12 @@ def main():
                     detector_oldname = "I"+detector[1:]
                     data_path = "/lfs/l1/legend/legend-prodenv/prod-usr/ggmarsh-test-v03/gen/"+detector_oldname+"/tier2/ba_HS4_top_dlt/"
                     # calibration="/lfs/l1/legend/legend-prodenv/prod-usr/ggmarsh-test-v03/genpar/dsp_ecal/"+detector_oldname+".json"
-
+                elif order == 0:
+                    data_path="/lfs/l1/legend/legend-prodenv/prod-usr/ggmarsh-test-v02/gen/"+detector+"/tier2/ba_HS4_top_dlt/" #gerda BEGe batch 1
+                elif order == 1:
+                    data_path = "/lfs/l1/legend/legend-prodenv/prod-usr/ggmarsh-full_dl-v01/gen/"+detector+"/tier2/ba_HS4_top_dlt/" #gerda BEGe batch 2
                 else:
                     data_path="/lfs/l1/legend/legend-prodenv/prod-usr/ggmarsh-test-v03/gen/"+detector+"/tier2/ba_HS4_top_dlt/" #HADES ICPCs
-                    #data_path="/lfs/l1/legend/legend-prodenv/prod-usr/ggmarsh-test-v02/gen/"+detector+"/tier2/ba_HS4_top_dlt/" #BEGe batch 1
-                    #data_path = "/lfs/l1/legend/legend-prodenv/prod-usr/ggmarsh-full_dl-v01/gen/"+detector+"/tier2/ba_HS4_top_dlt/" #BEGe batch 2
                     #calibration="/lfs/l1/legend/legend-prodenv/prod-usr/ggmarsh-test-v03/genpar/dsp_ecal/"+detector+".json" #can use own calibration
 
                 if cuts == "False":
@@ -96,7 +106,8 @@ def main():
                 #normal paramaters:
                 frac_FCCDbore=0.5
                 TL_model="notl"
-                FCCD_list=[0.0,0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 3.0] 
+                # FCCD_list=[0.0,0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 3.0] #ICPCs
+                FCCD_list=[0.0,0.25, 0.5, 0.75, 1.0, 1.25, 1.5,1.75,2.0, 3.0] #BEGes
 
                 ## ExLinT parameters
                 # frac_FCCDbore=1.0
@@ -161,7 +172,10 @@ def main():
                     detector_oldname = "I"+detector[1:]
                     data_path = "/lfs/l1/legend/legend-prodenv/prod-usr/ggmarsh-test-v03/gen/"+detector_oldname+"/tier2/ba_HS4_top_dlt/"
                     # calibration="/lfs/l1/legend/legend-prodenv/prod-usr/ggmarsh-test-v03/genpar/dsp_ecal/"+detector_oldname+".json"
-
+                elif order == 0:
+                    data_path="/lfs/l1/legend/legend-prodenv/prod-usr/ggmarsh-test-v02/gen/"+detector+"/tier2/ba_HS4_top_dlt/" #gerda BEGe batch 1
+                elif order == 1:
+                    data_path = "/lfs/l1/legend/legend-prodenv/prod-usr/ggmarsh-full_dl-v01/gen/"+detector+"/tier2/ba_HS4_top_dlt/" #gerda BEGe batch 2
                 else:
                     data_path="/lfs/l1/legend/legend-prodenv/prod-usr/ggmarsh-test-v03/gen/"+detector+"/tier2/ba_HS4_top_dlt/"
                     # calibration="/lfs/l1/legend/legend-prodenv/prod-usr/ggmarsh-test-v03/genpar/dsp_ecal/"+detector+".json"

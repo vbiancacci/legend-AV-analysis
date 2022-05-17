@@ -7,6 +7,7 @@ from datetime import datetime
 import json
 import argparse
 import os
+from pyrsistent import b
 from scipy import optimize
 from scipy import stats
 
@@ -53,7 +54,8 @@ def main():
     print("start...")
 
     #Get O_ba133 for each FCCD
-    FCCD_list = [0.0, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 3.0] #mm
+    # FCCD_list = [0.0, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 3.0] #mm ICPCs
+    FCCD_list = [0.0, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0, 3.0] #mm BEGes
     O_Ba133_list = []
     O_Ba133_err_pct_list = [] #stat and syst error on MC
     O_Ba133_err_pct_syst_list = [] #syst error on MC only
@@ -117,15 +119,21 @@ def main():
     #plot and fit exp decay
     print("fitting exp decay")
     xdata, ydata = np.array(FCCD_list), np.array(O_Ba133_list)
-    yerr = O_Ba133_err_pct_list*ydata/100 #total error
+    yerr = O_Ba133_err_pct_list*ydata/100 #absolute total error
+    print("yerr:", yerr)
     aguess = max(ydata)
     bguess = 1
     cguess = min(ydata)
     p_guess = [aguess,bguess,cguess]
-    popt, pcov = optimize.curve_fit(exponential_decay, xdata, ydata, p0=p_guess, sigma = yerr, maxfev = 10**7, method ="trf") #, bounds = bounds)
+    popt, pcov = optimize.curve_fit(exponential_decay, xdata, ydata, p0=p_guess, sigma = yerr,absolute_sigma=False, maxfev = 10**7, method ="trf") #, bounds = bounds)
     a,b,c = popt[0],popt[1],popt[2]
     a_err, b_err, c_err = np.sqrt(pcov[0][0]), np.sqrt(pcov[1][1]), np.sqrt(pcov[2][2])
     chi_sq, p_value, residuals, dof = chi_sq_calc(xdata, ydata, yerr, exponential_decay, popt)
+    print("fit errors:")
+    print("a: "+str(a)+", b: "+str(b)+", c: "+str(c))
+    print("a_err: "+str(a_err)+", b_err: "+str(b_err)+", c_err: "+str(c_err))
+    print("pcov:")
+    print(pcov)
 
     fig, ax = plt.subplots()
     plt.errorbar(xdata, ydata, xerr=0, yerr =yerr, label = "MC", color= plot_colors["MC"], elinewidth = 1, fmt='x', ms = 3.0, mew = 3.0)
@@ -292,7 +300,17 @@ def main():
     plt.title(detector)
     plt.legend(loc="upper right", fontsize=8)
 
-    plt.show()
+    # plt.show()
+
+    #try propagation of errors
+    FCCD_err_prop = np.sqrt((1/b**2)*((a_err/a)**2 +  (1/b**2)*((np.log(a/(O_Ba133_data-c))**2)*b_err**2 + (1/(O_Ba133_data-c)**2))*(c_err**2 + O_Ba133_data_err**2)))
+    print("FCCD err from propagation of fit errors with data error")
+    print(FCCD_err_prop)
+
+
+    FCCD_err_prop_cov = propagation_of_errors(a,b,c,O_Ba133_data,pcov,O_Ba133_data_err)
+    print("FCCD err from propagation of fit errors with data error AND COVARIANCE")
+    print(FCCD_err_prop_cov)
 
     if cuts == False:
         plt.savefig(dir+"/FCCD/plots/FCCD_OBa133_"+MC_id+"_"+smear+"_"+TL_model+"_fracFCCDbore"+frac_FCCDbore+"_"+energy_filter+"_run"+str(run)+".png")
@@ -360,6 +378,21 @@ def invert_exponential(x,a,b,c):
     # x = the O_ba133 value
     return (1/b)*np.log(a/(x-c))
 
+def propagation_of_errors(a,b,c,d,pcov,d_err):
+
+    dyda = 1/a*b
+    dydb = (-1/b**2)*(np.log(a/(d-c)))
+    dydc = (1/b)*(1/(d-c))
+    dydd = (1/b)*(1/(d-c))
+
+    err_sq = (dydd*d_err)**2 
+    err_sq =+ (dyda*dyda)*pcov[0,0] + (dyda*dydb)*pcov[0,1] + (dyda*dydc)*pcov[0,2] 
+    err_sq =+ (dydb*dyda)*pcov[1,0] + (dydb*dydb)*pcov[1,1] + (dydb*dydc)*pcov[1,2]
+    err_sq =+ (dydc*dyda)*pcov[2,0] + (dydc*dydb)*pcov[2,1] + (dydc*dydc)*pcov[2,2]
+
+    err = np.sqrt(err_sq)
+
+    return err
 
 if __name__ == "__main__":
     main()
