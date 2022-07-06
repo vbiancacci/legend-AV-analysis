@@ -94,8 +94,12 @@ def main():
     # pars, cov, results = cal.hpge_E_calibration(energy_filter_data,glines,guess,deg=1,range_keV = range_keV,funcs = [pgp.gauss_step,pgp.gauss_step,pgp.gauss_step],verbose=True)
     # print("cal pars: ", pars)
 
-    calibration_Th = "/lfs/l1/legend/legend-prodenv/prod-usr/ggmarsh-full_dl-v01/pargen/dsp_ecal/"+detector+".json"
-    with open(calibration_Th) as json_file:
+    
+
+    #calibration_Th = "/lfs/l1/legend/legend-prodenv/prod-usr/ggmarsh-full_dl-v01/pargen/dsp_ecal/"+detector+".json"
+    calibration_Co = "/lfs/l1/legend/legend-prodenv/prod-usr/ggmarsh-full_dl-v01/pargen/hit_pproc/ecal/all_sources/ecal-"+detector+"-co_HS5_top_dlt.json"
+    
+    with open(calibration_Co) as json_file:
         calibration_coefs = json.load(json_file)
     # print(calibration_coefs)
     m_Th = calibration_coefs[energy_filter]["Calibration_pars"][0]

@@ -14,8 +14,8 @@ def main():
 
     #Processing instructions
     order_list = [1] #List of orders to process
-    Calibrate_Data = False #Pre-reqs: needs dsp pygama data
-    Gamma_line_count_data = False #Pre-reqs: needs calibration
+    Calibrate_Data = True #Pre-reqs: needs dsp pygama data
+    Gamma_line_count_data = True #Pre-reqs: needs calibration
     Gamma_line_count_MC = False #Pre-reqs: needs AV post processed MC for range of FCCDs
     Calculate_FCCD = True #Pre-reqs: needs gammaline counts for data and MC
     Gamma_line_count_MC_bestfitFCCD = False #Pre-reqs: needs AV postprocessed MC for best fit FCCD
@@ -24,8 +24,6 @@ def main():
     source = "co_HS5"
     cuts = "False"
 
-    if order == 1:
-        order = "BEGe"
 
     #Get detector list
     detector_list = CodePath+"/../detector_list.json" 
@@ -33,11 +31,16 @@ def main():
         detector_list_data = json.load(json_file)
     
     for order in order_list:
+
         detectors = detector_list_data["order_"+str(order)]
+
+        if order == 1:
+            order = "BEGe"
+
         for detector in detectors:
 
-            # if detector == "B00035B":
-            #     continue
+            if detector != "B00002C":
+                continue
 
             #========Calibration - DATA==========
             if Calibrate_Data == True:
@@ -57,6 +60,9 @@ def main():
                     run=2
                 else:
                     run=1
+
+                if detector == "B00076C":
+                    run=3 #HV = 3500 V
 
                 os.system("python "+CodePath+"/Calibration_Co60.py "+detector+" "+data_path+" "+energy_filter+" "+cuts+" "+str(run))
 
@@ -79,7 +85,10 @@ def main():
                 else:
                     run=1
 
-                if cuts == "True":
+                if detector == "B00076C":
+                    run=3 #HV = 3500 V
+
+                if cuts == "False":
                     calibration = CodePath+"/data_calibration/"+detector+"/calibration_run"+str(run)+".json"
                 else:
                     calibration = CodePath+"/data_calibration/"+detector+"/calibration_run"+str(run)+"_cuts.json"
@@ -133,6 +142,9 @@ def main():
                     run=2
                 else:
                     run=1
+                
+                if detector == "B00076C":
+                    run=3 #HV = 3500 V
 
                 os.system("python "+CodePath+"/Calculate_FCCD.py "+detector+" "+MC_id+" "+smear+" "+TL_model+" "+str(frac_FCCDbore)+" "+energy_filter+" "+cuts+" "+str(run))
 
@@ -159,6 +171,8 @@ def main():
                     run=2
                 else:
                     run=1
+                if detector == "B00076C":
+                    run=3 #HV = 3500 V
                 
                 if cuts == "False":
                     with open(CodePath+"/FCCD/FCCD_data_"+detector+"-"+source+"-top-0r-"+source_z+"_"+smear+"_"+TL_model+"_fracFCCDbore"+str(frac_FCCDbore)+"_"+energy_filter+"_run"+str(run)+".json") as json_file:
@@ -192,6 +206,8 @@ def main():
                     run=2
                 else:
                     run=1
+                if detector == "B00076C":
+                    run=3 #HV = 3500 V
 
                 if cuts == "False":
                     calibration = CodePath+"/data_calibration/"+detector+"/calibration_run"+str(run)+".json"
