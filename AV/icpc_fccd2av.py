@@ -7,9 +7,9 @@ import numpy as np
 
 def main():
     FCCD_AV={}
-    order_list = [2,4,5,7,8]
-    dir = "/lfs/l1/legend/users/bianca/IC_geometry/analysis/post-proc-python/legend-AV-analysis/"
-    detector_list = dir +"detector_list_all.json"
+    order_list = [2,4,5,7,8,9]
+    dir = "/lfs/l1/legend/users/bianca/IC_geometry/analysis/post-proc-python/second_fork/legend-AV-analysis/"
+    detector_list = dir +"detector_list.json"
     with open(detector_list) as json_file:
         detector_list_data = json.load(json_file)
 
@@ -82,9 +82,10 @@ def main():
 
             h_cr = geom["crack"]["height_in_mm"]
             r_cr = geom["crack"]["radius_in_mm"]
+            #print("\hline")
+            #print(detName,"& $", H_c, "$ & $", R_c, "$ & $", h_w, "$ & $", r_w, "$ & $ ", h_g, "$ & $", r_g_o, "$ & $", r_g_i ,"$ & $",h_o,"$ & $", r_o,"$ & $", h_u, "$ & $",r_u, "$ & $",h_i,"$ & $", r_i, "$ & $", h_topg,"$ & $", r_topg, "$ & $",h_b, "$ & $",r_b, "$ & $",h_t,"$ & $", h_cr,"$ & $", r_cr ,"\\" )
 
-
-            #create a detector object
+                        #create a detector object
             detector = Detector( detName,
                                 FCCD_am, errPos_am, errNeg_am,
                                 FCCD_ba, errPos_ba, errNeg_ba,
@@ -102,8 +103,8 @@ def main():
                 FCCD, FCCD_errPos, FCCD_errNeg = detector.FCCD_collection()
             else:
                 FCCD, FCCD_errPos, FCCD_errNeg = FCCD_ba, errPos_ba, errNeg_ba
-
-            FCCD_bore = FCCD / 2.
+            #FCCD, FCCD_errPos, FCCD_errNeg =FCCD_ba, errPos_ba, errNeg_ba
+            FCCD_bore = FCCD / 2.   #change with correct fraction from bore analysis
             FCCD_bore_errPos = FCCD_errPos / 2.
             FCCD_bore_errNeg = FCCD_errNeg / 2.
 
@@ -118,6 +119,7 @@ def main():
             ratio_errPos = detector.ratio(FCCD - FCCD_errNeg, FCCD_bore - FCCD_bore_errNeg) - ratio
 
 
+            print(detName," & $", "{:.2f}".format(FCCD) ,"^{+" , "{:.2f}".format(FCCD_errPos), "}_{-", "{:.2f}".format(FCCD_errNeg), "} $ & $",  round(av) ,"^{+" , round(av_errPos), "}_{-", round(av_errNeg), "} $ & $", "{:.3f}".format(av/vol) ,"^{+" , "{:.3f}".format(ratio_errPos), "}_{-", "{:.3f}".format(ratio_errNeg), "} $", )
             #store in json file
             FCCD_AV[detName] =  {
                     "FCCD" : {
@@ -138,8 +140,8 @@ def main():
             }
 
 
-    with open(dir+"AV/FCCD_ActiveVolume.json", "w") as outfile:
-        json.dump(FCCD_AV, outfile, indent=4)
+    #with open(dir+"AV/FCCD_ActiveVolume.json", "w") as outfile:
+    #    json.dump(FCCD_AV, outfile, indent=4)
 
 
 
