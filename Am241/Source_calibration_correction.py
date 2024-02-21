@@ -68,6 +68,7 @@ def main():
     ratio_new_err_list=[]
 
     detectors_list = ["V07647B", "V07302A", "V07647A", "V07298B", "V07302B", "V04549B"]
+    #detectors_list = ["B00032B", "B00091B"] #["B00000B",
 
     ParametersCal = "par_calibration.json"
 
@@ -127,7 +128,7 @@ def main():
     median_sigma=stat.median(sigma_list)
     print(median_sigma, sigma)
     ax2.axvline(median_sigma, color='red', linestyle='dashed', linewidth=1)
-    plt.savefig('hist.png')
+    #plt.savefig('hist.png')
 
 
 if __name__ == "__main__":

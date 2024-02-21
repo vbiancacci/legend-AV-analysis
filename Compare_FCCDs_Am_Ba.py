@@ -34,7 +34,7 @@ def main():
 
     fig, ax = plt.subplots(figsize=(12,8))
     colors_orders = {2:'darkviolet', 4:'deepskyblue', 5:'orangered', 7:'green', 8:'gold', 9:'magenta'}
-    markers_sources = {"ba_HS4": "o", "am_HS1":"s", "am_HS6":"^"}
+    markers_sources = { "ICPC correction":"s","BEGe correction":"p", "am_HS6":"^"} #"ba_HS4": "o",
 
     detectors_all = []
     orders_all = []
@@ -56,6 +56,10 @@ def main():
         FCCDs_am1 = []
         FCCD_err_ups_am1 = []
         FCCD_err_lows_am1 = []
+
+        FCCDs_am1_2 = []
+        FCCD_err_ups_am1_2 = []
+        FCCD_err_lows_am1_2 = []
 
         FCCDs_am6 = []
         FCCD_err_ups_am6 = []
@@ -83,7 +87,7 @@ def main():
             else:
                 source_z = "78z"
             Ba133_FCCD_file = CodePath+"/Ba133/FCCD/FCCD_data_"+detector+"-ba_HS4-top-0r-"+source_z+"_"+smear+"_"+TL_model+"_fracFCCDbore"+str(frac_FCCDbore)+"_"+energy_filter+"_run"+str(run)+"_cuts.json"
-        
+
             try:
                 with open(Ba133_FCCD_file) as json_file_ba:
                     FCCD_data_ba = json.load(json_file_ba)
@@ -121,11 +125,21 @@ def main():
             except:
                 print("no Am241_HS1 analysis for ", detector)
 
+            am1_FCCD_file_2 = CodePath+"/Am241/FCCD/am_HS1/BEGe_correction/FCCD_data_"+detector+"-am_HS1-"+position+"_"+smear+"_"+TL_model+"_fracFCCDbore"+str(frac_FCCDbore)+"_"+energy_filter+"_run"+str(run)+"_cuts.json"
+            try:
+                with open(am1_FCCD_file_2) as json_file_am1_2:
+                    FCCD_data_am1_2 = json.load(json_file_am1_2)
+                FCCD_am1_2, FCCD_err_up_am1_2, FCCD_err_low_am1_2 = FCCD_data_am1_2["FCCD"], FCCD_data_am1_2["FCCD_err_up"], FCCD_data_am1_2["FCCD_err_low"]
+                FCCDs_am1_2.append(FCCD_am1_2)
+                FCCD_err_ups_am1_2.append(FCCD_err_up_am1_2)
+                FCCD_err_lows_am1_2.append(FCCD_err_low_am1_2)
+            except:
+                print("no Am241_HS1 analysis for ", detector)
 
             #================Am241 HS6==============
             run = 1
             am6_FCCD_file = CodePath+"/Am241/FCCD/am_HS6/FCCD_data_"+detector+"-am_HS6-top-0r-198z_"+smear+"_"+TL_model+"_fracFCCDbore"+str(frac_FCCDbore)+"_"+energy_filter+"_run"+str(run)+"_cuts.json"
-    
+
             try:
                 with open(am6_FCCD_file) as json_file_am6:
                     FCCD_data_am6 = json.load(json_file_am6)
@@ -138,10 +152,11 @@ def main():
                 print("no Am241_HS6 analysis for ", detector)
 
         cc = colors_orders[order]
-        ax.errorbar(detectors_ba,FCCDs_ba, yerr = [FCCD_err_lows_ba, FCCD_err_ups_ba], marker = markers_sources["ba_HS4"], color=cc, linestyle = '-')
-        ax.errorbar(detectors_am1,FCCDs_am1, yerr = [FCCD_err_lows_am1, FCCD_err_ups_am1], marker = markers_sources["am_HS1"], color=lighten_color(cc,1.2) ,linestyle = '-')
+        #ax.errorbar(detectors_ba,FCCDs_ba, yerr = [FCCD_err_lows_ba, FCCD_err_ups_ba], marker = markers_sources["ba_HS4"], color=cc, linestyle = '-')
+        ax.errorbar(detectors_am1,FCCDs_am1_2, yerr = [FCCD_err_lows_am1_2, FCCD_err_ups_am1_2], marker = markers_sources["ICPC correction"], color=lighten_color(cc,0.8) ,linestyle = '-')
+        ax.errorbar(detectors_am1,FCCDs_am1, yerr = [FCCD_err_lows_am1, FCCD_err_ups_am1], marker = markers_sources["BEGe correction"], color=lighten_color(cc,1.2) ,linestyle = '-')
         if order==7:
-            ax.errorbar(detectors_am6,FCCDs_am6, yerr = [FCCD_err_lows_am6, FCCD_err_ups_am6], marker = markers_sources["am_HS6"], color=lighten_color(cc,0.8), linestyle = '-')
+            ax.errorbar(detectors_am6,FCCDs_am6, yerr = [FCCD_err_lows_am6, FCCD_err_ups_am6], marker = markers_sources["am_HS6"], color=lighten_color(cc,0.3), linestyle = '-')
 
     for order in colors_orders:
         color = colors_orders[order]
@@ -153,16 +168,16 @@ def main():
         ax2.plot(np.NaN, np.NaN, marker=marker,c='grey',label=source)
     ax2.get_yaxis().set_visible(False)
 
-    ax.legend(loc='upper left', bbox_to_anchor=(0, 1))
-    ax2.legend(loc='upper left', bbox_to_anchor=(0, 0.8))
+    ax.legend(loc='upper left', bbox_to_anchor=(0, 1), prop={'size': 15})
+    ax2.legend(loc='upper left', bbox_to_anchor=(0.2, 1), prop={'size': 15})
 
-    ax.tick_params(axis='x', labelrotation=45)
-    ax.set_xlabel('Detector')
-    ax.set_ylabel('FCCD (mm)')
+    ax.tick_params(axis='x', labelsize= 15, labelrotation=45)
+    #ax.set_xlabel('Detector', fontsize=10)
+    ax.set_ylabel('FCCD [mm]',fontsize=20)
     ax.grid(linestyle='dashed', linewidth=0.5)
     plt.tight_layout()
-    ax.set_title("FCCDs from Ba-133, Am-241 HS1, Am-241 HS6")
-    plt.savefig(CodePath+"/FCCDs_Ba133_Am241_ICPC_correction.png", bbox_inches='tight')
+    #ax.set_title("FCCDs from Ba-133, Am-241 HS1, Am-241 HS6")
+    #plt.savefig(CodePath+"/FCCDs_Ba133_Am241_ICPC_correction_both.png", bbox_inches='tight')
     plt.show()
 
 if __name__ == "__main__":

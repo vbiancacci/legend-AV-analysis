@@ -2,30 +2,27 @@ import sys
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib import patches
 from matplotlib import gridspec
 from datetime import datetime
 import json
 import argparse
 import os
 from scipy import optimize
+from scipy.stats import poisson, norm
 from scipy import stats
-import fnmatch
-import h5py
+import math
+import pygama.analysis.histograms as pgh
 
 
 sys.path.insert(1,'/lfs/l1/legend/users/bianca/IC_geometry/analysis/myplot')
 from myplot import *
 
 myStyle = True
-
-
 #Script to plot spectra of MC (best fit FCCD) and data
 
 def main():
-    all = False
-    isotopes = False
-    lists  = False
-    scatterplot = True
+    bands = False
 
     if(len(sys.argv) != 8):
         print('Example usage: python AV_postproc.py <detector> <MC_id> <sim_path> <FCCD> <DLF> <data_path> <calibration> <cuts> <run>')
@@ -45,248 +42,250 @@ def main():
     print("applying data cuts: ", cuts)
     print("run: ", run)
 
-
     CodePath=os.path.dirname(os.path.realpath(__file__))
-    DLF=1.0
+    DLF_list= [0.9] #[0.3]#, 1.0]
     smear="g"
     frac_FCCDbore=0.5
-    TL_model="notl"
-    FCCD = 0.0
+    TL_model="l"
+    FCCD = 1.017
     sim_path="/lfs/l1/legend/detector_char/enr/hades/simulations/legend-g4simple-simulation/simulations/"+detector+"/th_HS2/top_0r_42z/hdf5/AV_processed/"
-    MC_id=detector+"-th_HS2-top-0r-42z"+"_"+smear+"_"+TL_model+"_FCCD"+str(FCCD)+"mm_DLF"+str(DLF)+"_fracFCCDbore"+str(frac_FCCDbore)
+
     isotope=".hdf5"
 
     dir=os.path.dirname(os.path.realpath(__file__))
-    print("working directory: ", dir)
+    print("working diboxory: ", dir)
 
-    #initialise directories to save spectra
+    #initialise diboxories to save spectra
     if not os.path.exists(dir+"/Spectra/"+detector+"/"):
         os.makedirs(dir+"/Spectra/"+detector+"/")
 
-    if all:
-        print("start...")
+    print("start...")
+    p =Plot((15,5),n=1)
+    ax0=p.ax
+    binwidth = 10 #keV
+    bins = np.arange(0,2700,binwidth)
+    #GET DATA
+    df = pd.read_hdf(dir+"/data_calibration/"+detector+"/calibrated_energy_"+detector+"_"+energy_filter+"_run"+str(run)+".hdf5", key='energy')
+    energy_data = df['calib_energy']
+    counts_data, bins, bars_data = ax0.hist(energy_data, bins=bins, histtype = 'step', linewidth = '0.75')
+    C_2100_data = area_between_vals(counts_data, bins, 2250, 2500)
+    counts_data, bins, bars_data = ax0.hist(energy_data, bins=bins,  label = "Data", histtype = 'step', linewidth = '0.55', color='tab:blue')
 
-        #GET DATA
-        #Get data and concoatonate into df
-        df=pd.read_hdf(CodePath+"/data_calibration/"+detector+"/calibrated_energy_"+detector+"_"+energy_filter+"_run"+str(run)+".hdf5", key='energy')
-        print(df.keys())
-        energy_data=df['calib_energy']
-
-        #GET MC
-        df =  pd.read_hdf(sim_path+MC_id+isotope, key="procdf")
-        energy_MC = df['energy']
+    #GET MC
+    for DLF in DLF_list:
+        MC_id=detector+"-th_HS2-top-0r-42z"+"_"+smear+"_"+TL_model+"_FCCD"+str(FCCD)+"mm_DLF"+str(DLF)+"_fracFCCDbore"+str(frac_FCCDbore)
+        df_sim =  pd.read_hdf(sim_path+MC_id+isotope, key="procdf")
+        print(sim_path+MC_id+isotope)
+        energy_MC = df_sim['energy']
         print("opened MC")
 
-        #Plot data and scaled MC
-        binwidth = 1 #keV
-        bins = np.arange(0,2700,binwidth)
+    #Plot data and scaled MC
 
-        p =Plot((12,8),n=1)
-        ax0=p.ax
-
-        counts_data, bins, bars_data = ax0.hist(energy_data, bins=bins,  label = "Data", histtype = 'step', linewidth = '0.55')
         counts_MC, bins = np.histogram(energy_MC, bins = bins)
 
-        C_2100_data = area_between_vals(counts_data, bins, 1000, 2200)
-        C_2100_MC = area_between_vals(counts_MC, bins, 1000, 2200)
+        C_2100_MC = area_between_vals(counts_MC, bins, 2250, 2500)
         print(C_2100_MC, C_2100_data)
 
-        scaled_counts_MC, bins, bars = ax0.hist(energy_MC, bins = bins,  label = "g4simple simulation", weights=(C_2100_data/C_2100_MC)*np.ones_like(energy_MC), histtype = 'step', linewidth = '0.55')
+        scaled_counts_MC, bins, bars = ax0.hist(energy_MC, bins = bins,  label = "g4simple simulation", weights=(C_2100_data/C_2100_MC)*np.ones_like(energy_MC), histtype = 'step', linewidth = '0.65')  #label="DLF "+str(DLF)
+
+    plt.xlabel("Energy [keV]",  family='serif', fontsize=20)
+    ax0.set_ylabel("Counts / 1keV", family='serif', fontsize=20)
+    ax0.tick_params(axis="both", labelsize=15)
+    ax0.set_yscale("log")
+    ax0.set_xlim(0,2700)
+    #ax0.set_title(detector, family='serif')
+
+    p.legend(ncol=1, out=False, pos = "lower left")
+    p.pretty(large=8, grid=False)
+    #plt.show()
+    p.figure(dir+"/Spectra/"+detector+"/DataMC_"+MC_id+"_"+energy_filter+"_run"+str(run)+"_cuts_top.pdf")
 
 
-        print("basic histos complete")
 
-        #counts_res, bins, bars_res
+    '''
+    print("basic histos complete")
 
-        Data_MC_ratios = []
-        Data_MC_ratios_err = []
-        for index, bin in enumerate(bins[1:]):
-            data = counts_data[index]
-            MC = scaled_counts_MC[index] #This counts has already been scaled by weights
-            if MC == 0:
-                ratio = 0.
-                error = 0.
+    Data_MC_ratios = []
+    Data_MC_ratios_err = []
+    for index, bin in enumerate(bins[1:]):
+        data = counts_data[index]
+        MC = counts_MC[index] #This counts has already been scaled by weights
+        if MC == 0:
+            ratio = 0.
+            error = 0.
+        else:
+            try:
+                ratio = data/MC
+                try:
+                    error = np.sqrt(1/data + 1/MC)
+                except:
+                    error = 0.
+            except:
+                ratio = 0 #if MC=0 and dividing by 0
+        Data_MC_ratios.append(ratio)
+        Data_MC_ratios_err.append(error)
+
+    print("errors")
+
+    ax1.errorbar(bins[1:], Data_MC_ratios, yerr=Data_MC_ratios_err,color="green", elinewidth = 1, fmt='x', ms = 1.0, mew = 1.0)
+    ax1.hlines(1, xmin, xmax, colors="gray", linestyles='dashed')
+    '''
+
+
+
+    if bands==True:
+        fig2 = plt.subplots()
+        gs = gridspec.GridSpec(2, 1, height_ratios=[2, 1])
+        ax2a = plt.subplot(gs[0])
+        ax2b = plt.subplot(gs[1], sharex = ax2a)
+        ax2a.set_yscale("log")
+        ax2b.set_ylim(0.8,1.2)
+        print('making figure')
+        counts_dataa, binsa, bars_dataa = ax2a.hist(energy_data, bins=bins,  label = "Data", histtype = 'step', linewidth = '0.35')
+        scaled_counts_MC, bins, bars = ax2a.hist(energy_MC, bins = bins,  label = "g4simple simulation", weights=(C_2100_data/C_2100_MC)*np.ones_like(energy_MC), histtype = 'step', linewidth = '0.55')
+        print('before dividing')
+        ratio = np.divide(counts_dataa,
+                  scaled_counts_MC,
+                  where=(scaled_counts_MC != 0))
+        ax2b.errorbar(binsa[1:], ratio, fmt='.',color='b')
+        print('after dividing')
+        residual = False
+        for c,b,l, in zip(scaled_counts_MC, binsa, pgh.get_bin_widths(binsa)):
+            print(b)
+            box1a, box2a, box3a = draw_poisson_bands(c,b,l,residual)
+            ax2a.add_patch(box3a)
+            ax2a.add_patch(box2a)
+            ax2a.add_patch(box1a)
+            #ax2a.set_xlabel("Energy [keV]",  family='serif')
+            ax2a.set_ylabel("Counts / 10keV", family='serif', fontsize=15)
+        residual2 = True
+        print('after first plot')
+        for c,b,l, in zip(counts_MC, bins, pgh.get_bin_widths(bins)):
+            print(b)
+            box1b, box2b, box3b = draw_poisson_bands(c,b,l,residual2)
+            ax2b.add_patch(box3b)
+            ax2b.add_patch(box2b)
+            ax2b.add_patch(box1b)
+            ax2b.set_xlabel("Energy [keV]",  family='serif', fontsize=15)
+            ax2b.set_ylabel("Residual", family='serif', fontsize=15)
+
+    plt.show()
+
+    # plt.subplots_adjust(hspace=.0)
+
+    if cuts == False:
+        plt.savefig(dir+"/Spectra/"+detector+"/DataMC_"+MC_id+"_"+energy_filter+"_run"+str(run)+".png")
+    else:
+        plt.savefig(dir+"/Spectra/"+detector+"/DataMC_"+MC_id+"_"+energy_filter+"_run"+str(run)+"_cuts.png")
+
+    print("done")
+
+
+
+
+
+def smallest_poisson_interval(cov, mu):
+    #if (cov > 1 or cov < 0 or mu < 0):
+    #    throw std::runtime_error("smallest_poisson_interval(): bad input");
+    res = [mu,mu]
+    if (mu>50):#gaussian pproximation
+        res = [
+        mu + norm.ppf((1-cov)/2)*np.sqrt(mu)-0.5,
+        mu - norm.ppf((1-cov)/2)*np.sqrt(mu)+0.5
+        ]
+    else:
+        mode = math.floor(mu) #start from the mode=integer part of the mean
+        l = mode
+        u = mode
+        prob = poisson.pmf(mode,mu)
+        while (prob < cov):
+            prob_u = poisson.pmf(u+1, mu)
+            l_new=l-1 if l>0 else 0
+            prob_l = poisson.pmf(l_new, mu)
+            # we expand on the right if:
+            #- the lower edge is already at zero
+            #- the prob of the right point is higher than the left
+            if (l == 0 or prob_u > prob_l):
+                u += 1
+                prob += prob_u
+            #otherwhise we expand on the left
+            elif (prob_u < prob_l):
+                l-= 1
+                prob += prob_l
+            #if prob_u == prob_l we expand on both sides
             else:
-                residual = data-MC
-            Data_MC_ratios.append(residual)
+                u += 1
+                l -= 1
+                prob += prob_u + prob_l
+        l_n=0 if l==0 else l-0.5
+        res = [l_n, u+0.5]
 
-        print("errors")
-
-        #ax1.errorbar(bins[1:], Data_MC_ratios, yerr=0,color="green", elinewidth = 1, fmt='x', ms = 1.0, mew = 1.0)
-        #ax1.hlines(1, 0, 3000, colors="gray", linestyles='dashed')
-        plt.xlabel("Energy [keV]",  family='serif')
-        ax0.set_ylabel("Counts", family='serif')
-        ax0.set_yscale("log")
-        #ax0.set_title(detector, family='serif')
-
-        p.legend(ncol=1, out=False, pos = "lower left")
-        p.pretty(large=8, grid=False)
-        p.figure(dir+"/Spectra/"+detector+"/DataMC_"+MC_id+"_"+energy_filter+"_run"+str(run)+"_cuts_top.eps")
+    return res
 
 
-        print("done")
+def draw_poisson_bands(mu, x_low, x_size, residuals = False):
+    #int col_idx = 9000
+    #if (!col_defined):
+    #    new TColor(col_idx  , 238./255, 136./255, 102./255, "tol-lig-orange")
+    #    new TColor(col_idx+1, 238./255, 221./255, 136./255, "tol-lig-lightyellow")
+    #    new TColor(col_idx+2, 187./255, 204./255,  51./255, "tol-lig-pear")
+    #    col_defined = true
+
+    sig1 = smallest_poisson_interval(0.682, mu)
+    sig2 = smallest_poisson_interval(0.954, mu)
+    sig3 = smallest_poisson_interval(0.997, mu)
+
+    if (residuals) :
+        if (mu != 0):
+            sig1[0] /= mu
+            sig1[1] /= mu
+            sig2[0] /= mu
+            sig2[1] /= mu
+            sig3[0] /= mu
+            sig3[1] /= mu
+        else:
+            sig1[0] = sig1[1] = 1
+            sig2[0] = sig2[1] = 1
+            sig3[0] = sig3[1] = 1
+
+    cent_b1 = (sig1[1] + sig1[0])/2
+    cent_b2 = (sig2[1] + sig2[0])/2
+    cent_b3 = (sig3[1] + sig3[0])/2
+
+    xdw = x_low
+    xup = x_low + x_size
+
+    ''''
+    if (h != nullptr):
+        auto xc1 = gPad->GetUxmin()
+        auto xc2 = gPad->GetUxmax()
+        auto yc1 = gPad->GetUymin()
+        auto yc2 = gPad->GetUymax()
+
+        if (sig1.[0]  < yc1):
+            sig1.[0]  = yc1
+        if (sig2.[0]  < yc1):
+            sig2.[0]  = yc1
+        if (sig3.[0]  < yc1):
+            sig3.[0]  = yc1
+        if (sig1.[1] > yc2):
+            sig1.[1] = yc2
+        if (sig2.[1] > yc2):
+            sig2.[1] = yc2
+        if (sig3.[1] > yc2):
+            sig3.[1] = yc2
+        if (xdw < xc1):
+            xdw = xc1
+        if (xup > xc2):
+            xup = xc2
+    '''
+
+    box_b1 = patches.Rectangle((xdw, sig1[0]), width=abs(xup-xdw),height=abs(sig1[1]-sig1[0]),color='yellowgreen')
+    box_b2 = patches.Rectangle((xdw, sig2[0]), width=abs(xup-xdw),height=abs(sig2[1]-sig2[0]), color='gold')
+    box_b3 = patches.Rectangle((xdw, sig3[0]), width=abs(xup-xdw),height=abs(sig3[1]-sig3[0]), color='orange')
 
 
-    if isotopes:
-        # plot of three isotopes
-        p_3 =Plot((12,8),n=1)
-        ax0_3=p_3.ax
-        binwidth = 1 #keV
-        bins = np.arange(0,2700,binwidth)
-        #fig = plt.figure()
-        #gs = gridspec.GridSpec(2, 1, height_ratios=[2, 1])
-        #ax0 = plt.subplot(gs[0])
-        #ax1 = plt.subplot(gs[1], sharex = ax0)
-
-        df_tl =  pd.read_hdf(sim_path+MC_id+"_LBE_tl.hdf5", key="procdf")
-        df_bi =  pd.read_hdf(sim_path+MC_id+"_LBE_bi.hdf5", key="procdf")
-        df_pb =  pd.read_hdf(sim_path+MC_id+"_LBE_pb.hdf5", key="procdf")
-        energy_MC_tl = df_tl['energy']
-        energy_MC_bi = df_bi['energy']
-        energy_MC_pb = df_pb['energy']
-        counts_MC_is, bins, bars = ax0_3.hist([energy_MC_tl,energy_MC_bi,energy_MC_pb], bins = bins,  label = ['$^{208}$Tl', '$^{212}$Bi','$^{212}$Pb'], linewidth = '0.55', histtype ='step',color=['blueviolet','mediumpurple','darkslateblue'])
-        #counts_MC_bi, bins, bars = ax0_3.hist(energy_MC_bi, bins = bins, histtype = 'step', linewidth = '0.35')
-        #counts_MC_pb, bins, bars = ax0_3.hist(energy_MC_pb, bins = bins, histtype = 'step', linewidth = '0.35')
-        plt.xlabel("Energy [keV]",  family='serif')
-        ax0_3.set_ylabel("Counts", family='serif')
-        ax0_3.set_yscale("log")
-        #ax0_3.set_title(detector, family='serif')
-        p_3.legend(ncol=1, out=False)
-        p_3.pretty(large=8, grid=False)
-        p_3.figure(dir+"/Spectra/"+detector+"/three_isotopes.eps")
-
-
-
-    if lists:
-        # plot of three isotopes
-        p =Plot((12,8),n=1)
-        ax0=p.ax
-        binwidth = 1 #keV
-        bins = np.arange(0,3000,binwidth)
-        #fig = plt.figure()
-        #gs = gridspec.GridSpec(2, 1, height_ratios=[2, 1])
-        #ax0 = plt.subplot(gs[0])
-        #ax1 = plt.subplot(gs[1], sharex = ax0)
-        df=pd.read_hdf(CodePath+"/data_calibration/"+detector+"/calibrated_energy_test_"+detector+"_"+energy_filter+"_run"+str(run)+".hdf5", key='energy')
-        print(df.keys())
-        energy_data=df['calib_energy']
-
-        df_Sh =  pd.read_hdf(sim_path+MC_id+"_Shielding.hdf5", key="procdf")
-        df_ShL =  pd.read_hdf(sim_path+MC_id+"_ShieldingLIV.hdf5", key="procdf")
-        df_LBE =  pd.read_hdf(sim_path+MC_id+"_LBE.hdf5", key="procdf")
-        energy_MC_Sh = df_Sh['energy']
-        energy_MC_ShL = df_ShL['energy']
-        energy_MC_LBE = df_LBE['energy']
-
-        counts_data, bins = np.histogram(energy_data, bins=bins)
-        counts_MC_Sh, bins = np.histogram(energy_MC_Sh, bins = bins)
-        counts_MC_ShL, bins = np.histogram(energy_MC_ShL, bins = bins)
-        counts_MC_LBE, bins = np.histogram(energy_MC_LBE, bins = bins)
-
-        C_2100_data = area_between_vals(counts_data, bins, 1000, 2200)
-        C_2100_MC_Sh = area_between_vals(counts_MC_Sh, bins, 1000, 2200)
-        C_2100_MC_ShL = area_between_vals(counts_MC_ShL, bins, 1000, 2200)
-        C_2100_MC_LBE = area_between_vals(counts_MC_LBE, bins, 1000, 2200)
-        weights=[(C_2100_data/C_2100_MC_LBE)*np.ones_like(energy_MC_LBE),(C_2100_data/C_2100_MC_ShL)*np.ones_like(energy_MC_ShL),(C_2100_data/C_2100_MC_Sh)*np.ones_like(energy_MC_Sh)]
-
-        bins_new=np.arange(50,110,binwidth)
-
-        counts_MC_list, bins, bars = ax0.hist([energy_MC_LBE,energy_MC_ShL,energy_MC_Sh], bins = bins_new, weights=weights, label = ['LBE List', 'Shielding_LIV List','Shielding List'], linewidth = 0.55, histtype ='step',color=['tab:orange','tab:grey','mediumseagreen'])
-        counts_data, bins, bars_data = ax0.hist(energy_data, bins=bins_new,  label = "Data", histtype = 'step', linewidth = '0.65', color='tab:blue')
-        #counts_MC_bi, bins, bars = ax0_3.hist(energy_MC_bi, bins = bins, histtype = 'step', linewidth = '0.35')
-        #counts_MC_pb, bins, bars = ax0_3.hist(energy_MC_pb, bins = bins, histtype = 'step', linewidth = '0.35')
-        plt.xlabel("Energy [keV]",  family='serif')
-        ax0.set_ylabel("Counts", family='serif')
-        ax0.set_yscale("log")
-        #ax0_3.set_title(detector, family='serif')
-        p.legend(ncol=1, out=False)
-        p.pretty(large=8, grid=False)
-        p.figure(dir+"/Spectra/"+detector+"/PhysicsList.eps")
-
-
-    if scatterplot:
-        g4sdf = combine_simulations("/lfs/l1/legend/detector_char/enr/hades/simulations/legend-g4simple-simulation/simulations/"+detector+"/th_HS2/top_0r_42z/hdf5/LBE/", MC_id)
-        print("combined done")
-        detector_hits = g4sdf.loc[(g4sdf.Edep>0)&(g4sdf.volID==1)]
-        print("selection")
-        procdf = pd.DataFrame(detector_hits.groupby(['x', 'y', 'z'], as_index=False))
-        x_MC= procdf['x']
-        y_MC= procdf['y']
-        z_MC= procdf['z']
-        print("preparation figure")
-        fig, ax = plt.subplots()
-        ax.scatter(x_MC, y_MC)
-        ax.set_xlabel("x [mm]",    ha='right', x=1)
-        ax.set_ylabel("y [mm]", ha='right', y=1)
-        plt.savefig("scatterplot_xy.eps")
-        fig2,ax2 = plt.subplots()
-        ax2.scatter(x_MC, z_MC)
-        ax.set_xlabel("x [mm]",    ha='right', x=1)
-        ax.set_ylabel("z [mm]", ha='right', y=1)
-        plt.savefig("scatterplot_xz.eps")
-        #plt.show()
-
-
-        #x_MC = read_all_MC_hdf5(sim_path+MC_id+isotope,'x')
-        #y_MC = read_all_MC_hdf5(sim_path+MC_id+isotope,'y')
-        #z_MC = read_all_MC_hdf5(sim_path+MC_id+isotope,'z')
-
-
-
-def combine_simulations(MC_raw_path, MC_id):
-    "combine all g4simple .hdf5 simulations within a folder into one dataframe"
-
-    #read in each hdf5 file
-    files = os.listdir(MC_raw_path)
-    files = fnmatch.filter(files, "*.hdf5")
-    df_list = []
-    for file in files:
-
-        # print("file: ", str(file))
-        file_no = file[-7]+file[-6]
-        # print("raw MC file_no: ", file_no)
-
-        g4sfile = h5py.File(MC_raw_path+file, 'r')
-
-        g4sntuple = g4sfile['default_ntuples']['g4sntuple']
-        g4sdf = pd.DataFrame(np.array(g4sntuple), columns=['event'])
-
-        # # build a pandas DataFrame from the hdf5 datasets we will use
-        g4sdf = pd.DataFrame(np.array(g4sntuple['event']['pages']), columns=['event'])
-        g4sdf = g4sdf.join(pd.DataFrame(np.array(g4sntuple['Edep']['pages']), columns=['Edep']),lsuffix = '_caller', rsuffix = '_other')
-        g4sdf = g4sdf.join(pd.DataFrame(np.array(g4sntuple['volID']['pages']),columns=['volID']), lsuffix = '_caller', rsuffix = '_other')
-        g4sdf = g4sdf.join(pd.DataFrame(np.array(g4sntuple['x']['pages']),columns=['x']), lsuffix = '_caller', rsuffix = '_other')
-        g4sdf = g4sdf.join(pd.DataFrame(np.array(g4sntuple['y']['pages']),columns=['y']), lsuffix = '_caller', rsuffix = '_other')
-        g4sdf = g4sdf.join(pd.DataFrame(np.array(g4sntuple['z']['pages']),columns=['z']), lsuffix = '_caller', rsuffix = '_other')
-
-        #add new column to each df for the raw MC file no
-        g4sdf["raw_MC_fileno"] = file_no
-
-        df_list.append(g4sdf)
-
-    #concatonate
-    df_total = pd.concat(df_list, axis=0, ignore_index=True)
-    return df_total
-
-
-def read_all_MC_hdf5(path_MC, key):
-
-    #sto = lh5.Store()
-    files = os.listdir(t2_folder)
-    files = fnmatch.filter(files, "*hdf5")
-
-    df_list = []
-
-    for file in files:
-        #get data, no cuts
-        df=pd.read_hdf(file,key=key)
-        #tb = sto.read_object("raw",t2_folder+file)[0]
-        #df = lh5.Table.get_dataframe(tb)
-        df_list.append(df)
-
-    df_total = pd.concat(df_list, axis=0, ignore_index=True)
-    return df_total
-
+    return box_b1, box_b2, box_b3
 
 def find_bin_idx_of_value(bins, value):
     """Finds the bin which the value corresponds to."""
@@ -301,6 +300,7 @@ def area_between_vals(counts, bins, val1, val2):
     bin_width = np.diff(bins)[0]
     area = sum(bin_width * counts[left_bin_edge_index:right_bin_edge_index])
     return area
+
 
 if __name__ == "__main__":
     main()

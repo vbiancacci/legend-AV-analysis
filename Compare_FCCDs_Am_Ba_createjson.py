@@ -94,7 +94,7 @@ def main():
                 source_z = "74z"
             else:
                 source_z = "78z"
-
+            '''
             Ba133_FCCD_file = CodePath+"/Ba133/FCCD/FCCD_data_"+detector+"-ba_HS4-top-0r-"+source_z+"_"+smear+"_"+TL_model+"_fracFCCDbore"+str(frac_FCCDbore)+"_"+energy_filter+"_run"+str(run)+"_cuts.json"
 
             try:
@@ -110,7 +110,7 @@ def main():
                 detectors_ba.append(detector)
             except:
                 print("no Ba133 analysis for ", detector)
-
+            '''
 
             #===============Am241 HS1===============
             if detector=='V08682A':
@@ -126,22 +126,29 @@ def main():
 
             position=positions_list_data[detector]
 
-            am1_FCCD_file = CodePath+"/Am241/FCCD/am_HS1/ICPC_correction/FCCD_data_"+detector+"-am_HS1-"+position+"_"+smear+"_"+TL_model+"_fracFCCDbore"+str(frac_FCCDbore)+"_"+energy_filter+"_run"+str(run)+"_cuts.json"
-            
+            am1_FCCD_file = CodePath+"/Am241/FCCD/am_HS1/ICPC_correction_covmatrix/FCCD_data_"+detector+"-am_HS1-"+position+"_"+smear+"_"+TL_model+"_fracFCCDbore"+str(frac_FCCDbore)+"_"+energy_filter+"_run"+str(run)+"_cuts.json"
             try:
                 with open(am1_FCCD_file) as json_file_am1:
                     FCCD_data_am1 = json.load(json_file_am1)
                 FCCD_am1, FCCD_err_up_am1, FCCD_err_low_am1 = FCCD_data_am1["FCCD"], FCCD_data_am1["FCCD_err_up"], FCCD_data_am1["FCCD_err_low"]
-                det[detector]["FCCD_am"]=FCCD_am1
-                det[detector]["FCCD_am_err_up"]=FCCD_err_up_am1
-                det[detector]["FCCD_am_err_low"]=FCCD_err_low_am1
+                FCCD_err_corr_up_am1, FCCD_err_corr_low_am1, FCCD_err_uncorr_up_am1, FCCD_err_uncorr_low_am1 = FCCD_data_am1["FCCD_corr_err_up"], FCCD_data_am1["FCCD_corr_err_low"], FCCD_data_am1["FCCD_uncorr_err_up"], FCCD_data_am1["FCCD_uncorr_err_low"]
+                print(FCCD_am1)
+                det[detector]['FCCD_am1']=FCCD_data_am1["FCCD"]
+                det[detector]['FCCD_am1_err_up']=FCCD_err_up_am1
+                det[detector]['FCCD_am1_err_low']=FCCD_err_low_am1
+
+                det[detector]['FCCD_am1_err_corr_up'] = FCCD_err_corr_up_am1
+                det[detector]['FCCD_am1_err_corr_low'] = FCCD_err_corr_low_am1
+                det[detector]['FCCD_am1_err_uncorr_up'] = FCCD_err_uncorr_up_am1
+                det[detector]['FCCD_am1_err_uncorr_low'] = FCCD_err_uncorr_low_am1
+
                 FCCDs_am1.append(FCCD_am1)
                 FCCD_err_ups_am1.append(FCCD_err_up_am1)
                 FCCD_err_lows_am1.append(FCCD_err_low_am1)
                 detectors_am1.append(detector)
             except:
                 print("no Am241_HS1 analysis for ", detector)
-
+            '''
             am1_FCCD_file_BEGe = CodePath+"/Am241/FCCD/am_HS1/BEGe_correction/FCCD_data_"+detector+"-am_HS1-"+position+"_"+smear+"_"+TL_model+"_fracFCCDbore"+str(frac_FCCDbore)+"_"+energy_filter+"_run"+str(run)+"_cuts.json"
             try:
                 with open(am1_FCCD_file_BEGe) as json_file_am1_BEGe:
@@ -169,10 +176,10 @@ def main():
                 detectors_am6.append(detector)
             except:
                 print("no Am241_HS6 analysis for ", detector)
-
+            '''
 
             #dump results to json file
-            with open ("FCCD_parameters.json", 'w') as f:
+            with open ("FCCD_parameters_covmatrix.json", 'w') as f:
                 json.dump(det, f, indent=4)
 
         cc = colors_orders[order]
@@ -205,9 +212,9 @@ def main():
     ax.grid(linestyle='dashed', linewidth=0.5)
     plt.tight_layout()
     ax.set_title("FCCDs from Ba-133 HS4 and Am-241 HS1", fontsize=14) #, Am-241 HS6")
-    plt.savefig(CodePath+"/FCCDs_Ba133_Am241_both_corrections.png", bbox_inches='tight')
+    #plt.savefig(CodePath+"/FCCDs_Ba133_Am241_both_corrections.png", bbox_inches='tight')
     #plt.savefig(CodePath+"/FCCDs_Ba133_Am241_BEGe_corrections.png", bbox_inches='tight') #abi plot
-    plt.show()
+    #plt.show()
 
 
 

@@ -41,8 +41,9 @@ def main():
     print("source: ", source)
 
 
-    calibration="/lfs/l1/legend/legend-prodenv/prod-usr/ggmarsh-test-v03/genpar/dsp_ecal/"+detector+".json"
+    #calibration="/lfs/l1/legend/legend-prodenv/prod-usr/ggmarsh-test-v03/genpar/dsp_ecal/"+detector+".json"
     #calibration="/lfs/l1/legend/legend-prodenv/prod-usr/ggmarsh-test-v03/genpar/dsp_ecal/I02160A.json"
+    calibration = CodePath+"/data_calibration/"+detector+"/calibration_run"+str(run)+"_cuts.json"
 
     if cuts == "False":
         cuts = False
@@ -73,11 +74,11 @@ def main():
     energy_load_data=energy_filter_data.to_frame(name='energy_filter')
     energy_load_failed=failed_cuts.to_frame(name='failed_cuts')
 
-    output_file=CodePath+"/data_calibration/"+detector+"/loaded_energy_side_"+detector+"_"+energy_filter+"_run"+str(run)+".hdf5"
+    output_file=CodePath+"/data_calibration/"+detector+"/loaded_energy_"+detector+"_"+energy_filter+"_run"+str(run)+".hdf5"
 
     energy_load_data.to_hdf(output_file, key='energy', mode='w')
     energy_load_failed.to_hdf(output_file, key='failed')
-
+    '''
 
 
     #========Compute calibration coefficients===========
@@ -92,7 +93,7 @@ def main():
     # glines    = [160.61, 223.24, 276.40, 302.85, 356.01, 383.85] # gamma lines used for calibration
     # range_keV = [(2,2),(3,3),(4,4),(4,4),(4,4),(4,4)] # side bands width
 
-    guess = 2614.5/(energy_filter_data.quantile(0.9))#2614.5/45403. #old Th guess
+    guess = 0.05# 2614.5/(energy_filter_data.quantile(0.9))#2614.5/45403. #old Th guess
     print(guess)
     # print(energy_filter_data.quantile(0.9))
     #guess = 383/(energy_filter_data.quantile(0.9))
@@ -102,7 +103,7 @@ def main():
     pars, cov, results = cal.hpge_E_calibration(energy_filter_data,glines,guess,deg=1,range_keV = range_keV,funcs = [pgp.gauss_step,pgp.gauss_step,pgp.gauss_step,pgp.gauss_step,pgp.gauss_step,pgp.gauss_step,pgp.gauss_step],verbose=True)
     # pars, cov, results = cal.hpge_E_calibration(energy_filter_data,glines,guess,deg=1,range_keV = range_keV,funcs = [pgp.gauss_step,pgp.gauss_step,pgp.gauss_step,pgp.gauss_step,pgp.gauss_step,pgp.gauss_step],verbose=False)
     print("cal pars: ", pars)
-    '''
+
     #======Plot calibrated energy=======
 
     #Get data and concoatonate into df
@@ -115,20 +116,20 @@ def main():
 
 
     #print("df_total_lh5: ", df_total_lh5)
-    df=pd.read_hdf(CodePath+"/data_calibration/"+detector+"/loaded_energy_side_"+detector+"_"+energy_filter+"_run"+str(run)+".hdf5", key='energy')
+    df=pd.read_hdf(CodePath+"/data_calibration/"+detector+"/loaded_energy_"+detector+"_"+energy_filter+"_run"+str(run)+".hdf5", key='energy')
     energy_filter_data=df['energy_filter']
     #energy_filter_data = df_total_lh5[energy_filter]
 
     #Get Calibration
     with open(calibration) as json_file:
         calibration_coefs = json.load(json_file)
-    m = calibration_coefs[energy_filter]["Calibration_pars"][0]
-    c = calibration_coefs[energy_filter]["Calibration_pars"][1]
+    m = calibration_coefs[energy_filter]["calibration"][0] #["Calibration_pars"][0]
+    c = calibration_coefs[energy_filter]["calibration"][0] #["Calibration_pars"][1]
 
     #m=0.0634603499212275 #for PhysicsList
     #c=-0.611497784803706# for PhysicsList
 
-    xpb = 0.1
+    xpb = 1
     xlo = 0
     xhi = 3000
 
@@ -149,13 +150,13 @@ def main():
 
     plt.savefig(CodePath+"/data_calibration/"+detector+"/plots/calibrated_energy_"+energy_filter+"_run"+str(run)+".png")
 
-    output_file=CodePath+"/data_calibration/"+detector+"/calibrated_energy_side_"+detector+"_"+energy_filter+"_run"+str(run)+".hdf5"
+    output_file=CodePath+"/data_calibration/"+detector+"/calibrated_energy_"+detector+"_"+energy_filter+"_run"+str(run)+".hdf5"
     energies_df=energies.to_frame(name='calib_energy')
     energies_df.to_hdf(output_file, key='energy', mode='w')
 
-    '''
+
     ecal_pass = pgp.poly(energy_filter_data, pars)
-    ecal_cut  = pgp.poly(failed_cuts,  pars)
+    #ecal_cut  = pgp.poly(failed_cuts,  pars)
 
     xpb = 0.1
     xlo = 0
@@ -164,12 +165,12 @@ def main():
     nb = int((xhi-xlo)/xpb)
     hist_pass, bin_edges = np.histogram(ecal_pass, range=(xlo, xhi), bins=nb)
     bins_pass = pgh.get_bin_centers(bin_edges)
-    hist_cut, bin_edges = np.histogram(ecal_cut, range=(xlo, xhi), bins=nb)
+    #hist_cut, bin_edges = np.histogram(ecal_cut, range=(xlo, xhi), bins=nb)
     bins_cut = pgh.get_bin_centers(bin_edges)
     plot_title = detector+' - run '+str(run)
     plt.plot(bins_pass, hist_pass, label='QC pass', lw=1, c='b')
-    plt.plot(bins_cut,  hist_cut,  label='QC fail', lw=1, c='r')
-    plt.plot(bins_cut,  hist_cut+hist_pass,  label='no QC', lw=1)
+    #plt.plot(bins_cut,  hist_cut,  label='QC fail', lw=1, c='r')
+    #plt.plot(bins_cut,  hist_cut+hist_pass,  label='no QC', lw=1)
 
     plt.xlabel("Energy (keV)",     ha='right', x=1)
     plt.ylabel("Counts / keV",     ha='right', y=1)
@@ -237,7 +238,7 @@ def main():
 
     print("done")
     print("")
-    '''
+
 def read_all_dsp_lh5(t2_folder, cuts, cut_file_path=None, run="all", sigma=4):
 
     sto = lh5.Store()

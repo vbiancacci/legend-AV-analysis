@@ -73,10 +73,10 @@ def main():
     # plt.xlim(0,4000)
     plt.xlabel("adc")
     plt.ylabel("Counts")
-    plt.yscale('log') 
+    plt.yscale('log')
 
     # plt.show()
-    
+
     # #========Compute calibration coefficients===========
 
     #CANNOT CALIBRATE WITH ONLY 2 PEAKS - USE TH CONSTANTS INSTEAD
@@ -84,7 +84,7 @@ def main():
     # print("Calibrating...")
     # glines    = [75,1173.2, 1332.5] # gamma lines used for calibration
     # range_keV = [(2,2),(5,5),(5,5)] # side bands width
-    
+
     # idx = np.where(counts == np.max(counts))[0][0]
     # max_x = bins[idx]
     # guess = 1173.2/max_x
@@ -94,18 +94,19 @@ def main():
     # pars, cov, results = cal.hpge_E_calibration(energy_filter_data,glines,guess,deg=1,range_keV = range_keV,funcs = [pgp.gauss_step,pgp.gauss_step,pgp.gauss_step],verbose=True)
     # print("cal pars: ", pars)
 
-    
+
 
     #calibration_Th = "/lfs/l1/legend/legend-prodenv/prod-usr/ggmarsh-full_dl-v01/pargen/dsp_ecal/"+detector+".json"
-    calibration_Co = "/lfs/l1/legend/legend-prodenv/prod-usr/ggmarsh-full_dl-v01/pargen/hit_pproc/ecal/all_sources/ecal-"+detector+"-co_HS5_top_dlt.json"
-    
+    #calibration_Co = "/lfs/l1/legend/legend-prodenv/prod-usr/ggmarsh-full_dl-v01/pargen/hit_pproc/ecal/all_sources/"+detector+"/ecal-"+detector+"-co_HS5_top_dlt.json"
+    #calibration_Co = "/lfs/l1/legend/users/bianca/IC_geometry/analysis/post-proc-python/second_fork/legend-AV-analysis/Ba133/data_calibration/B00000B/calibration_run1_cuts.json"
+    calibration_Co = "/lfs/l1/legend/users/bianca/IC_geometry/analysis/post-proc-python/second_fork/legend-AV-analysis/Co60/data_calibration/B00035B/calibration_run1_cuts_original.json"
     with open(calibration_Co) as json_file:
         calibration_coefs = json.load(json_file)
     # print(calibration_coefs)
-    m_Th = calibration_coefs[energy_filter]["Calibration_pars"][0]
-    c_Th = calibration_coefs[energy_filter]["Calibration_pars"][1]
-    a_Th = calibration_coefs[energy_filter]["m0"]
-    b_Th = calibration_coefs[energy_filter]["m1"]
+    m_Th = calibration_coefs[energy_filter]["calibration"][0]#["Calibration_pars"][0]
+    c_Th = calibration_coefs[energy_filter]["calibration"][1]#["Calibration_pars"][1]
+    a_Th = calibration_coefs[energy_filter]["resolution"][0]#["m0"]
+    b_Th = calibration_coefs[energy_filter]["resolution"][1]#["m1"]
 
     pars = [m_Th, c_Th]
     print("cal pars: ", pars)
@@ -117,7 +118,7 @@ def main():
     ecal_pass = pgp.poly(energy_filter_data, pars)
     ecal_cut  = pgp.poly(failed_cuts,  pars)
 
-    xpb = 0.25
+    xpb = 0.5 #0.25
     xlo = 0
     xhi = 1500
 
@@ -133,18 +134,18 @@ def main():
     plt.plot(bins_cut,  hist_cut,  label='QC fail', lw=1, c='r')
     plt.plot(bins_cut,  hist_cut+hist_pass,  label='no QC', lw=1)
 
-    plt.xlabel("Energy (keV)",     ha='right', x=1)
-    plt.ylabel("Counts / keV",     ha='right', y=1)
-    plt.title(plot_title)
+    plt.xlabel("Energy [keV]",     ha='right', x=1)
+    plt.ylabel("Counts / 0.5keV",     ha='right', y=1)
+    #plt.title(plot_title)
     plt.yscale('log')
     plt.tight_layout()
     plt.legend(loc='upper left')
 
     if cuts == True:
-        plt.savefig(CodePath+"/data_calibration/"+detector+"/plots/calibrated_energy_"+energy_filter+"_run"+str(run)+"_cuts.png")
+        plt.savefig(CodePath+"/data_calibration/"+detector+"/plots/calibrated_energy_"+energy_filter+"_run"+str(run)+"_cuts_new.png")
     else:
         plt.savefig(CodePath+"/data_calibration/"+detector+"/plots/calibrated_energy_"+energy_filter+"_run"+str(run)+".png")
-   
+
     # #=========Plot Calibration Curve===========
 
     # fitted_peaks = results['fitted_keV']
@@ -192,10 +193,10 @@ def main():
     dict = {energy_filter: {"resolution": list(resolution_pars), "calibration": list(pars)}}
     print(dict)
     if cuts == False:
-        with open(CodePath+"/data_calibration/"+detector+"/calibration_run"+str(run)+".json", "w") as outfile: 
+        with open(CodePath+"/data_calibration/"+detector+"/calibration_run"+str(run)+".json", "w") as outfile:
             json.dump(dict, outfile, indent=4)
     else:
-        with open(CodePath+"/data_calibration/"+detector+"/calibration_run"+str(run)+"_cuts.json", "w") as outfile: 
+        with open(CodePath+"/data_calibration/"+detector+"/calibration_run"+str(run)+"_cuts_new.json", "w") as outfile:
             json.dump(dict, outfile, indent=4)
 
     print("done")
@@ -212,15 +213,15 @@ def read_all_dsp_lh5(t2_folder, cuts, cut_file_path=None, run="all", sigma=4):
         files = fnmatch.filter(files, "*run0002*")
 
     df_list = []
-    
+
     if cuts == False:
         for file in files:
-        
+
             #get data, no cuts
             tb = sto.read_object("raw",t2_folder+file)[0]
             df = lh5.Table.get_dataframe(tb)
             df_list.append(df)
-    
+
         df_total = pd.concat(df_list, axis=0, ignore_index=True)
         return df_total
 
@@ -229,8 +230,8 @@ def read_all_dsp_lh5(t2_folder, cuts, cut_file_path=None, run="all", sigma=4):
         lh5_group = "raw"
         # df_total_cuts, failed_cuts = cut.load_df_with_cuts(files, lh5_group, cut_file = cut_file_path, cut_parameters= {'bl_mean':sigma,'bl_std':sigma, 'pz_std':sigma}, verbose=True)
         df_total_cuts, failed_cuts = cut.load_df_with_cuts(files, lh5_group, cut_parameters= {'bl_mean':sigma,'bl_std':sigma, 'pz_std':sigma}, verbose=True)
-        
-        return df_total_cuts, failed_cuts       
+
+        return df_total_cuts, failed_cuts
 
 def fwhm_slope(x, m0, m1, m2):
     """

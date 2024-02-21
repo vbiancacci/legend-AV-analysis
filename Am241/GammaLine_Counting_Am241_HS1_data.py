@@ -60,21 +60,23 @@ def main():
             os.makedirs(dir+"/PeakCounts/"+detector+"/"+source+"/new/plots/data/")
 
         #Get data and concoatonate into df
-        df=pd.read_hdf(dir+"/data_calibration/"+detector+"/"+source+"/loaded_energy_"+detector+"_"+energy_filter+"_run"+str(run)+".hdf5", key='energy')
+        df=pd.read_hdf("/lfs/l1/legend/users/bianca/IC_geometry/analysis/post-proc-python/second_fork/legend-AV-analysis/Am241/data_calibration/"+detector+"/"+source+"/loaded_energy_"+detector+"_"+energy_filter+"_run"+str(run)+"_test.hdf5", key='energy')
+        #df=pd.read_hdf(dir+"/data_calibration/"+detector+"/"+source+"/loaded_energy_"+detector+"_"+energy_filter+"_run"+str(run)+".hdf5", key='energy')
         energies=df['energy_filter']
 
-        if detector=='V05261B':
-            sigma=0.7
-        else:
-            sigma=0.1
+        #if detector=='V05261B':
+        #    sigma=0.7
+        #else:
+        #    sigma=0.1
 	#Get Calibration
-        #with open(calibration) as json_file:
-        #   calibration_coefs = json.load(json_file)
-        #m = calibration_coefs[energy_filter]["calibration"][0]
-        #c = calibration_coefs[energy_filter]["calibration"][1]
+        calibration='/lfs/l1/legend/users/bianca/IC_geometry/analysis/post-proc-python/second_fork/legend-AV-analysis/Am241/data_calibration/V07646A/am_HS1/calibration_run1_cuts.json'
+        with open(calibration) as json_file:
+           calibration_coefs = json.load(json_file)
+        m = calibration_coefs[energy_filter]["calibration"][0]
+        c = calibration_coefs[energy_filter]["calibration"][1]
 
         # energies = (energy_filter_data-c)/m
-        #energies = energy_filter_data*m + c
+        energies = energies*m + c
 
 
 
@@ -220,6 +222,7 @@ def main():
             #compute chi sq of fit
             chi_sq, p_value, residuals, dof = chi_sq_calc(bins_centres_peak, hist_peak, np.sqrt(hist_peak), peak_fitting.gauss_cdf, coeff)
             print("r chi sq: ", chi_sq/dof)
+            print(sigma_59, a_59, s, tail, tau, bkg)
 
             #Counting - integrate gaussian signal part +/- 3 sigma
             C_60, C_60_err = gauss_count(a_59, mu_59 ,sigma_59, a_59_err, binwidth)

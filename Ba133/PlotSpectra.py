@@ -14,7 +14,7 @@ from GammaLine_Counting_Ba133 import read_all_dsp_lh5
 
 #Script to plot spectra of MC (best fit FCCD) and data
 
-def main(): 
+def main():
 
 
     if(len(sys.argv) != 11):
@@ -47,7 +47,7 @@ def main():
         cuts = False
     else:
         cuts = True
- 
+
     dir=os.path.dirname(os.path.realpath(__file__))
     print("working directory: ", dir)
 
@@ -88,13 +88,13 @@ def main():
         PeakCounts_data = dir+"/PeakCounts/"+detector+"/PeakCounts_data_"+detector+"_"+energy_filter+"_run"+str(run)+".json"
     else:
         PeakCounts_data = dir+"/PeakCounts/"+detector+"/PeakCounts_data_"+detector+"_cuts_"+energy_filter+"_run"+str(run)+".json"
-    
-    PeakCounts_MC = dir+"/PeakCounts/"+detector+"/PeakCounts_sim_"+MC_id+".json"
+
+    PeakCounts_MC = dir+"/PeakCounts/"+detector+"/new/PeakCounts_sim_"+MC_id+".json"
 
     with open(PeakCounts_data) as json_file:
         PeakCounts = json.load(json_file)
         C_356_data = PeakCounts['C_356']
-    
+
     with open(PeakCounts_MC) as json_file:
         PeakCounts = json.load(json_file)
         C_356_MC = PeakCounts['C_356']
@@ -105,14 +105,14 @@ def main():
     binwidth = 0.1 #keV
     bins = np.arange(0,450,binwidth)
 
+    fig, ax =plt.subplots()
+    #fig = plt.figure()
+    #gs = gridspec.GridSpec(2, 1, height_ratios=[2, 1])
+    #ax0 = plt.subplot(gs[0])
+    #ax1 = plt.subplot(gs[1], sharex = ax0)
 
-    fig = plt.figure()
-    gs = gridspec.GridSpec(2, 1, height_ratios=[2, 1]) 
-    ax0 = plt.subplot(gs[0])
-    ax1 = plt.subplot(gs[1], sharex = ax0)
-
-    counts_data, bins, bars_data = ax0.hist(energy_data, bins=bins,  label = "Data", histtype = 'step', linewidth = '0.35')
-    counts_MC, bins, bars = ax0.hist(energy_MC, bins = bins, weights=(C_356_data/C_356_MC)*np.ones_like(energy_MC), label = "MC: FCCD "+str(FCCD)+"mm, DLF: "+str(DLF)+" (scaled)", histtype = 'step', linewidth = '0.35')
+    counts_data, bins, bars_data = ax.hist(energy_data, bins=bins,  label = "Data", histtype = 'step', linewidth = '0.35')
+    counts_MC, bins, bars = ax.hist(energy_MC, bins = bins, weights=(C_356_data/C_356_MC)*np.ones_like(energy_MC), label = "G4simple simulation", histtype = 'step', linewidth = '0.35')
 
     print("basic histos complete")
 
@@ -125,9 +125,9 @@ def main():
             ratio = 0.
             error = 0.
         else:
-            try: 
+            try:
                 ratio = data/MC
-                try: 
+                try:
                     error = np.sqrt(1/data + 1/MC)
                 except:
                     error = 0.
@@ -137,25 +137,26 @@ def main():
         Data_MC_ratios_err.append(error)
 
     print("errors")
-    
-    ax1.errorbar(bins[1:], Data_MC_ratios, yerr=Data_MC_ratios_err,color="green", elinewidth = 1, fmt='x', ms = 1.0, mew = 1.0)
-    ax1.hlines(1, 0, 450, colors="gray", linestyles='dashed') 
-    
+
+    #ax1.errorbar(bins[1:], Data_MC_ratios, yerr=Data_MC_ratios_err,color="green", elinewidth = 1, fmt='x', ms = 1.0, mew = 1.0)
+    #ax1.hlines(1, 0, 450, colors="gray", linestyles='dashed')
+
 
     plt.xlabel("Energy [keV]")
-    ax0.set_ylabel("Counts")
-    ax0.set_yscale("log")
-    ax0.legend(loc = "lower left")
-    ax0.set_title(detector)
-    ax1.set_ylabel("data/MC")
-    ax1.set_yscale("log")
-    ax1.set_xlim(0,450)
-    ax0.set_xlim(0,450)
-    
+    ax.set_ylabel("Counts / 0.1keV")
+    ax.set_yscale("log")
+    ax.legend(frameon=False, loc = "lower left")
+    plt.show()
+    #ax0.set_title(detector)
+    #ax1.set_ylabel("data/MC")
+    #ax1.set_yscale("log")
+    #ax1.set_xlim(0,450)
+    #ax0.set_xlim(0,450)
+
     # plt.subplots_adjust(hspace=.0)
 
     if cuts == False:
-        plt.savefig(dir+"/Spectra/"+detector+"/DataMC_"+MC_id+"_"+energy_filter+"_run"+str(run)+".png")
+        plt.savefig(dir+"/Spectra/"+detector+"/DataMC_"+MC_id+"_"+energy_filter+"_run"+str(run)+".pdf")
     else:
         plt.savefig(dir+"/Spectra/"+detector+"/DataMC_"+MC_id+"_"+energy_filter+"_run"+str(run)+"_cuts.png")
 

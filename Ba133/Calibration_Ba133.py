@@ -43,8 +43,8 @@ def main():
         cuts = True
 
     #initialise directories for detectors to save
-    if not os.path.exists(CodePath+"/data_calibration/"+detector+"/plots/"):
-        os.makedirs(CodePath+"/data_calibration/"+detector+"/plots/")
+    if not os.path.exists(CodePath+"/data_calibration/"+detector+"/new/plots/"):
+        os.makedirs(CodePath+"/data_calibration/"+detector+"/new/plots/")
 
     #====Load data======
     print(" ")
@@ -74,6 +74,7 @@ def main():
     # guess = 2614.5/45403 #old Th guess
     # print(energy_filter_data.quantile(0.9))
     guess = 383/(energy_filter_data.quantile(0.9))
+    #guess = 383/(energy_filter_data.quantile(0.59))
 
     print("Find peaks and compute calibration curve...",end=' ')
     pars, cov, results = cal.hpge_E_calibration(energy_filter_data,glines,guess,deg=1,range_keV = range_keV,funcs = [pgp.gauss_step,pgp.gauss_step,pgp.gauss_step,pgp.gauss_step,pgp.gauss_step,pgp.gauss_step,pgp.gauss_step],verbose=True)
@@ -90,6 +91,7 @@ def main():
     xhi = 450
 
     nb = int((xhi-xlo)/xpb)
+    fig, ax1 = plt.subplots(figsize=(12,8))
     hist_pass, bin_edges = np.histogram(ecal_pass, range=(xlo, xhi), bins=nb)
     bins_pass = pgh.get_bin_centers(bin_edges)
     hist_cut, bin_edges = np.histogram(ecal_cut, range=(xlo, xhi), bins=nb)
@@ -99,15 +101,21 @@ def main():
     plt.plot(bins_cut,  hist_cut,  label='QC fail', lw=1, c='r')
     plt.plot(bins_cut,  hist_cut+hist_pass,  label='no QC', lw=1)
 
-    plt.xlabel("Energy (keV)",     ha='right', x=1)
-    plt.ylabel("Counts / keV",     ha='right', y=1)
-    plt.title(plot_title)
+    ax1.set_xlabel("Energy [keV]", fontsize=30)
+    ax1.set_ylabel("Counts / 0.1keV", fontsize=30)
+    ax1.tick_params(axis="both", labelsize=25)
+    #plt.xlabel("Energy [keV]")#     ha='right', x=1)
+    #plt.ylabel("Counts / 0.1keV")#,     ha='right', y=1)
+    #plt.title(plot_title)
     plt.yscale('log')
     plt.tight_layout()
-    plt.legend(loc='upper right')
+    plt.legend(loc='lower left', fontsize=25)
 
-    plt.savefig(CodePath+"/data_calibration/"+detector+"/plots/calibrated_energy_"+energy_filter+"_run"+str(run)+".png")
-
+    if cuts == True:
+        plt.savefig(CodePath+"/data_calibration/"+detector+"/new/plots/calibrated_energy_"+energy_filter+"_run"+str(run)+".pdf")
+    else:
+        plt.savefig(CodePath+"/data_calibration/"+detector+"/new/plots/calibrated_energy_"+energy_filter+"_nocuts_run"+str(run)+".png")
+    
     #=========Plot Calibration Curve===========
 
     fitted_peaks = results['fitted_keV']
@@ -148,22 +156,23 @@ def main():
     ax2.set_ylabel("Residuals (keV)", ha='right', y=1)
 
     fig.suptitle(plot_title)
-
-    plt.savefig(CodePath+"/data_calibration/"+detector+"/plots/calibration_curve_"+energy_filter+"_run"+str(run)+".png")
-
+    if cuts==True:
+        plt.savefig(CodePath+"/data_calibration/"+detector+"/new/plots/calibration_curve_"+energy_filter+"_run"+str(run)+".png")
+    else:
+        plt.savefig(CodePath+"/data_calibration/"+detector+"/new/plots/calibration_curve_"+energy_filter+"_nocuts_run"+str(run)+".png")
     #=========Save Calibration Coefficients==========
     dict = {energy_filter: {"resolution": list(fit_pars), "calibration": list(pars)}}
     print(dict)
     if cuts == False:
-        with open(CodePath+"/data_calibration/"+detector+"/calibration_run"+str(run)+".json", "w") as outfile:
+        with open(CodePath+"/data_calibration/"+detector+"/new/calibration_run"+str(run)+".json", "w") as outfile:
             json.dump(dict, outfile, indent=4)
     else:
-        with open(CodePath+"/data_calibration/"+detector+"/calibration_run"+str(run)+"_cuts.json", "w") as outfile:
+        with open(CodePath+"/data_calibration/"+detector+"/new/calibration_run"+str(run)+"_cuts.json", "w") as outfile:
             json.dump(dict, outfile, indent=4)
 
     print("done")
     print("")
-
+    
 def read_all_dsp_lh5(t2_folder, cuts, cut_file_path=None, run="all", sigma=4):
 
     sto = lh5.Store()
@@ -175,6 +184,8 @@ def read_all_dsp_lh5(t2_folder, cuts, cut_file_path=None, run="all", sigma=4):
         files = fnmatch.filter(files, "*run0002*")
     if run == 3:
         files = fnmatch.filter(files, "*run0003*")
+    if run == 4:
+        files = fnmatch.filter(files, "*run0004*")
 
     df_list = []
 

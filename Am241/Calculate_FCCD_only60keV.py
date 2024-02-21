@@ -61,6 +61,13 @@ def main():
     O_Am241_uncorr_err_list = []
     DLF = 1.0 #considering 0 TL
 
+    A_source_today=396E3;
+    data_live_time=21600;
+    N_data = A_source_today*data_live_time
+    N_sims =2*50*10**7*0.000565145/0.000203 #10 files with 10^7 events
+    R = N_data/N_sims #need to scale sims by this number
+
+
     for FCCD in FCCD_list:
 
         #Get count ratio for simulations
@@ -70,7 +77,7 @@ def main():
             sigma_60 = PeakCounts['C_60_err']
             C_99_103 = PeakCounts['C_99_103']
             sigma_99_103 = PeakCounts['C_99_103_err']
-            O_Am241 = PeakCounts['O_Am241']
+            O_Am241 = R*PeakCounts['C_99_103']
             O_Am241_err = PeakCounts ['O_Am241_err']
             O_Am241_list.append(O_Am241)
 
@@ -88,8 +95,8 @@ def main():
             sigma_60 = PeakCounts['C_60_err']
             C_99_103 = PeakCounts['C_99_103']
             sigma_99_103 = PeakCounts['C_99_103_err']
-            O_Am241_data = PeakCounts['O_Am241']
-            O_Am241_data_err = 3.6978361721441564 # PeakCounts ['O_Am241_err']
+            O_Am241_data = PeakCounts['C_99_103']
+            O_Am241_data_err = PeakCounts ['O_Am241_err']
 
     else:
         cuts_sigma = 4 #default =4, change by hand here if interested
@@ -127,7 +134,7 @@ def main():
     p_guess = [aguess,bguess]
 
     popt, pcov = optimize.curve_fit(exponential_decay, xdata, ydata, p0=p_guess, sigma = y_err, maxfev = 10**7, method ="trf") #, bounds = bounds)
-    a,b = popt[0],popt[1]
+    a,b = popt[0],popt[1]#,popt[2]
     print(a,b)
     #a_err, b_err = np.sqrt(pcov[0][0]), np.sqrt(pcov[1][1])#,np.sqrt(pcov[2][2])
     chi_sq, p_value, residuals, dof = chi_sq_calc(xdata, ydata, y_err, exponential_decay, popt)
@@ -141,7 +148,7 @@ def main():
 
     #calculate FCCD of data - invert eq
     FCCD_data = (1/b)*np.log(a/(O_Am241_data))
-    print("FCCD_data ", FCCD_data)
+    print("FCCD_data ",FCCD_data)
 
     #fit exp decay of total error bars:
     y_uplim = ydata+y_err
@@ -151,12 +158,12 @@ def main():
     #plt.plot(xfit, yfit_up, color='grey', linestyle='dashed', linewidth=1)
 
     y_lowlim = ydata-y_err
-    p_guess_low = [max(y_lowlim), 1]
+    p_guess_low = [max(y_lowlim), 1]#, min(y_lowlim)]
     popt_low, pcov_low = optimize.curve_fit(exponential_decay, xdata, y_lowlim, p0=p_guess_low, maxfev = 10**7, method ="trf") #, bounds = bounds)
     yfit_low = exponential_decay(xfit,*popt_low)
     #plt.plot(xfit, yfit_low, color='grey', linestyle='dashed', linewidth=1)
 
-    a_up, b_up= popt_up[0], popt_up[1]
+    a_up, b_up = popt_up[0], popt_up[1]
     a_low, b_low = popt_low[0], popt_low[1]
 
 
@@ -168,7 +175,7 @@ def main():
     #plt.plot(xfit, yfit_up, color='grey', linestyle='dashed', linewidth=1)
 
     y_lowlim = ydata-y_corr_err
-    p_guess_low = [max(y_lowlim), 1]
+    p_guess_low = [max(y_lowlim), 1]#, min(y_lowlim)]
     popt_low_corr, pcov_low_corr = optimize.curve_fit(exponential_decay, xdata, y_lowlim, p0=p_guess_low, maxfev = 10**7, method ="trf") #, bounds = bounds)
     yfit_low = exponential_decay(xfit,*popt_low_corr)
     #plt.plot(xfit, yfit_low, color='grey', linestyle='dashed', linewidth=1)
@@ -185,7 +192,7 @@ def main():
     plt.plot(xfit, yfit_up, color='grey', linestyle='dashed', linewidth=1)
 
     y_lowlim = ydata-y_uncorr_err
-    p_guess_low = [max(y_lowlim), 1]
+    p_guess_low = [max(y_lowlim), 1]#, min(y_lowlim)]
     popt_low_uncorr, pcov_low_uncorr = optimize.curve_fit(exponential_decay, xdata, y_lowlim, p0=p_guess_low, maxfev = 10**7, method ="trf") #, bounds = bounds)
     yfit_low = exponential_decay(xfit,*popt_low_uncorr)
     plt.plot(xfit, yfit_low, color='grey', linestyle='dashed', linewidth=1)
@@ -236,12 +243,12 @@ def main():
     plt.legend(loc="upper right", fontsize=8)
     #plt.show()
 
-    
+
     if cuts == False:
-        plt.savefig(dir+"/FCCD/"+source+"/test_err/plots/FCCD_OAm241_"+MC_id+"_"+smear+"_"+TL_model+"_fracFCCDbore"+frac_FCCDbore+"_"+energy_filter+"_run"+str(run)+".pdf")
+        plt.savefig(dir+"/FCCD/"+source+"/plots/FCCD_OAm241_"+MC_id+"_"+smear+"_"+TL_model+"_fracFCCDbore"+frac_FCCDbore+"_"+energy_filter+"_run"+str(run)+"_only60keV.pdf")
     else:
         plt.savefig(dir+"/FCCD/"+source+"/plots/FCCD_OAm241_"+MC_id+"_"+smear+"_"+TL_model+"_fracFCCDbore"+frac_FCCDbore+"_"+energy_filter+"_run"+str(run)+"_cuts_corr_uncorr.pdf")
-    
+
 
     #Save interpolated fccd for data to a json file
     FCCD_data_dict = {
@@ -263,7 +270,7 @@ def main():
     }
 
     if cuts == False:
-        with open(dir+"/FCCD/"+source+"/test_err/FCCD_data_"+MC_id+"_"+smear+"_"+TL_model+"_fracFCCDbore"+frac_FCCDbore+"_"+energy_filter+"_run"+str(run)+".json", "w") as outfile:
+        with open(dir+"/FCCD/"+source+"/FCCD_data_"+MC_id+"_"+smear+"_"+TL_model+"_fracFCCDbore"+frac_FCCDbore+"_"+energy_filter+"_run"+str(run)+"_only60keV.json", "w") as outfile:
             json.dump(FCCD_data_dict, outfile, indent=4)
             print("json file saved")
     else:

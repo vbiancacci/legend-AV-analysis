@@ -95,16 +95,16 @@ def main():
     print("ratio data to MC: ",R)
 
     #Plot data and scaled MC
-    binwidth = 0.25 #keV
+    binwidth = 0.5 #keV
     bins = np.arange(0,1500,binwidth)
 
     fig = plt.figure()
-    gs = gridspec.GridSpec(2, 1, height_ratios=[2, 1]) 
-    ax0 = plt.subplot(gs[0])
-    ax1 = plt.subplot(gs[1], sharex = ax0)
+    #gs = gridspec.GridSpec(2, 1, height_ratios=[2, 1]) 
+    ax0 = plt.subplot()
+    #ax1 = plt.subplot(gs[1], sharex = ax0)
 
     counts_data, bins, bars_data = ax0.hist(energy_data, bins=bins,  label = "Data", histtype = 'step', linewidth = '0.35')
-    counts_MC, bins, bars = ax0.hist(energy_MC, bins = bins, weights=(R)*np.ones_like(energy_MC), label = "MC: FCCD "+str(FCCD)+"mm, DLF: "+str(DLF)+" (scaled)", histtype = 'step', linewidth = '0.35')
+    counts_MC, bins, bars = ax0.hist(energy_MC, bins = bins, weights=(R)*np.ones_like(energy_MC), label = "G4simple simulation", histtype = 'step', linewidth = '0.35')
     # counts_MC_, bins, bars = ax0.hist(energy_MC, bins = bins, label = "MC: FCCD "+str(FCCD)+"mm, DLF: "+str(DLF)+" (unscaled)", histtype = 'step', linewidth = '0.35')
 
     print("basic histos complete")
@@ -131,24 +131,24 @@ def main():
 
     print("errors")
     
-    ax1.errorbar(bins[1:], Data_MC_ratios, yerr=Data_MC_ratios_err,color="green", elinewidth = 1, fmt='x', ms = 1.0, mew = 1.0)
-    ax1.hlines(1, 0, 450, colors="gray", linestyles='dashed') 
+    #ax1.errorbar(bins[1:], Data_MC_ratios, yerr=Data_MC_ratios_err,color="green", elinewidth = 1, fmt='x', ms = 1.0, mew = 1.0)
+    #ax1.hlines(1, 0, 450, colors="gray", linestyles='dashed') 
     
 
     plt.xlabel("Energy [keV]")
-    ax0.set_ylabel("Counts")
+    ax0.set_ylabel("Counts /0.1keV")
     ax0.set_yscale("log")
-    ax0.legend(loc = "lower left")
-    ax0.set_title(detector)
-    ax1.set_ylabel("data/MC")
-    ax1.set_yscale("log")
-    ax1.set_xlim(0,1500)
-    ax0.set_xlim(0,1500)
+    ax0.legend(frameon=False,loc = "lower left")
+    #ax0.set_title(detector)
+    #ax1.set_ylabel("data/MC")
+    #ax1.set_yscale("log")
+    #ax1.set_xlim(0,1500)
+    ax0.set_xlim(0,1430)
     
     # plt.subplots_adjust(hspace=.0)
 
     if cuts == False:
-        plt.savefig(dir+"/Spectra/"+detector+"/DataMC_"+MC_id+"_"+energy_filter+"_run"+str(run)+".png")
+        plt.savefig(dir+"/Spectra/"+detector+"/DataMC_"+MC_id+"_"+energy_filter+"_run"+str(run)+".pdf")
     else:
         plt.savefig(dir+"/Spectra/"+detector+"/DataMC_"+MC_id+"_"+energy_filter+"_run"+str(run)+"_cuts.png")
 
