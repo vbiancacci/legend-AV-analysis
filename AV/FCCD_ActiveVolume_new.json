@@ -1,0 +1,814 @@
+{
+    "V02160A": {
+        "FCCD": {
+            "Central": 0.0,
+            "ErrPos": 0.0,
+            "ErrNeg": 0.0,
+            "ErrCorrPos": 0.0,
+            "ErrCorrNeg": 0.0,
+            "ErrUncorrPos": 0.0,
+            "ErrUncorrNeg": 0.0
+        },
+        "ActiveVolume": {
+            "Central": 318.7914941582298,
+            "ErrPos": 0.0,
+            "ErrNeg": 0.0,
+            "ErrCorrPos": 0.0,
+            "ErrCorrNeg": 0.0,
+            "ErrUncorrPos": 0.0,
+            "ErrUncorrNeg": 0.0
+        },
+        "AV/Volume": {
+            "Central": 1.0,
+            "ErrPos": 0.0,
+            "ErrNeg": 0.0,
+            "ErrCorrPos": 0.0,
+            "ErrCorrNeg": 0.0,
+            "ErrUncorrPos": 0.0,
+            "ErrUncorrNeg": 0.0
+        }
+    },
+    "V02160B": {
+        "FCCD": {
+            "Central": 0.6263494561576082,
+            "ErrPos": 0.0451019017729406,
+            "ErrNeg": 0.0458627578253048,
+            "ErrCorrPos": 0.033116763251631265,
+            "ErrCorrNeg": 0.033987746715172684,
+            "ErrUncorrPos": 0.011985138521309557,
+            "ErrUncorrNeg": 0.011875011110132117
+        },
+        "ActiveVolume": {
+            "Central": 294.6229779132076,
+            "ErrPos": 1.1386214229630696,
+            "ErrNeg": 1.116964893816828,
+            "ErrCorrPos": 0.8435315650535244,
+            "ErrCorrNeg": 0.8204161110876385,
+            "ErrUncorrPos": 0.294545126753178,
+            "ErrUncorrNeg": 0.29708383867858856
+        },
+        "AV/Volume": {
+            "Central": 0.9491113379221126,
+            "ErrPos": 0.003668004816832826,
+            "ErrNeg": 0.0035982395273148615,
+            "ErrCorrPos": 0.0027173894512848573,
+            "ErrCorrNeg": 0.002642924317588724,
+            "ErrUncorrPos": 0.0009488605447925957,
+            "ErrUncorrNeg": 0.0009570388623467707
+        }
+    },
+    "V02162B": {
+        "FCCD": {
+            "Central": 0.0,
+            "ErrPos": 0.0,
+            "ErrNeg": 0.0,
+            "ErrCorrPos": 0.0,
+            "ErrCorrNeg": 0.0,
+            "ErrUncorrPos": 0.0,
+            "ErrUncorrNeg": 0.0
+        },
+        "ActiveVolume": {
+            "Central": 446.05253265695785,
+            "ErrPos": 0.0,
+            "ErrNeg": 0.0,
+            "ErrCorrPos": 0.0,
+            "ErrCorrNeg": 0.0,
+            "ErrUncorrPos": 0.0,
+            "ErrUncorrNeg": 0.0
+        },
+        "AV/Volume": {
+            "Central": 1.0,
+            "ErrPos": 0.0,
+            "ErrNeg": 0.0,
+            "ErrCorrPos": 0.0,
+            "ErrCorrNeg": 0.0,
+            "ErrUncorrPos": 0.0,
+            "ErrUncorrNeg": 0.0
+        }
+    },
+    "V02166B": {
+        "FCCD": {
+            "Central": 0.608547698072481,
+            "ErrPos": 0.04868208163228693,
+            "ErrNeg": 0.04937929856279932,
+            "ErrCorrPos": 0.03332480515049041,
+            "ErrCorrNeg": 0.03420126019506342,
+            "ErrUncorrPos": 0.015357276481796633,
+            "ErrUncorrNeg": 0.015178038367735902
+        },
+        "ActiveVolume": {
+            "Central": 455.3596706994218,
+            "ErrPos": 1.6474791004165468,
+            "ErrNeg": 1.6206358855134795,
+            "ErrCorrPos": 1.1406929605806226,
+            "ErrCorrNeg": 1.1097728881130138,
+            "ErrUncorrPos": 0.5060067981009979,
+            "ErrUncorrNeg": 0.5116304479943778
+        },
+        "AV/Volume": {
+            "Central": 0.9567993451250157,
+            "ErrPos": 0.003461674420935257,
+            "ErrNeg": 0.0034052715989619786,
+            "ErrCorrPos": 0.0023968180493363356,
+            "ErrCorrNeg": 0.0023318489556906075,
+            "ErrUncorrPos": 0.0010632188228443251,
+            "ErrUncorrNeg": 0.0010750352064229363
+        }
+    },
+    "V04199A": {
+        "FCCD": {
+            "Central": 1.0854469988541153,
+            "ErrPos": 0.04673670318054346,
+            "ErrNeg": 0.047473094118615666,
+            "ErrCorrPos": 0.03326260911463663,
+            "ErrCorrNeg": 0.034137428379821255,
+            "ErrUncorrPos": 0.01347409406590705,
+            "ErrUncorrNeg": 0.013335665738793967
+        },
+        "ActiveVolume": {
+            "Central": 513.314749568781,
+            "ErrPos": 1.6508748181925057,
+            "ErrNeg": 1.62176278999425,
+            "ErrCorrPos": 1.186765094253019,
+            "ErrCorrNeg": 1.154568417244377,
+            "ErrUncorrPos": 0.46338474494791626,
+            "ErrUncorrNeg": 0.46790734166893344
+        },
+        "AV/Volume": {
+            "Central": 0.9468490310327509,
+            "ErrPos": 0.003045167167464169,
+            "ErrNeg": 0.002991467764292821,
+            "ErrCorrPos": 0.0021890806381482664,
+            "ErrCorrNeg": 0.002129691360022723,
+            "ErrUncorrPos": 0.0008547492491066677,
+            "ErrUncorrNeg": 0.0008630915309651987
+        }
+    },
+    "V04545A": {
+        "FCCD": {
+            "Central": 1.0775633815127597,
+            "ErrPos": 0.04412612225498935,
+            "ErrNeg": 0.04489920476154219,
+            "ErrCorrPos": 0.03301022096936701,
+            "ErrCorrNeg": 0.03387840233038086,
+            "ErrUncorrPos": 0.011115901285622565,
+            "ErrUncorrNeg": 0.011020802431161325
+        },
+        "ActiveVolume": {
+            "Central": 525.7350788991661,
+            "ErrPos": 1.6497135440214379,
+            "ErrNeg": 1.6182337809185583,
+            "ErrCorrPos": 1.244488198048657,
+            "ErrCorrNeg": 1.2108682480103425,
+            "ErrUncorrPos": 0.40464058647739876,
+            "ErrUncorrNeg": 0.40793964645456526
+        },
+        "AV/Volume": {
+            "Central": 0.9285228390904499,
+            "ErrPos": 0.0029136284890636244,
+            "ErrNeg": 0.0028580307551795414,
+            "ErrCorrPos": 0.002197942958811594,
+            "ErrCorrNeg": 0.0021385653507489666,
+            "ErrUncorrPos": 0.0007146527619079635,
+            "ErrUncorrNeg": 0.0007204793705162249
+        }
+    },
+    "V04549A": {
+        "FCCD": {
+            "Central": 1.0681862154974233,
+            "ErrPos": 0.053832345155900185,
+            "ErrNeg": 0.0543753827132456,
+            "ErrCorrPos": 0.03310008796795083,
+            "ErrCorrNeg": 0.033970632865192085,
+            "ErrUncorrPos": 0.020732257187949577,
+            "ErrUncorrNeg": 0.020404749848053294
+        },
+        "ActiveVolume": {
+            "Central": 322.149225998604,
+            "ErrPos": 1.4405691343706621,
+            "ErrNeg": 1.4222526287122719,
+            "ErrCorrPos": 0.899517312146088,
+            "ErrCorrNeg": 0.8749682032025135,
+            "ErrUncorrPos": 0.5401158998162714,
+            "ErrUncorrNeg": 0.5482096884829275
+        },
+        "AV/Volume": {
+            "Central": 0.917316737312541,
+            "ErrPos": 0.004102006373343903,
+            "ErrNeg": 0.004049850304498892,
+            "ErrCorrPos": 0.0025613666566363102,
+            "ErrCorrNeg": 0.0024914633115319385,
+            "ErrUncorrPos": 0.0015379746868994237,
+            "ErrUncorrNeg": 0.001561021670138829
+        }
+    },
+    "V04549B": {
+        "FCCD": {
+            "Central": 1.1516018706805433,
+            "ErrPos": 0.04704075281344755,
+            "ErrNeg": 0.047766580555124616,
+            "ErrCorrPos": 0.033179727615576304,
+            "ErrCorrNeg": 0.03405236706582704,
+            "ErrUncorrPos": 0.013861025197871246,
+            "ErrUncorrNeg": 0.0137142134892978
+        },
+        "ActiveVolume": {
+            "Central": 268.3632085387167,
+            "ErrPos": 1.0472313748305169,
+            "ErrNeg": 1.0285927905827634,
+            "ErrCorrPos": 0.7462761994190714,
+            "ErrCorrNeg": 0.725788522999153,
+            "ErrUncorrPos": 0.3003839200366656,
+            "ErrUncorrNeg": 0.303365963142312
+        },
+        "AV/Volume": {
+            "Central": 0.9302545138358561,
+            "ErrPos": 0.003630123960625009,
+            "ErrNeg": 0.003565515152203158,
+            "ErrCorrPos": 0.002586892617874259,
+            "ErrCorrNeg": 0.0025158741143640473,
+            "ErrUncorrPos": 0.0010412511425070825,
+            "ErrUncorrNeg": 0.0010515880999261151
+        }
+    },
+    "V05261A": {
+        "FCCD": {
+            "Central": 0.0,
+            "ErrPos": 0.0,
+            "ErrNeg": 0.0,
+            "ErrCorrPos": 0.0,
+            "ErrCorrNeg": 0.0,
+            "ErrUncorrPos": 0.0,
+            "ErrUncorrNeg": 0.0
+        },
+        "ActiveVolume": {
+            "Central": 327.501493119847,
+            "ErrPos": 0.0,
+            "ErrNeg": 0.0,
+            "ErrCorrPos": 0.0,
+            "ErrCorrNeg": 0.0,
+            "ErrUncorrPos": 0.0,
+            "ErrUncorrNeg": 0.0
+        },
+        "AV/Volume": {
+            "Central": 1.0061082666266605,
+            "ErrPos": 0.0,
+            "ErrNeg": 0.0,
+            "ErrCorrPos": 0.0,
+            "ErrCorrNeg": 0.0,
+            "ErrUncorrPos": 0.0,
+            "ErrUncorrNeg": 0.0
+        }
+    },
+    "V05261B": {
+        "FCCD": {
+            "Central": 1.1864749176125493,
+            "ErrPos": 0.04591295968537379,
+            "ErrNeg": 0.04665728096195676,
+            "ErrCorrPos": 0.0330925037601324,
+            "ErrCorrNeg": 0.03396284918982495,
+            "ErrUncorrPos": 0.012820455925241392,
+            "ErrUncorrNeg": 0.012694431772131809
+        },
+        "ActiveVolume": {
+            "Central": 398.37557545403627,
+            "ErrPos": 1.432510802153672,
+            "ErrNeg": 1.4067745177882784,
+            "ErrCorrPos": 1.042463021522849,
+            "ErrCorrNeg": 1.01424295877041,
+            "ErrUncorrPos": 0.3894623709510938,
+            "ErrUncorrNeg": 0.39310683814687764
+        },
+        "AV/Volume": {
+            "Central": 0.9187903508034694,
+            "ErrPos": 0.003303859934034481,
+            "ErrNeg": 0.0032445032585819433,
+            "ErrCorrPos": 0.0024042763268129486,
+            "ErrCorrNeg": 0.0023391912087645794,
+            "ErrUncorrPos": 0.0008982334522468216,
+            "ErrUncorrNeg": 0.0009066388402767522
+        }
+    },
+    "V05266A": {
+        "FCCD": {
+            "Central": 1.024516223971166,
+            "ErrPos": 0.046097354880318075,
+            "ErrNeg": 0.04683420605346711,
+            "ErrCorrPos": 0.0330159625391675,
+            "ErrCorrNeg": 0.03388429490564948,
+            "ErrUncorrPos": 0.0130813923411508,
+            "ErrUncorrNeg": 0.012949911147817517
+        },
+        "ActiveVolume": {
+            "Central": 346.72610694313704,
+            "ErrPos": 1.2759077816208446,
+            "ErrNeg": 1.2528602411265979,
+            "ErrCorrPos": 0.922807606489016,
+            "ErrCorrNeg": 0.8976262626096627,
+            "ErrUncorrPos": 0.3524906766925824,
+            "ErrUncorrNeg": 0.35583317812432824
+        },
+        "AV/Volume": {
+            "Central": 0.9237687500043421,
+            "ErrPos": 0.0033993509947665146,
+            "ErrNeg": 0.0033379463377571916,
+            "ErrCorrPos": 0.0024586000652112583,
+            "ErrCorrNeg": 0.0023915103996423603,
+            "ErrUncorrPos": 0.000939127066799994,
+            "ErrUncorrNeg": 0.0009480323620969511
+        }
+    },
+    "V05266B": {
+        "FCCD": {
+            "Central": 0.9959288882531392,
+            "ErrPos": 0.04394913435223735,
+            "ErrNeg": 0.0447342303272843,
+            "ErrCorrPos": 0.03320818573612727,
+            "ErrCorrNeg": 0.03408157364576725,
+            "ErrUncorrPos": 0.01074094861611008,
+            "ErrUncorrNeg": 0.01065265668151727
+        },
+        "ActiveVolume": {
+            "Central": 332.83107238719174,
+            "ErrPos": 1.1957591824192377,
+            "ErrNeg": 1.172102503345343,
+            "ErrCorrPos": 0.9107615684633288,
+            "ErrCorrNeg": 0.885890773128267,
+            "ErrUncorrPos": 0.2844997517791512,
+            "ErrUncorrNeg": 0.28670029565620325
+        },
+        "AV/Volume": {
+            "Central": 0.9242547424322524,
+            "ErrPos": 0.0033205616507829827,
+            "ErrNeg": 0.003254868271653999,
+            "ErrCorrPos": 0.00252913795830334,
+            "ErrCorrNeg": 0.002460073040861599,
+            "ErrUncorrPos": 0.0007900411548618091,
+            "ErrUncorrNeg": 0.0007961519518487892
+        }
+    },
+    "V05267A": {
+        "FCCD": {
+            "Central": 0.0,
+            "ErrPos": 0.0,
+            "ErrNeg": 0.0,
+            "ErrCorrPos": 0.0,
+            "ErrCorrNeg": 0.0,
+            "ErrUncorrPos": 0.0,
+            "ErrUncorrNeg": 0.0
+        },
+        "ActiveVolume": {
+            "Central": 392.2514643052526,
+            "ErrPos": 0.0,
+            "ErrNeg": 0.0,
+            "ErrCorrPos": 0.0,
+            "ErrCorrNeg": 0.0,
+            "ErrUncorrPos": 0.0,
+            "ErrUncorrNeg": 0.0
+        },
+        "AV/Volume": {
+            "Central": 1.0,
+            "ErrPos": 0.0,
+            "ErrNeg": 0.0,
+            "ErrCorrPos": 0.0,
+            "ErrCorrNeg": 0.0,
+            "ErrUncorrPos": 0.0,
+            "ErrUncorrNeg": 0.0
+        }
+    },
+    "V05267B": {
+        "FCCD": {
+            "Central": 1.0863016440191113,
+            "ErrPos": 0.04565082963720046,
+            "ErrNeg": 0.04640046585731006,
+            "ErrCorrPos": 0.033097362101634165,
+            "ErrCorrNeg": 0.03396783530755565,
+            "ErrUncorrPos": 0.012553467535566076,
+            "ErrUncorrNeg": 0.01243263054975463
+        },
+        "ActiveVolume": {
+            "Central": 394.70432168466454,
+            "ErrPos": 1.3903330490412031,
+            "ErrNeg": 1.3649677501993551,
+            "ErrCorrPos": 1.01751251824345,
+            "ErrCorrNeg": 0.9899037299633164,
+            "ErrUncorrPos": 0.3722365817466766,
+            "ErrUncorrNeg": 0.37563776473621147
+        },
+        "AV/Volume": {
+            "Central": 0.9257308459310408,
+            "ErrPos": 0.003260856592908201,
+            "ErrNeg": 0.003201365378183385,
+            "ErrCorrPos": 0.0023864515094199623,
+            "ErrCorrNeg": 0.0023216984638474436,
+            "ErrUncorrPos": 0.0008730355022110725,
+            "ErrUncorrNeg": 0.0008810125620836162
+        }
+    },
+    "V05268A": {
+        "FCCD": {
+            "Central": 1.044989665146236,
+            "ErrPos": 0.04586234191047356,
+            "ErrNeg": 0.04660934609998835,
+            "ErrCorrPos": 0.03312675183831226,
+            "ErrCorrNeg": 0.0339979980054812,
+            "ErrUncorrPos": 0.012735590072160852,
+            "ErrUncorrNeg": 0.012611348094506925
+        },
+        "ActiveVolume": {
+            "Central": 385.93213592198566,
+            "ErrPos": 1.3544308452044334,
+            "ErrNeg": 1.3297771651700714,
+            "ErrCorrPos": 0.9876569112550442,
+            "ErrCorrNeg": 0.960802003391052,
+            "ErrUncorrPos": 0.3661777902239578,
+            "ErrUncorrNeg": 0.36956096532077254
+        },
+        "AV/Volume": {
+            "Central": 0.9298856024213595,
+            "ErrPos": 0.003263438374786154,
+            "ErrNeg": 0.003204036474874661,
+            "ErrCorrPos": 0.0023797135724755725,
+            "ErrCorrNeg": 0.0023150079160848547,
+            "ErrUncorrPos": 0.0008822884216218574,
+            "ErrUncorrNeg": 0.0008904400252851552
+        }
+    },
+    "V05268B": {
+        "FCCD": {
+            "Central": 0.0,
+            "ErrPos": 0.0,
+            "ErrNeg": 0.0,
+            "ErrCorrPos": 0.0,
+            "ErrCorrNeg": 0.0,
+            "ErrUncorrPos": 0.0,
+            "ErrUncorrNeg": 0.0
+        },
+        "ActiveVolume": {
+            "Central": 327.5935072270781,
+            "ErrPos": 0.0,
+            "ErrNeg": 0.0,
+            "ErrCorrPos": 0.0,
+            "ErrCorrNeg": 0.0,
+            "ErrUncorrPos": 0.0,
+            "ErrUncorrNeg": 0.0
+        },
+        "AV/Volume": {
+            "Central": 1.011177721850942,
+            "ErrPos": 0.0,
+            "ErrNeg": 0.0,
+            "ErrCorrPos": 0.0,
+            "ErrCorrNeg": 0.0,
+            "ErrUncorrPos": 0.0,
+            "ErrUncorrNeg": 0.0
+        }
+    },
+    "V05612A": {
+        "FCCD": {
+            "Central": 1.4367575144434168,
+            "ErrPos": 0.04673745612163538,
+            "ErrNeg": 0.04746732474195081,
+            "ErrCorrPos": 0.03313515122577848,
+            "ErrCorrNeg": 0.03400661830003071,
+            "ErrUncorrPos": 0.013602304895856898,
+            "ErrUncorrNeg": 0.0134607064419201
+        },
+        "ActiveVolume": {
+            "Central": 359.2958595383385,
+            "ErrPos": 1.312242622886174,
+            "ErrNeg": 1.2890705270280591,
+            "ErrCorrPos": 0.939807401068208,
+            "ErrCorrNeg": 0.9142102952738469,
+            "ErrUncorrPos": 0.371812081857513,
+            "ErrUncorrNeg": 0.37547293471470766
+        },
+        "AV/Volume": {
+            "Central": 0.9007618889381814,
+            "ErrPos": 0.0032898184389180685,
+            "ErrNeg": 0.0032317255322460436,
+            "ErrCorrPos": 0.002356115906573586,
+            "ErrCorrNeg": 0.002291943451604772,
+            "ErrUncorrPos": 0.0009321403080301272,
+            "ErrUncorrNeg": 0.0009413181391885184
+        }
+    },
+    "V05612B": {
+        "FCCD": {
+            "Central": 0.9721122929473955,
+            "ErrPos": 0.045713259061545664,
+            "ErrNeg": 0.04646242306141113,
+            "ErrCorrPos": 0.033112139351533454,
+            "ErrCorrNeg": 0.03398300120474518,
+            "ErrUncorrPos": 0.012601119710011988,
+            "ErrUncorrNeg": 0.012479421856666173
+        },
+        "ActiveVolume": {
+            "Central": 354.36583329426395,
+            "ErrPos": 1.2981857906967775,
+            "ErrNeg": 1.2745130548787529,
+            "ErrCorrPos": 0.9492277777353024,
+            "ErrCorrNeg": 0.9234574550040975,
+            "ErrUncorrPos": 0.3484059420543417,
+            "ErrUncorrNeg": 0.35159799427179905
+        },
+        "AV/Volume": {
+            "Central": 0.9366055297477777,
+            "ErrPos": 0.0034311659758600177,
+            "ErrNeg": 0.003368597824000563,
+            "ErrCorrPos": 0.0025088535690708236,
+            "ErrCorrNeg": 0.0024407413965483737,
+            "ErrUncorrPos": 0.0009208532574699335,
+            "ErrUncorrNeg": 0.000929290001301486
+        }
+    },
+    "V07298B": {
+        "FCCD": {
+            "Central": 1.0254455877624167,
+            "ErrPos": 0.0459199664566865,
+            "ErrNeg": 0.04664944379040581,
+            "ErrCorrPos": 0.03279882542539836,
+            "ErrCorrNeg": 0.03366144700323914,
+            "ErrUncorrPos": 0.013121141031288142,
+            "ErrUncorrNeg": 0.012987996787166445
+        },
+        "ActiveVolume": {
+            "Central": 346.6141955509182,
+            "ErrPos": 1.2887911052411027,
+            "ErrNeg": 1.2657066965473405,
+            "ErrCorrPos": 0.9296681283923931,
+            "ErrCorrNeg": 0.9043410390826239,
+            "ErrUncorrPos": 0.35851970507565056,
+            "ErrUncorrNeg": 0.3619587914164981
+        },
+        "AV/Volume": {
+            "Central": 0.9227229819947592,
+            "ErrPos": 0.00343089575401323,
+            "ErrNeg": 0.003369442660917654,
+            "ErrCorrPos": 0.002474873097255137,
+            "ErrCorrNeg": 0.0024074497554731344,
+            "ErrUncorrPos": 0.0009544166846526814,
+            "ErrUncorrNeg": 0.0009635718896169321
+        }
+    },
+    "V07302A": {
+        "FCCD": {
+            "Central": 1.211814918759766,
+            "ErrPos": 0.04509330171037229,
+            "ErrNeg": 0.04585289507631618,
+            "ErrCorrPos": 0.03308712664117763,
+            "ErrCorrNeg": 0.03395733065059714,
+            "ErrUncorrPos": 0.012006175069194658,
+            "ErrUncorrNeg": 0.01189556442571904
+        },
+        "ActiveVolume": {
+            "Central": 293.6241611344041,
+            "ErrPos": 1.1272002682964057,
+            "ErrNeg": 1.1058031072886365,
+            "ErrCorrPos": 0.8345034812492145,
+            "ErrCorrNeg": 0.8116446681315779,
+            "ErrUncorrPos": 0.29215983294994885,
+            "ErrUncorrNeg": 0.2946858595217918
+        },
+        "AV/Volume": {
+            "Central": 0.9052327726590655,
+            "ErrPos": 0.00347511805659928,
+            "ErrNeg": 0.003409151375549424,
+            "ErrCorrPos": 0.002572744345037292,
+            "ErrCorrNeg": 0.0025022714428816206,
+            "ErrUncorrPos": 0.0009007183013111097,
+            "ErrUncorrNeg": 0.0009085059507627502
+        }
+    },
+    "V07302B": {
+        "FCCD": {
+            "Central": 0.9496971873739345,
+            "ErrPos": 0.04441633708331105,
+            "ErrNeg": 0.04518634875582539,
+            "ErrCorrPos": 0.03305168302614814,
+            "ErrCorrNeg": 0.03392095485501734,
+            "ErrUncorrPos": 0.011364654057163137,
+            "ErrUncorrNeg": 0.011265393900807719
+        },
+        "ActiveVolume": {
+            "Central": 264.64891410147345,
+            "ErrPos": 1.0466572663731313,
+            "ErrNeg": 1.0262362767423383,
+            "ErrCorrPos": 0.785467091742305,
+            "ErrCorrNeg": 0.7639005742705649,
+            "ErrUncorrPos": 0.2606934411808197,
+            "ErrUncorrNeg": 0.26282337626355456
+        },
+        "AV/Volume": {
+            "Central": 0.9214478142861474,
+            "ErrPos": 0.003644224476343161,
+            "ErrNeg": 0.0035731231974102107,
+            "ErrCorrPos": 0.0027348192126045445,
+            "ErrCorrNeg": 0.002659729464159599,
+            "ErrUncorrPos": 0.0009076757499284493,
+            "ErrUncorrNeg": 0.0009150917033745598
+        }
+    },
+    "V07647A": {
+        "FCCD": {
+            "Central": 1.3138183918533803,
+            "ErrPos": 0.04572989815572859,
+            "ErrNeg": 0.04646241100290749,
+            "ErrCorrPos": 0.0327833672056681,
+            "ErrCorrNeg": 0.033645582226454085,
+            "ErrUncorrPos": 0.012946530950060264,
+            "ErrUncorrNeg": 0.012816828776453626
+        },
+        "ActiveVolume": {
+            "Central": 309.9682827040272,
+            "ErrPos": 1.1520893164560562,
+            "ErrNeg": 1.1312861887346344,
+            "ErrCorrPos": 0.834011027033398,
+            "ErrCorrNeg": 0.8112748198989266,
+            "ErrUncorrPos": 0.3175379968429297,
+            "ErrUncorrNeg": 0.3205425456224589
+        },
+        "AV/Volume": {
+            "Central": 1.0074978464387605,
+            "ErrPos": 0.0037446654061146223,
+            "ErrNeg": 0.0036770484673891435,
+            "ErrCorrPos": 0.002710807397170445,
+            "ErrCorrNeg": 0.0026369073209293603,
+            "ErrUncorrPos": 0.0010321018821373151,
+            "ErrUncorrNeg": 0.0010418676439711838
+        }
+    },
+    "V07647B": {
+        "FCCD": {
+            "Central": 1.0830456445057886,
+            "ErrPos": 0.044492258175670374,
+            "ErrNeg": 0.04526092243334334,
+            "ErrCorrPos": 0.03305119954187541,
+            "ErrCorrNeg": 0.0339204586549251,
+            "ErrUncorrPos": 0.011441058633794743,
+            "ErrUncorrNeg": 0.01134046377841802
+        },
+        "ActiveVolume": {
+            "Central": 295.94792027976456,
+            "ErrPos": 1.105706439359949,
+            "ErrNeg": 1.0844470373505146,
+            "ErrCorrPos": 0.82842421971867,
+            "ErrCorrNeg": 0.8058193438245098,
+            "ErrUncorrPos": 0.27680391815675875,
+            "ErrUncorrNeg": 0.27909733991145913
+        },
+        "AV/Volume": {
+            "Central": 0.9159318381467163,
+            "ErrPos": 0.0034220606466713877,
+            "ErrNeg": 0.0033562647352083363,
+            "ErrCorrPos": 0.002563897450655883,
+            "ErrCorrNeg": 0.002493937420157022,
+            "ErrUncorrPos": 0.0008566828965173023,
+            "ErrUncorrNeg": 0.0008637808278068038
+        }
+    },
+    "V08682A": {
+        "FCCD": {
+            "Central": 1.1381254384346393,
+            "ErrPos": 0.04628482949910406,
+            "ErrNeg": 0.04702612604026979,
+            "ErrCorrPos": 0.033179092571238966,
+            "ErrCorrNeg": 0.03405171531958229,
+            "ErrUncorrPos": 0.013105736927865097,
+            "ErrUncorrNeg": 0.012974410720687723
+        },
+        "ActiveVolume": {
+            "Central": 562.2292571221939,
+            "ErrPos": 1.78300413086572,
+            "ErrNeg": 1.751513097256975,
+            "ErrCorrPos": 1.2907305151624087,
+            "ErrCorrNeg": 1.2559056103176545,
+            "ErrUncorrPos": 0.4915807363130398,
+            "ErrUncorrNeg": 0.4962886260614141
+        },
+        "AV/Volume": {
+            "Central": 0.9345774326281924,
+            "ErrPos": 0.0029638361964997584,
+            "ErrNeg": 0.002911489562154368,
+            "ErrCorrPos": 0.002145544003259059,
+            "ErrCorrNeg": 0.002087655571184399,
+            "ErrUncorrPos": 0.0008171404398704674,
+            "ErrUncorrNeg": 0.0008249662288318804
+        }
+    },
+    "V08682B": {
+        "FCCD": {
+            "Central": 1.4573073630132825,
+            "ErrPos": 0.04694494957567219,
+            "ErrNeg": 0.04770966488778727,
+            "ErrCorrPos": 0.033910299297494895,
+            "ErrCorrNeg": 0.03480215306072165,
+            "ErrUncorrPos": 0.013034650278177518,
+            "ErrUncorrNeg": 0.012907511827065399
+        },
+        "ActiveVolume": {
+            "Central": 239.7153232147715,
+            "ErrPos": 1.0816977864789976,
+            "ErrNeg": 1.0613883624220932,
+            "ErrCorrPos": 0.7887515109768515,
+            "ErrCorrNeg": 0.7669805376007446,
+            "ErrUncorrPos": 0.29234512770290166,
+            "ErrUncorrNeg": 0.2949985975667744
+        },
+        "AV/Volume": {
+            "Central": 0.8744011524292336,
+            "ErrPos": 0.003945670966682302,
+            "ErrNeg": 0.0038715889949403337,
+            "ErrCorrPos": 0.002877101142009786,
+            "ErrCorrNeg": 0.0027976879282265443,
+            "ErrUncorrPos": 0.0010663770389908178,
+            "ErrUncorrNeg": 0.0010760560076766845
+        }
+    },
+    "V09374A": {
+        "FCCD": {
+            "Central": 1.0848746098905515,
+            "ErrPos": 0.045308314002535655,
+            "ErrNeg": 0.04607078669500542,
+            "ErrCorrPos": 0.03322941389867995,
+            "ErrCorrNeg": 0.03410336011706572,
+            "ErrUncorrPos": 0.012078900103855927,
+            "ErrUncorrNeg": 0.011967426577939921
+        },
+        "ActiveVolume": {
+            "Central": 446.7759275380832,
+            "ErrPos": 1.4882937922979522,
+            "ErrNeg": 1.4605895076128945,
+            "ErrCorrPos": 1.1013889023347474,
+            "ErrCorrNeg": 1.0715035967540985,
+            "ErrUncorrPos": 0.38629866748385666,
+            "ErrUncorrNeg": 0.38968136112112006
+        },
+        "AV/Volume": {
+            "Central": 0.9318876088656372,
+            "ErrPos": 0.003104291117555502,
+            "ErrNeg": 0.00304650537302642,
+            "ErrCorrPos": 0.0022972828376935928,
+            "ErrCorrNeg": 0.0022349479081658075,
+            "ErrUncorrPos": 0.0008057438177861975,
+            "ErrUncorrNeg": 0.0008127994581885734
+        }
+    },
+    "V09724A": {
+        "FCCD": {
+            "Central": 1.1563119649561295,
+            "ErrPos": 0.04549996341088258,
+            "ErrNeg": 0.04625083971899113,
+            "ErrCorrPos": 0.033063901049211086,
+            "ErrCorrNeg": 0.033933494216732196,
+            "ErrUncorrPos": 0.012436062361671718,
+            "ErrUncorrNeg": 0.012317345502258714
+        },
+        "ActiveVolume": {
+            "Central": 442.4508976351765,
+            "ErrPos": 1.4845270649927897,
+            "ErrNeg": 1.457338682694342,
+            "ErrCorrPos": 1.088864210281372,
+            "ErrCorrNeg": 1.059322341938298,
+            "ErrUncorrPos": 0.39504426677535776,
+            "ErrUncorrNeg": 0.398624125629226
+        },
+        "AV/Volume": {
+            "Central": 0.9270086834386947,
+            "ErrPos": 0.00311033266607319,
+            "ErrNeg": 0.003053368454645322,
+            "ErrCorrPos": 0.0022813527634625297,
+            "ErrCorrNeg": 0.0022194576048687464,
+            "ErrUncorrPos": 0.0008276838573517686,
+            "ErrUncorrNeg": 0.0008351842608106397
+        }
+    },
+    "V09372A": {
+        "FCCD": {
+            "Central": 1.007440386732285,
+            "ErrPos": 0.04747122824554362,
+            "ErrNeg": 0.048183981670770426,
+            "ErrCorrPos": 0.03310649713627556,
+            "ErrCorrNeg": 0.033977210597080365,
+            "ErrUncorrPos": 0.014364731109268059,
+            "ErrUncorrNeg": 0.014206771073690061
+        },
+        "ActiveVolume": {
+            "Central": 694.5186466938768,
+            "ErrPos": 2.1259947809403457,
+            "ErrNeg": 2.090776784532409,
+            "ErrCorrPos": 1.4987564140585619,
+            "ErrCorrNeg": 1.4585050133498498,
+            "ErrUncorrPos": 0.6264364708522407,
+            "ErrUncorrNeg": 0.6330608882195747
+        },
+        "AV/Volume": {
+            "Central": 0.9470763559476022,
+            "ErrPos": 0.002899100548964917,
+            "ErrNeg": 0.0028510757308256585,
+            "ErrCorrPos": 0.0020437705594178457,
+            "ErrCorrNeg": 0.001988881968468692,
+            "ErrUncorrPos": 0.0008542364886409137,
+            "ErrUncorrNeg": 0.0008632698372635916
+        }
+    }
+}
