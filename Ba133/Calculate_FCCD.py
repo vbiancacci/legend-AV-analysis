@@ -1,3 +1,4 @@
+from ast import Invert
 import sys
 import pandas as pd
 import numpy as np
@@ -6,6 +7,7 @@ from datetime import datetime
 import json
 import argparse
 import os
+from pyrsistent import b
 from scipy import optimize
 from scipy import stats
 
@@ -55,7 +57,10 @@ def main():
     FCCD_list = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0] #mm
     #[0.0, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 3.0] #mm
     O_Ba133_list = []
-    O_Ba133_err_pct_list = []
+    O_Ba133_tot_err_pct_list = [] 
+    O_Ba133_corr_err_pct_list = [] #corr is actually all systematic errors
+    O_Ba133_uncorr_err_pct_list = [] #uncorr is actually only statistical error
+
     DLF = 1.0 #considering 0 TL
 
     for FCCD in FCCD_list:
@@ -67,13 +72,16 @@ def main():
             C_79 = PeakCounts['C_79']
             C_81 = PeakCounts['C_81']
             O_Ba133 = PeakCounts['O_Ba133']
-            O_Ba133_err = PeakCounts ['O_Ba133_err']
+            O_Ba133_err = PeakCounts ['O_Ba133_err'] #stat fit error on MC
             O_Ba133_list.append(O_Ba133)
 
             #get errors:
-            O_Ba133_err_pct = uncertainty(O_Ba133, O_Ba133_err)
-            O_Ba133_err_pct_list.append(O_Ba133_err_pct)
+            O_Ba133_tot_err_pct, O_Ba133_corr_err_pct, O_Ba133_uncorr_err_pct = error_O_Ba133_MC(O_Ba133, O_Ba133_err) #stat and syst error on MC
+            O_Ba133_tot_err_pct_list.append(O_Ba133_tot_err_pct)
+            O_Ba133_corr_err_pct_list.append(O_Ba133_corr_err_pct)
+            O_Ba133_uncorr_err_pct_list.append(O_Ba133_uncorr_err_pct)
 
+            
     #Get count ratio for data
     if cuts == False:
         with open(dir+"/PeakCounts/"+detector+"/PeakCounts_data_"+detector+"_"+energy_filter+"_run"+str(run)+".json") as json_file:
@@ -94,6 +102,7 @@ def main():
                 C_81 = PeakCounts['C_81']
                 O_Ba133_data = PeakCounts['O_Ba133']
                 O_Ba133_data_err = PeakCounts ['O_Ba133_err']
+                O_Ba133_data_err = PeakCounts ['O_Ba133_err']
         else:
             with open(dir+"/PeakCounts/"+detector+"/PeakCounts_data_"+detector+"_cuts_"+energy_filter+"_run"+str(run)+"_"+str(sigma_cuts)+"sigma.json") as json_file:
                 PeakCounts = json.load(json_file)
@@ -103,45 +112,46 @@ def main():
                 O_Ba133_data = PeakCounts['O_Ba133']
                 O_Ba133_data_err = PeakCounts ['O_Ba133_err']
 
+    #========= PLOTTING ===========
+                O_Ba133_data_err = PeakCounts ['O_Ba133_err']
+
+    plot_colors = {"MC":"black", "MC_fit": "black", "data": "orange", "data_err_stat": "green", "MC_err_stat": "green", "MC_err_syst": "pink", "MC_err_total": "red", "FCCD": "orange", "FCCD_err_total": "blue", "FCCD_err_MCstatsyst": "red", "FCCD_err_MCstat": "purple", "FCCD_err_MCsyst": "pink", "FCCD_err_datastat": "green", "FCCD_err_statMCstatdata": "grey"}
 
     #plot and fit exp decay
+    print("fitting exp decay")
     xdata, ydata = np.array(FCCD_list), np.array(O_Ba133_list)
-    yerr = O_Ba133_err_pct_list*ydata/100 #get absolute error, not percentage
+    yerr = O_Ba133_tot_err_pct_list*ydata/100 #absolute total error
     aguess = max(ydata)
     bguess = 1
     cguess = min(ydata)
     p_guess = [aguess,bguess,cguess]
-    #bounds=([0, 0, 0, 0, -np.inf], [np.inf]*5)
-    popt, pcov = optimize.curve_fit(exponential_decay, xdata, ydata, p0=p_guess, sigma = yerr, maxfev = 10**7, method ="trf") #, bounds = bounds)
+    popt, pcov = optimize.curve_fit(exponential_decay, xdata, ydata, p0=p_guess, sigma = yerr,absolute_sigma=False, maxfev = 10**7, method ="trf") #, bounds = bounds)
     a,b,c = popt[0],popt[1],popt[2]
     a_err, b_err, c_err = np.sqrt(pcov[0][0]), np.sqrt(pcov[1][1]), np.sqrt(pcov[2][2])
-    #a,b = popt[0],popt[1]
-    #a_err, b_err= np.sqrt(pcov[0][0]), np.sqrt(pcov[1][1])
     chi_sq, p_value, residuals, dof = chi_sq_calc(xdata, ydata, yerr, exponential_decay, popt)
 
     fig, ax = plt.subplots()
-    plt.errorbar(xdata, ydata, xerr=0, yerr =yerr, label = "simulations", elinewidth = 1, fmt='x', ms = 3.0, mew = 3.0)
+    plt.errorbar(xdata, ydata, xerr=0, yerr =yerr, label = "MC", color= plot_colors["MC"], elinewidth = 1, fmt='x', ms = 3.0, mew = 3.0)
     xfit = np.linspace(min(xdata), max(xdata), 1000)
     yfit = exponential_decay(xfit,*popt)
-    plt.plot(xfit, yfit, "g", label = "fit: a*exp(-bx)")#"+c")
+    plt.plot(xfit, yfit, color=plot_colors["MC_fit"])
 
 
-    #fit exp decay of error bars:
+    #=====fit exp decay of error bars========
+
+    # MC stat and syst
+    print("fitting exp decay of total MC O_Ba133 errors")
     y_uplim = ydata+yerr
     p_guess_up = [max(y_uplim), 1, min(y_uplim)]
     popt_up, pcov_up = optimize.curve_fit(exponential_decay, xdata, y_uplim, p0=p_guess_up, maxfev = 10**7, method ="trf") #, bounds = bounds)
     yfit_up = exponential_decay(xfit,*popt_up)
-    plt.plot(xfit, yfit_up, color='grey', linestyle='dashed', linewidth=1)
+    plt.plot(xfit, yfit_up, color=plot_colors["MC_err_total"], linestyle='dashed', linewidth=1, label="MC err (stat/corr + syst/uncorr)")
 
     y_lowlim = ydata-yerr
     p_guess_low = [max(y_lowlim), 1, min(y_lowlim)]
     popt_low, pcov_low = optimize.curve_fit(exponential_decay, xdata, y_lowlim, p0=p_guess_low, maxfev = 10**7, method ="trf") #, bounds = bounds)
     yfit_low = exponential_decay(xfit,*popt_low)
-    plt.plot(xfit, yfit_low, color='grey', linestyle='dashed', linewidth=1)
-
-
-    #calculate FCCD of data - invert eq
-    FCCD_data = (1/b)*np.log(a/(O_Ba133_data-c))
+    plt.plot(xfit, yfit_low, color=plot_colors["MC_err_total"], linestyle='dashed', linewidth=1)
 
     a_up, b_up, c_up = popt_up[0], popt_up[1], popt_up[2]
     FCCD_data_err_up = (1/b_up)*np.log(a_up/(O_Ba133_data-O_Ba133_data_err-c_up))-FCCD_data
@@ -163,16 +173,38 @@ def main():
     info_str = '\n'.join((r'$a=%.3f \pm %.3f$' % (a, np.sqrt(pcov[0][0])), r'$b=%.3f \pm %.3f$' % (b, np.sqrt(pcov[1][1])), r'$\chi^2/dof=%.2f/%.0f$'%(chi_sq, dof), r'FCCD_data=$%.2f^{+%.2f}_{-%.2f}$ mm' % (FCCD_data, FCCD_data_err_up, FCCD_data_err_low)))
     plt.text(0.05, 0.9, info_str, transform=ax.transAxes, fontsize=9,verticalalignment='top', bbox=props) #ax.text..ax.tra
 
-    #plot data line
-    plt.hlines(O_Ba133_data, 0, FCCD_list[-1], colors="orange", label = 'data')
-    plt.plot(xfit, [O_Ba133_data+O_Ba133_data_err]*(len(xfit)), color = 'grey', linestyle = 'dashed', linewidth = '1.0')
-    plt.plot(xfit, [O_Ba133_data-O_Ba133_data_err]*(len(xfit)), color = 'grey', linestyle = 'dashed', linewidth = '1.0')
+    #plot horizontal data line and errors
+    plt.hlines(O_Ba133_data, 0, FCCD_list[-1], color=plot_colors["data"], label = 'data')
 
+    plt.plot(xfit, [O_Ba133_data+O_Ba133_data_err]*(len(xfit)), plot_colors["data_err_stat"], label = 'Data err (stat/uncorr)', linestyle = 'dashed', linewidth = '1.0')
+    plt.plot(xfit, [O_Ba133_data-O_Ba133_data_err]*(len(xfit)), plot_colors["data_err_stat"], linestyle = 'dashed', linewidth = '1.0')
 
-    plt.vlines(FCCD_data, 0, O_Ba133_data, colors='orange', linestyles='dashed')
-    plt.vlines(FCCD_data+FCCD_data_err_up, 0, O_Ba133_data, colors='grey', linestyles='dashed', linewidths=1)
-    plt.vlines(FCCD_data-FCCD_data_err_low, 0, O_Ba133_data, colors='grey', linestyles='dashed', linewidths=1)
+    #plot vertical lines
+    plt.vlines(FCCD_data, 0, O_Ba133_data, color=plot_colors["FCCD"] , linestyles='dashed')
 
+    #plot total error line
+    plt.vlines(FCCD_data+FCCD_err_total_up, 0, O_Ba133_data-O_Ba133_data_err, color=plot_colors["FCCD_err_total"], linestyles='dashed', linewidths=1, label="FCCD total err")
+    plt.vlines(FCCD_data-FCCD_err_total_low, 0, O_Ba133_data+O_Ba133_data_err, color=plot_colors["FCCD_err_total"], linestyles='dashed', linewidths=1)
+
+    # #plot stat data error line
+    # plt.vlines(FCCD_data+FCCD_err_statdata_up, 0, O_Ba133_data-O_Ba133_data_err, color=plot_colors["FCCD_err_datastat"], linestyles='dashed', linewidths=1, label="FCCD stat data err")
+    # plt.vlines(FCCD_data-FCCD_err_statdata_low, 0, O_Ba133_data+O_Ba133_data_err, color=plot_colors["FCCD_err_datastat"], linestyles='dashed', linewidths=1)
+
+    # plot syst MC/total corr error line
+    plt.vlines(FCCD_data+FCCD_err_corr_up, 0, O_Ba133_data, color=plot_colors["FCCD_err_MCsyst"], linestyles='dashed', linewidths=1, label = "FCCD corr err")
+    plt.vlines(FCCD_data-FCCD_err_corr_low, 0, O_Ba133_data, color=plot_colors["FCCD_err_MCsyst"], linestyles='dashed', linewidths=1)
+
+    # # #plot stat MC error line
+    # plt.vlines(FCCD_data+FCCD_err_statMC_up, 0, O_Ba133_data, color=plot_colors["FCCD_err_MCstat"], linestyles='dashed', linewidths=1, label = "FCCD stat MC err")
+    # plt.vlines(FCCD_data-FCCD_err_statMC_low, 0, O_Ba133_data, color=plot_colors["FCCD_err_MCstat"], linestyles='dashed', linewidths=1)
+
+    # #plot syst+stat MC error line
+    # plt.vlines(FCCD_data+FCCD_err_statsystMC_up, 0, O_Ba133_data, color=plot_colors["FCCD_err_MCstatsyst"], linestyles='dashed', linewidths=1, label = "FCCD syst+stat MC err")
+    # plt.vlines(FCCD_data-FCCD_err_statsystMC_low, 0, O_Ba133_data, color=plot_colors["FCCD_err_MCstatsyst"], linestyles='dashed', linewidths=1)
+
+    # #plot stat MC + stat data/ total uncorr:
+    plt.vlines(FCCD_data+FCCD_err_uncorr_up, 0, O_Ba133_data-O_Ba133_data_err, color=plot_colors["FCCD_err_statMCstatdata"], linestyles='dashed', linewidths=1, label = "FCCD uncorr err")
+    plt.vlines(FCCD_data-FCCD_err_uncorr_low, 0, O_Ba133_data-O_Ba133_data_err, color=plot_colors["FCCD_err_statMCstatdata"], linestyles='dashed', linewidths=1)
 
     plt.ylabel(r'$O_{Ba133} = \frac{C_{79.6keV}+C_{91keV}}{C_{356keV}}$')
     plt.xlabel("FCCD [mm]")
@@ -187,16 +219,24 @@ def main():
         plt.savefig(dir+"/FCCD/plots/FCCD_OBa133_"+MC_id+"_"+smear+"_"+TL_model+"_fracFCCDbore"+frac_FCCDbore+"_"+energy_filter+"_run"+str(run)+"_cuts.pdf")
     '''
 
+
     #Save interpolated fccd for data to a json file
 
     FCCD_data_dict = {
         "FCCD": FCCD_data,
-        "FCCD_err_up": FCCD_data_err_up,
-        "FCCD_err_low": FCCD_data_err_low,
-        "FCCD_uncorr_err_up": FCCD_data_uncerr_up,
-        "FCCD_uncorr_err_low": FCCD_data_uncerr_low,
-        "FCCD_corr_err_up": FCCD_data_corerr_up,
-        "FCCD_corr_err_low": FCCD_data_corerr_low,
+
+        "FCC_err_total_up": FCCD_err_total_up,
+        "FCCD_err_total_low": FCCD_err_total_low,
+
+        "FCCD_err_corr_up": FCCD_err_corr_up,
+        "FCCD_err_corr_low": FCCD_err_corr_low,
+
+        "FCCD_err_uncorr_up": FCCD_err_uncorr_up,
+        "FCCD_err_uncorr_low": FCCD_err_uncorr_low,
+
+        "FCCD_err_corr_uncorr_quadrature_up": FCCD_err_corr_uncorr_quadrature_up,
+        "FCCD_err_corr_uncorr_quadrature_low": FCCD_err_corr_uncorr_quadrature_low,
+
         "O_Ba133_data": O_Ba133_data,
         "O_Ba133_data_err": O_Ba133_data_err,
         "a": a,
@@ -224,9 +264,9 @@ def exponential_decay(x, a, b ,c):
 
 def uncertainty(O_Ba133, O_Ba133_err):
 
-    #values from Bjoern's thesis - Barium source
-    #all percentages
-    gamma_line=0.69
+    #MC Systematics
+    #values from Bjoern's thesis - Barium source, all percentages
+    gamma_line=0.69 
     geant4=2.
     source_thickness=0.02
     source_material=0.01
@@ -237,11 +277,41 @@ def uncertainty(O_Ba133, O_Ba133_err):
     #compute statistical error
     MC_statistics = O_Ba133_err/O_Ba133*100
 
-    #sum squared of all the contributions
+    #Total error: sum in quadrature of all contributions
     tot_error=np.sqrt(gamma_line**2+geant4**2+source_thickness**2+source_material**2+endcap_thickness**2+detector_cup_thickness**2+detector_cup_material**2+MC_statistics**2)
 
-    return tot_error #NB: tot_error is a percentage error
+    correlated = [gamma_line, geant4, source_thickness, source_material, endcap_thickness, detector_cup_thickness, detector_cup_material]
+    uncorrelated = [MC_statistics]
 
+    #correlated error
+    corr_error = np.sqrt(gamma_line**2+geant4**2+source_thickness**2+source_material**2+endcap_thickness**2+detector_cup_thickness**2+detector_cup_material**2)
+
+    #uncorrelated error
+    uncorr_error = MC_statistics
+    
+    return tot_error, corr_error, uncorr_error
+
+
+def invert_exponential(x,a,b,c):
+    #for f=a*exp(-b*x) +c
+    # x = the O_ba133 value
+    return (1/b)*np.log(a/(x-c))
+
+# def propagation_of_errors(a,b,c,d,pcov,d_err):
+
+#     dyda = 1/a*b
+#     dydb = (-1/b**2)*(np.log(a/(d-c)))
+#     dydc = (1/b)*(1/(d-c))
+#     dydd = (1/b)*(1/(d-c))
+
+#     err_sq = (dydd*d_err)**2 
+#     err_sq =+ (dyda*dyda)*pcov[0,0] + (dyda*dydb)*pcov[0,1] + (dyda*dydc)*pcov[0,2] 
+#     err_sq =+ (dydb*dyda)*pcov[1,0] + (dydb*dydb)*pcov[1,1] + (dydb*dydc)*pcov[1,2]
+#     err_sq =+ (dydc*dyda)*pcov[2,0] + (dydc*dydb)*pcov[2,1] + (dydc*dydc)*pcov[2,2]
+
+#     err = np.sqrt(err_sq)
+
+#     return err
 
 if __name__ == "__main__":
     main()

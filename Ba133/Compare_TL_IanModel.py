@@ -16,8 +16,9 @@ CodePath=dir=os.path.dirname(os.path.realpath(__file__))
 
 def main():
 
-    detector = "V05266A"
+    detector = "V07302B"
     FCCD = 1.5
+    source_z = "78z"
 
     #==========DATA==========
     #Parameters
@@ -71,8 +72,9 @@ def main():
 
     for alpha in alpha_list:
         for beta in beta_list:
-            MC_id=detector+"-ba_HS4-top-0r-81z_"+smear+"_"+TL_model+"_FCCD"+str(FCCD)+"mm__alpha"+str(alpha)+"_beta"+str(beta)+"_fracFCCDbore"+str(frac_FCCDbore)
-            sim_path="/lfs/l1/legend/detector_char/enr/hades/simulations/legend-g4simple-simulation/simulations/"+detector+"/ba_HS4/top_0r_81z/hdf5/AV_processed_test/"+MC_id+".hdf5"
+            MC_id=detector+"-ba_HS4-top-0r-"+source_z+"_"+smear+"_"+TL_model+"_FCCD"+str(FCCD)+"mm__alpha"+str(alpha)+"_beta"+str(beta)+"_fracFCCDbore"+str(frac_FCCDbore)
+            # sim_path="/lfs/l1/legend/detector_char/enr/hades/simulations/legend-g4simple-simulation/simulations/"+detector+"/ba_HS4/top_0r_81z/hdf5/AV_processed_test/"+MC_id+".hdf5"
+            sim_path="/lfs/l1/legend/users/aalexander/legend-g4simple-simulation/simulations/"+detector+"/ba_HS4/top_0r_"+source_z+"/hdf5/AV_processed_test/"+MC_id+".hdf5"
             df =  pd.read_hdf(sim_path, key="procdf")
             energy_MC = df['energy']
 

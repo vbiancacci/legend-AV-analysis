@@ -60,8 +60,13 @@ def main():
     print("df_total_lh5: ", df_total_lh5)
     energy_filter_data = df_total_lh5[energy_filter]
 
-    # plt.hist(energy_filter_data, bins=5000)
-    # plt.show()
+    plt.hist(energy_filter_data, bins=5000, histtype="step")
+    plt.xlim(0,5000)
+    plt.xlabel(energy_filter,     ha='right', x=1)
+    plt.ylabel("Counts",     ha='right', y=1)
+    plt.yscale('log')
+    plt.tight_layout()
+    plt.show()
 
 
     #========Compute calibration coefficients===========
@@ -72,7 +77,7 @@ def main():
     # range_keV = [(2,2),(3,3),(4,4),(4,4),(4,4),(4,4)] # side bands width
 
     # guess = 2614.5/45403 #old Th guess
-    # print(energy_filter_data.quantile(0.9))
+    print(energy_filter_data.quantile(0.9))
     guess = 383/(energy_filter_data.quantile(0.9))
     #guess = 383/(energy_filter_data.quantile(0.59))
 
